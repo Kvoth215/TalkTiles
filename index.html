@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalkTiles — Free AAC Communication</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --core-bg: #1e293b;
+      --tile-size: 110px;
+      --tile-font: 0.78rem;
+      --radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.10);
+      --shadow-lg: 0 8px 28px rgba(0,0,0,0.16);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── TOP BAR ── */
+    #top-bar {
+      background: var(--primary);
+      color: white;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    #top-bar h1 { font-size: 1.35rem; font-weight: 900; letter-spacing: -0.5px; margin-right: auto; }
+    .top-btn {
+      background: rgba(255,255,255,0.18);
+      border: none; color: white;
+      padding: 6px 11px; border-radius: 8px;
+      cursor: pointer; font-family: 'Nunito', sans-serif;
+      font-size: 0.78rem; font-weight: 700;
+      display: flex; align-items: center; gap: 4px;
+      transition: background 0.2s; white-space: nowrap;
+    }
+    .top-btn:hover { background: rgba(255,255,255,0.3); }
+    .top-btn.active { background: #ef4444; }
+    #profile-select {
+      background: rgba(255,255,255,0.18);
+      border: 2px solid rgba(255,255,255,0.35);
+      color: white; padding: 5px 9px; border-radius: 8px;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.82rem; cursor: pointer;
+    }
+    #profile-select option { color: #1e293b; background: white; }
+
+    /* ── CORE WORD STRIP ── */
+    #core-strip {
+      background: var(--core-bg);
+      padding: 9px 12px;
+      display: flex; gap: 7px;
+      overflow-x: auto; flex-shrink: 0;
+      scrollbar-width: thin; scrollbar-color: #475569 transparent;
+    }
+    .core-word {
+      background: #334155; color: white; border: none;
+      border-radius: 9px; padding: 7px 13px;
+      font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap; flex-shrink: 0;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .core-word:hover { background: #475569; }
+    .core-word:active { transform: scale(0.93); }
+    .core-word.scanning { outline: 3px solid #facc15; outline-offset: 2px; }
+
+    /* ── SENTENCE BAR ── */
+    #sentence-area {
+      background: white; border-bottom: 2px solid #e2e8f0;
+      padding: 10px 14px; display: flex; flex-direction: column; gap: 9px;
+    }
+    #sentence-display {
+      min-height: 50px; background: #f8fafc;
+      border: 2px solid #cbd5e1; border-radius: 10px;
+      padding: 9px 13px; font-size: 1.1rem; font-weight: 600; color: #1e293b;
+      display: flex; flex-wrap: wrap; gap: 5px; align-items: center; cursor: pointer;
+    }
+    #sentence-display:empty::before {
+      content: 'Tap pictures to build a sentence…';
+      color: #94a3b8; font-weight: 400; font-size: 0.95rem;
+    }
+    .sentence-word {
+      background: #dbeafe; color: #1d4ed8;
+      border-radius: 6px; padding: 2px 8px;
+      font-size: 0.95rem; font-weight: 800;
+    }
+    #sentence-controls { display: flex; gap: 7px; flex-wrap: wrap; }
+    .ctrl-btn {
+      padding: 8px 14px; border-radius: 9px; border: none;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.82rem;
+      cursor: pointer; display: flex; align-items: center; gap: 4px;
+      transition: transform 0.1s;
+    }
+    .ctrl-btn:active { transform: scale(0.94); }
+    .btn-speak { background: #22c55e; color: white; font-size: 0.95rem; padding: 8px 18px; }
+    .btn-clear { background: #ef4444; color: white; }
+    .btn-delete { background: #f97316; color: white; }
+    .btn-auto { background: #64748b; color: white; }
+    .btn-auto.on { background: #0891b2; }
+    .btn-history { background: #8b5cf6; color: white; }
+    .btn-print { background: #0ea5e9; color: white; }
+
+    /* ── SIZE / SCAN BAR ── */
+    #size-bar {
+      background: white; border-bottom: 1px solid #e2e8f0;
+      padding: 5px 14px; display: flex; align-items: center;
+      gap: 7px; font-size: 0.78rem; font-weight: 700; color: #64748b;
+    }
+    .size-btn {
+      background: #f1f5f9; border: 2px solid transparent;
+      border-radius: 7px; padding: 3px 11px;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.77rem; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .size-btn.active { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+    .scan-hint { font-size: 0.72rem; color: #94a3b8; margin-left: 6px; }
+
+    /* ── CATEGORY TABS ── */
+    #cat-tabs {
+      background: white; display: flex; overflow-x: auto;
+      border-bottom: 2px solid #e2e8f0; flex-shrink: 0; scrollbar-width: none;
+    }
+    #cat-tabs::-webkit-scrollbar { display: none; }
+    .cat-tab {
+      padding: 9px 15px; border: none; background: transparent;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.82rem;
+      cursor: pointer; white-space: nowrap; color: #64748b;
+      border-bottom: 3px solid transparent; transition: all 0.15s;
+    }
+    .cat-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: #eff6ff; }
+
+    /* ── SYMBOL GRID ── */
+    #symbol-grid {
+      flex: 1; overflow-y: auto; padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(var(--tile-size), 1fr));
+      gap: 11px; align-content: start;
+    }
+    body.size-sm { --tile-size: 80px; --tile-font: 0.65rem; }
+    body.size-md { --tile-size: 110px; --tile-font: 0.78rem; }
+    body.size-lg { --tile-size: 150px; --tile-font: 0.9rem; }
+
+    .symbol-tile {
+      background: white; border-radius: var(--radius);
+      border: 2px solid #e2e8f0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 9px 5px 7px; cursor: pointer; aspect-ratio: 1;
+      transition: transform 0.12s, box-shadow 0.12s;
+      box-shadow: var(--shadow); position: relative; user-select: none;
+    }
+    .symbol-tile:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .symbol-tile:active { transform: scale(0.92); }
+    .symbol-tile.scanning { outline: 4px solid #facc15 !important; outline-offset: 3px !important; }
+    .tile-emoji {
+      font-size: calc(var(--tile-size) * 0.34);
+      line-height: 1; display: flex; align-items: center; justify-content: center;
+      height: 60%; width: 60%;
+    }
+    .tile-img-el {
+      width: 65%; height: 65%; object-fit: contain;
+    }
+    .tile-label {
+      font-size: var(--tile-font); font-weight: 800; color: #1e293b;
+      text-align: center; margin-top: 5px; line-height: 1.2;
+      max-width: 100%; overflow: hidden;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    }
+    .tile-cat-dot {
+      position: absolute; top: 5px; right: 5px;
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .tile-edit-btn {
+      position: absolute; top: 3px; left: 3px;
+      background: rgba(0,0,0,0.45); color: white; border: none;
+      border-radius: 5px; padding: 2px 5px; font-size: 0.58rem; cursor: pointer; display: none;
+    }
+    body.edit-mode .tile-edit-btn { display: block; }
+    .arasaac-badge {
+      position: absolute; bottom: 3px; right: 3px;
+      font-size: 0.48rem; background: rgba(37,99,235,0.7); color: white;
+      border-radius: 3px; padding: 1px 3px; font-weight: 700;
+    }
+    .add-tile {
+      background: #f8fafc; border: 2px dashed #cbd5e1; color: #94a3b8;
+    }
+    .add-tile:hover { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+
+    /* ── LOCK / EDIT MODES ── */
+    body.locked .top-btn:not(#lock-btn) { display: none; }
+    body.locked #profile-select { display: none; }
+    body.locked #size-bar { display: none; }
+    body.locked .tile-edit-btn { display: none !important; }
+    body.locked .add-tile { display: none; }
+    body.locked .btn-history,
+    body.locked .btn-print,
+    body.locked .btn-undo,
+    body.locked .btn-redo,
+    body.locked .btn-tmpl { display: none; }
+    #lock-btn.locked { background: #dc2626; }
+
+    /* ── MODALS ── */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.52); z-index: 100;
+      align-items: center; justify-content: center; padding: 18px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: white; border-radius: 16px; padding: 22px;
+      width: 100%; max-width: 490px; max-height: 87vh;
+      overflow-y: auto; box-shadow: var(--shadow-lg);
+    }
+    .modal h2 {
+      font-size: 1.15rem; font-weight: 800; margin-bottom: 14px;
+      color: #1e293b; display: flex; align-items: center; gap: 8px;
+    }
+    .modal-close {
+      margin-left: auto; background: #f1f5f9; border: none;
+      border-radius: 7px; padding: 3px 9px; cursor: pointer; font-size: 1rem;
+    }
+    .form-group { margin-bottom: 13px; }
+    .form-group label { display: block; font-weight: 700; font-size: 0.82rem; color: #475569; margin-bottom: 4px; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 8px 11px;
+      border: 2px solid #e2e8f0; border-radius: 8px;
+      font-family: 'Nunito', sans-serif; font-size: 0.88rem;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+    .action-btn {
+      padding: 9px 16px; border-radius: 9px; border: none;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.88rem;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .action-btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-secondary { background: #f1f5f9; color: #475569; }
+
+    /* ARASAAC results */
+    #arasaac-results {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 7px; max-height: 190px; overflow-y: auto; margin-top: 7px;
+    }
+    .arasaac-result {
+      border: 2px solid #e2e8f0; border-radius: 8px;
+      padding: 5px; cursor: pointer; text-align: center; transition: border-color 0.15s;
+    }
+    .arasaac-result:hover, .arasaac-result.selected { border-color: var(--primary); background: #eff6ff; }
+    .arasaac-result img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+    .arasaac-result span { font-size: 0.62rem; font-weight: 700; color: #475569; display: block; margin-top: 2px; }
+
+    /* Emoji picker */
+    #emoji-picker {
+      display: flex; flex-wrap: wrap; gap: 5px;
+      max-height: 110px; overflow-y: auto; padding: 7px;
+      border: 2px solid #e2e8f0; border-radius: 8px;
+    }
+    .emoji-opt {
+      font-size: 1.4rem; cursor: pointer; padding: 3px;
+      border-radius: 6px; border: 2px solid transparent; line-height: 1;
+      transition: border-color 0.15s;
+    }
+    .emoji-opt:hover, .emoji-opt.selected { border-color: var(--primary); background: #eff6ff; }
+
+    /* History */
+    #history-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    #history-list li {
+      background: #f8fafc; border-radius: 8px; padding: 9px 13px;
+      font-size: 0.88rem; font-weight: 600; color: #1e293b;
+      display: flex; justify-content: space-between; align-items: center; gap: 9px;
+    }
+    #history-list li button {
+      background: var(--primary); color: white; border: none;
+      border-radius: 6px; padding: 3px 9px; font-size: 0.72rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+    }
+    #history-list li .h-time { font-size: 0.68rem; color: #94a3b8; display: block; }
+
+    /* Profiles */
+    .profile-item {
+      display: flex; align-items: center; gap: 9px; padding: 9px;
+      background: #f8fafc; border-radius: 9px; margin-bottom: 7px;
+    }
+    .profile-item span { flex: 1; font-weight: 700; }
+
+    /* Voice sliders */
+    input[type=range] { width: 100%; accent-color: var(--primary); }
+
+    /* Usage bars */
+    .usage-bar-row { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
+    .usage-bar-row .u-label { width: 75px; font-size: 0.78rem; font-weight: 700; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .usage-bar { flex: 1; background: #e2e8f0; border-radius: 99px; height: 11px; overflow: hidden; }
+    .usage-bar-fill { height: 100%; background: var(--primary); border-radius: 99px; transition: width 0.4s; }
+    .usage-count { font-size: 0.73rem; font-weight: 700; color: #64748b; width: 28px; text-align: right; }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 18px; left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: #1e293b; color: white; padding: 9px 18px;
+      border-radius: 9px; font-weight: 700; font-size: 0.88rem;
+      opacity: 0; transition: all 0.28s; z-index: 300; pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── UNDO / REDO ── */
+    .btn-undo, .btn-redo { background: #475569; color: white; }
+    .btn-undo:disabled, .btn-redo:disabled {
+      background: #e2e8f0; color: #94a3b8; cursor: not-allowed; opacity: 0.6;
+    }
+
+    /* ── SPEAKING HIGHLIGHT ── */
+    .sentence-word.speaking {
+      background: #fef08a; color: #854d0e;
+      transform: scale(1.1); outline: 2px solid #fbbf24;
+    }
+
+    /* ── PREDICTION STRIP ── */
+    #prediction-strip {
+      background: #f0f9ff; border-bottom: 1px solid #bae6fd;
+      padding: 7px 14px; display: none; flex-wrap: wrap;
+      gap: 6px; align-items: center;
+    }
+    #prediction-strip.visible { display: flex; }
+    .pred-label { font-size: 0.7rem; font-weight: 700; color: #0369a1; white-space: nowrap; }
+    .pred-chip {
+      background: #e0f2fe; border: 2px solid #7dd3fc; color: #0369a1;
+      border-radius: 8px; padding: 4px 11px;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .pred-chip:hover { background: #bae6fd; }
+
+    /* ── TEMPLATE STRIP ── */
+    #template-strip {
+      background: #fefce8; border-bottom: 1px solid #fde68a;
+      padding: 7px 14px; display: none; flex-wrap: wrap;
+      gap: 6px; align-items: center;
+    }
+    #template-strip.visible { display: flex; }
+    .tmpl-label { font-size: 0.7rem; font-weight: 700; color: #92400e; white-space: nowrap; }
+    .tmpl-chip {
+      background: #fef3c7; border: 2px solid #fcd34d; color: #92400e;
+      border-radius: 8px; padding: 4px 11px;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .tmpl-chip:hover { background: #fde68a; }
+    .btn-tmpl { background: #d97706; color: white; }
+    .btn-tmpl.on { background: #92400e; }
+
+    /* Print */
+    @media print {
+      #top-bar, #core-strip, #sentence-area, #size-bar, #cat-tabs { display: none !important; }
+      body { background: white; }
+      #symbol-grid { grid-template-columns: repeat(5,1fr); gap: 8px; padding: 10px; }
+      .symbol-tile { border: 1px solid #ccc; box-shadow: none; }
+      .add-tile, .tile-edit-btn, .arasaac-badge { display: none !important; }
+    }
+
+    @media (max-width: 480px) {
+      .top-btn span { display: none; }
+      #symbol-grid { padding: 9px; gap: 8px; }
+    }
+
+    /* Cat manage list */
+    .cat-manage-item {
+      display: flex; align-items: center; gap: 9px; padding: 8px 10px;
+      background: #f8fafc; border-radius: 9px; margin-bottom: 6px;
+    }
+    .cat-color-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+    .cat-manage-item span { flex:1; font-weight: 700; font-size: 0.88rem; }
+  </style>
+</head>
+<body class="size-md">
+
+<!-- TOP BAR -->
+<div id="top-bar">
+  <h1>🗣️ TalkTiles</h1>
+  <select id="profile-select" onchange="switchProfile()"></select>
+  <button class="top-btn" onclick="openModal('modal-profiles')">👤 <span>Profiles</span></button>
+  <button class="top-btn" onclick="openModal('modal-voice')">🔊 <span>Voice</span></button>
+  <button class="top-btn" onclick="openModal('modal-usage')">📊 <span>Stats</span></button>
+  <button class="top-btn" onclick="openModal('modal-share')">📲 <span>Share</span></button>
+  <button class="top-btn" onclick="openModal('modal-library')">🌐 <span>Library</span></button>
+  <button class="top-btn" onclick="exportData()">⬆ <span>Export</span></button>
+  <button class="top-btn" onclick="document.getElementById('import-file').click()">⬇ <span>Import</span></button>
+  <button class="top-btn" id="edit-btn" onclick="toggleEdit()">✏️ <span>Edit</span></button>
+  <button class="top-btn" id="lock-btn" onclick="toggleLock()">🔓 <span>Lock</span></button>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+
+<!-- CORE WORD STRIP -->
+<div id="core-strip"></div>
+
+<!-- SENTENCE AREA -->
+<div id="sentence-area">
+  <div id="sentence-display" onclick="speakSentence()"></div>
+  <div id="sentence-controls">
+    <button class="ctrl-btn btn-speak" onclick="speakSentence()">🔊 Speak</button>
+    <button class="ctrl-btn btn-clear" onclick="clearSentence()">✕ Clear</button>
+    <button class="ctrl-btn btn-delete" onclick="deleteLastWord()">⌫ Delete</button>
+    <button class="ctrl-btn btn-undo" id="btn-undo" onclick="undoSentence()" disabled title="Undo last word">↩ Undo</button>
+    <button class="ctrl-btn btn-redo" id="btn-redo" onclick="redoSentence()" disabled title="Redo">↪ Redo</button>
+    <button class="ctrl-btn btn-auto" id="auto-btn" onclick="toggleAuto()">🔇 Auto Off</button>
+    <button class="ctrl-btn btn-tmpl" id="tmpl-btn" onclick="toggleTemplates()">📝 Templates</button>
+    <button class="ctrl-btn btn-history" onclick="openModal('modal-history')">📜 History</button>
+    <button class="ctrl-btn btn-print" onclick="printBoard()">🖨️ Print</button>
+  </div>
+</div>
+
+<!-- TEMPLATE STRIP -->
+<div id="template-strip">
+  <span class="tmpl-label">📝 Quick Start:</span>
+  <button class="tmpl-chip" onclick="useTemplate([{label:'I',speech:'I'},{label:'want',speech:'want'}])">I want…</button>
+  <button class="tmpl-chip" onclick="useTemplate([{label:'I',speech:'I'},{label:'feel',speech:'feel'}])">I feel…</button>
+  <button class="tmpl-chip" onclick="useTemplate([{label:'I',speech:'I'},{label:'need',speech:'need'}])">I need…</button>
+  <button class="tmpl-chip" onclick="useTemplate([{label:'I',speech:'I'},{label:'am',speech:'am'}])">I am…</button>
+  <button class="tmpl-chip" onclick="useTemplate([{label:'please',speech:'please'},{label:'help',speech:'help'}])">Please help</button>
+  <button class="tmpl-chip" onclick="useTemplate([{label:'I',speech:'I'},{label:'don\'t',speech:'don\'t'},{label:'want',speech:'want'}])">I don't want…</button>
+  <button class="tmpl-chip" onclick="useTemplate([{label:'can',speech:'can'},{label:'I',speech:'I'}])">Can I…</button>
+  <button class="tmpl-chip" onclick="useTemplate([{label:'I',speech:'I'},{label:'like',speech:'like'}])">I like…</button>
+</div>
+
+<!-- PREDICTION STRIP -->
+<div id="prediction-strip"></div>
+
+<!-- SIZE / SCAN BAR -->
+<div id="size-bar">
+  Tile Size:
+  <button class="size-btn" id="size-sm" onclick="setSize('sm')">Small</button>
+  <button class="size-btn active" id="size-md" onclick="setSize('md')">Medium</button>
+  <button class="size-btn" id="size-lg" onclick="setSize('lg')">Large</button>
+  <span class="scan-hint">⌨️ Space = scan &nbsp; Enter = select &nbsp; Esc = stop</span>
+</div>
+
+<!-- CATEGORY TABS -->
+<div id="cat-tabs"></div>
+
+<!-- SYMBOL GRID -->
+<div id="symbol-grid"></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════ -->
+
+<!-- ADD / EDIT SYMBOL -->
+<div class="modal-backdrop" id="modal-add">
+  <div class="modal">
+    <h2>➕ Add / Edit Symbol <button class="modal-close" onclick="closeModal('modal-add')">✕</button></h2>
+    <input type="hidden" id="edit-symbol-id">
+    <div class="form-group">
+      <label>Label (shown under tile)</label>
+      <input type="text" id="sym-label" placeholder="e.g. eat">
+    </div>
+    <div class="form-group">
+      <label>Speech text (what the app says)</label>
+      <input type="text" id="sym-speech" placeholder="e.g. I want to eat">
+    </div>
+    <div class="form-group">
+      <label>🔍 Search ARASAAC Pictogram Library</label>
+      <div style="display:flex;gap:7px">
+        <input type="text" id="arasaac-search" placeholder="Type a word…" style="flex:1"
+          onkeydown="if(event.key==='Enter') searchArasaac()">
+        <button class="action-btn btn-primary" onclick="searchArasaac()">Search</button>
+      </div>
+      <div id="arasaac-results"></div>
+    </div>
+    <div class="form-group">
+      <label>— or choose an emoji —</label>
+      <div id="emoji-picker"></div>
+    </div>
+    <div class="form-group">
+      <label>— or paste an image URL —</label>
+      <input type="text" id="sym-url" placeholder="https://…">
+    </div>
+    <div class="form-group">
+      <label>— or upload a photo —</label>
+      <input type="file" id="sym-file" accept="image/*" onchange="handleFileUpload(event)">
+    </div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="sym-category"></select>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="action-btn btn-primary" onclick="saveSymbol()">💾 Save Symbol</button>
+      <button class="action-btn btn-secondary" onclick="closeModal('modal-add')">Cancel</button>
+      <button class="action-btn btn-danger" id="delete-sym-btn" onclick="deleteSymbol()" style="display:none">🗑 Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- VOICE SETTINGS -->
+<div class="modal-backdrop" id="modal-voice">
+  <div class="modal">
+    <h2>🔊 Voice Settings <button class="modal-close" onclick="closeModal('modal-voice')">✕</button></h2>
+    <div class="form-group">
+      <label>Voice</label>
+      <select id="voice-select" onchange="saveVoiceSettings()"></select>
+    </div>
+    <div class="form-group">
+      <label>Speed: <strong id="rate-val">1.0</strong>x</label>
+      <input type="range" id="voice-rate" min="0.5" max="2" step="0.1" value="1"
+        oninput="document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(1); saveVoiceSettings()">
+    </div>
+    <div class="form-group">
+      <label>Pitch: <strong id="pitch-val">1.0</strong></label>
+      <input type="range" id="voice-pitch" min="0.5" max="2" step="0.1" value="1"
+        oninput="document.getElementById('pitch-val').textContent=parseFloat(this.value).toFixed(1); saveVoiceSettings()">
+    </div>
+    <div class="form-group">
+      <label>Volume: <strong id="vol-val">1.0</strong></label>
+      <input type="range" id="voice-vol" min="0" max="1" step="0.05" value="1"
+        oninput="document.getElementById('vol-val').textContent=parseFloat(this.value).toFixed(2); saveVoiceSettings()">
+    </div>
+    <button class="action-btn btn-primary" onclick="testVoice()">🔊 Test Voice</button>
+  </div>
+</div>
+
+<!-- PROFILES -->
+<div class="modal-backdrop" id="modal-profiles">
+  <div class="modal">
+    <h2>👤 Student Profiles <button class="modal-close" onclick="closeModal('modal-profiles')">✕</button></h2>
+    <div id="profiles-list"></div>
+    <hr style="margin:14px 0;border-color:#e2e8f0">
+    <div class="form-group">
+      <label>New Profile Name</label>
+      <input type="text" id="new-profile-name" placeholder="e.g. Alex"
+        onkeydown="if(event.key==='Enter') addProfile()">
+    </div>
+    <button class="action-btn btn-primary" onclick="addProfile()">➕ Add Profile</button>
+    <p style="margin-top:10px;font-size:0.78rem;color:#94a3b8">Each profile stores its own vocabulary on this device.</p>
+  </div>
+</div>
+
+<!-- SENTENCE HISTORY -->
+<div class="modal-backdrop" id="modal-history">
+  <div class="modal">
+    <h2>📜 Sentence History <button class="modal-close" onclick="closeModal('modal-history')">✕</button></h2>
+    <ul id="history-list"></ul>
+    <button class="action-btn btn-danger" onclick="clearHistory()" style="margin-top:12px">🗑 Clear History</button>
+  </div>
+</div>
+
+<!-- USAGE STATS -->
+<div class="modal-backdrop" id="modal-usage">
+  <div class="modal">
+    <h2>📊 Usage Stats <button class="modal-close" onclick="closeModal('modal-usage')">✕</button></h2>
+    <p style="font-size:0.78rem;color:#64748b;margin-bottom:11px">Most-used tiles for <strong id="usage-profile-name"></strong></p>
+    <div id="usage-bars"></div>
+    <button class="action-btn btn-danger" onclick="clearUsage()" style="margin-top:14px">🗑 Reset Stats</button>
+  </div>
+</div>
+
+<!-- SHARE / QR -->
+<div class="modal-backdrop" id="modal-share">
+  <div class="modal">
+    <h2>📲 Share Vocabulary <button class="modal-close" onclick="closeModal('modal-share')">✕</button></h2>
+    <p style="font-size:0.82rem;color:#475569;margin-bottom:11px">Students scan to instantly load this vocabulary on any device.</p>
+    <div class="form-group">
+      <label>What to share</label>
+      <select id="share-scope">
+        <option value="cat">This Category Only</option>
+        <option value="all">All Categories</option>
+      </select>
+    </div>
+    <button class="action-btn btn-primary" onclick="generateQR()">📲 Generate QR Code</button>
+    <canvas id="qr-canvas" style="display:none;margin-top:14px;max-width:200px;border-radius:8px"></canvas>
+    <div id="share-link-area" style="display:none;margin-top:10px">
+      <input type="text" id="share-link-input" readonly style="font-size:0.75rem">
+      <button class="action-btn btn-secondary" style="margin-top:7px" onclick="copyShareLink()">📋 Copy Link</button>
+    </div>
+    <p style="margin-top:9px;font-size:0.72rem;color:#94a3b8">💡 Project on your screen or share the link directly</p>
+  </div>
+</div>
+
+<!-- COMMUNITY LIBRARY -->
+<div class="modal-backdrop" id="modal-library">
+  <div class="modal">
+    <h2>🌐 Community Library <button class="modal-close" onclick="closeModal('modal-library')">✕</button></h2>
+    <div id="lib-packs" style="display:flex;flex-direction:column;gap:10px"></div>
+    <hr style="margin:14px 0;border-color:#e2e8f0">
+    <p style="font-size:0.78rem;color:#94a3b8">Built-in starter packs. More community packs coming soon.</p>
+  </div>
+</div>
+
+<!-- MANAGE CATEGORIES -->
+<div class="modal-backdrop" id="modal-cats">
+  <div class="modal">
+    <h2>📁 Manage Categories <button class="modal-close" onclick="closeModal('modal-cats')">✕</button></h2>
+    <div id="cat-list"></div>
+    <hr style="margin:14px 0;border-color:#e2e8f0">
+    <div class="form-group">
+      <label>Category Name</label>
+      <input type="text" id="new-cat-name" placeholder="e.g. Feelings">
+    </div>
+    <div style="display:flex;gap:10px">
+      <div class="form-group" style="flex:1">
+        <label>Emoji Icon</label>
+        <input type="text" id="new-cat-emoji" placeholder="😊" maxlength="2">
+      </div>
+      <div class="form-group" style="flex:1">
+        <label>Color</label>
+        <input type="color" id="new-cat-color" value="#3b82f6" style="padding:4px;height:40px">
+      </div>
+    </div>
+    <button class="action-btn btn-primary" onclick="addCategory()">➕ Add Category</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════ -->
+<script>
+// ─── DEFAULTS ───────────────────────────────
+
+const CORE_WORDS = [
+  'I','you','want','need','like','don\'t','more','stop',
+  'help','go','yes','no','here','all done','please','thank you',
+  'feel','good','bad','hi','bye','what','where','who'
+];
+
+const DEFAULT_CATEGORIES = [
+  { id:'daily',      name:'Daily Life',   emoji:'🏠', color:'#f97316' },
+  { id:'social',     name:'Social & SEL', emoji:'💛', color:'#eab308' },
+  { id:'academic',   name:'Academic',     emoji:'📚', color:'#3b82f6' },
+  { id:'school',     name:'School',       emoji:'🏫', color:'#8b5cf6' },
+  { id:'transition', name:'Transition',   emoji:'🎓', color:'#10b981' },
+];
+
+const DEFAULT_SYMBOLS = [
+  // Daily Life – mix of ARASAAC and emoji
+  { id:'s1',  label:'eat',       speech:'I want to eat',           type:'arasaac', arasaacId:2768,  category:'daily' },
+  { id:'s2',  label:'drink',     speech:'I want to drink',         type:'arasaac', arasaacId:2595,  category:'daily' },
+  { id:'s3',  label:'bathroom',  speech:'I need the bathroom',     type:'arasaac', arasaacId:2010,  category:'daily' },
+  { id:'s4',  label:'sleep',     speech:'I want to sleep',         type:'emoji',   emoji:'😴',      category:'daily' },
+  { id:'s5',  label:'home',      speech:'I want to go home',       type:'arasaac', arasaacId:4919,  category:'daily' },
+  // Social & SEL
+  { id:'s6',  label:'happy',     speech:'I feel happy',            type:'emoji',   emoji:'😊',      category:'social' },
+  { id:'s7',  label:'sad',       speech:'I feel sad',              type:'emoji',   emoji:'😢',      category:'social' },
+  { id:'s8',  label:'angry',     speech:'I feel angry',            type:'emoji',   emoji:'😡',      category:'social' },
+  { id:'s9',  label:'scared',    speech:'I feel scared',           type:'emoji',   emoji:'😨',      category:'social' },
+  { id:'s10', label:'play',      speech:'I want to play',          type:'emoji',   emoji:'🎮',      category:'social' },
+  // Academic
+  { id:'s11', label:'read',      speech:'I want to read',          type:'emoji',   emoji:'📚',      category:'academic' },
+  { id:'s12', label:'write',     speech:'I need to write',         type:'emoji',   emoji:'✏️',      category:'academic' },
+  { id:'s13', label:'help me',   speech:'I need help',             type:'emoji',   emoji:'🙋',      category:'academic' },
+  { id:'s14', label:'finished',  speech:'I am finished',           type:'emoji',   emoji:'✅',      category:'academic' },
+  { id:'s15', label:'question',  speech:'I have a question',       type:'emoji',   emoji:'❓',      category:'academic' },
+  // School
+  { id:'s16', label:'lunch',     speech:'It is time for lunch',    type:'arasaac', arasaacId:5867,  category:'school' },
+  { id:'s17', label:'recess',    speech:'I want to go to recess',  type:'emoji',   emoji:'⚽',      category:'school' },
+  { id:'s18', label:'class',     speech:'I am in class',           type:'emoji',   emoji:'🏫',      category:'school' },
+  { id:'s19', label:'teacher',   speech:'I need the teacher',      type:'emoji',   emoji:'👨‍🏫',    category:'school' },
+  { id:'s20', label:'computer',  speech:'I want the computer',     type:'emoji',   emoji:'💻',      category:'school' },
+  // Transition
+  { id:'s21', label:'wait',      speech:'I need to wait',          type:'emoji',   emoji:'⏳',      category:'transition' },
+  { id:'s22', label:'next',      speech:'What is next',            type:'emoji',   emoji:'➡️',      category:'transition' },
+  { id:'s23', label:'schedule',  speech:'I need my schedule',      type:'emoji',   emoji:'📅',      category:'transition' },
+  { id:'s24', label:'break',     speech:'I need a break',          type:'emoji',   emoji:'☕',      category:'transition' },
+  { id:'s25', label:'go',        speech:'Time to go',              type:'emoji',   emoji:'🚶',      category:'transition' },
+];
+
+const COMMUNITY_PACKS = [
+  {
+    id:'pack_emotions',
+    name:'Extended Emotions Pack',
+    desc:'12 feeling tiles for SEL work',
+    symbols:[
+      { id:'p1_1', label:'excited',    speech:'I feel excited',      type:'emoji', emoji:'🤩', category:'social' },
+      { id:'p1_2', label:'worried',    speech:'I feel worried',      type:'emoji', emoji:'😟', category:'social' },
+      { id:'p1_3', label:'frustrated', speech:'I feel frustrated',   type:'emoji', emoji:'😤', category:'social' },
+      { id:'p1_4', label:'proud',      speech:'I feel proud',        type:'emoji', emoji:'😎', category:'social' },
+      { id:'p1_5', label:'tired',      speech:'I feel tired',        type:'emoji', emoji:'😪', category:'social' },
+      { id:'p1_6', label:'bored',      speech:'I feel bored',        type:'emoji', emoji:'😑', category:'social' },
+      { id:'p1_7', label:'confused',   speech:'I feel confused',     type:'emoji', emoji:'😕', category:'social' },
+      { id:'p1_8', label:'calm',       speech:'I feel calm',         type:'emoji', emoji:'😌', category:'social' },
+      { id:'p1_9', label:'silly',      speech:'I feel silly',        type:'emoji', emoji:'🤪', category:'social' },
+      { id:'p1_10',label:'hurt',       speech:'I feel hurt',         type:'emoji', emoji:'🤕', category:'social' },
+      { id:'p1_11',label:'surprised',  speech:'I feel surprised',    type:'emoji', emoji:'😲', category:'social' },
+      { id:'p1_12',label:'loved',      speech:'I feel loved',        type:'emoji', emoji:'🥰', category:'social' },
+    ]
+  },
+  {
+    id:'pack_food',
+    name:'Food & Snack Requests',
+    desc:'Common cafeteria and snack choices',
+    symbols:[
+      { id:'p2_1', label:'pizza',      speech:'I want pizza',        type:'emoji', emoji:'🍕', category:'daily' },
+      { id:'p2_2', label:'sandwich',   speech:'I want a sandwich',   type:'emoji', emoji:'🥪', category:'daily' },
+      { id:'p2_3', label:'apple',      speech:'I want an apple',     type:'emoji', emoji:'🍎', category:'daily' },
+      { id:'p2_4', label:'water',      speech:'I want water',        type:'emoji', emoji:'💧', category:'daily' },
+      { id:'p2_5', label:'milk',       speech:'I want milk',         type:'emoji', emoji:'🥛', category:'daily' },
+      { id:'p2_6', label:'snack',      speech:'I want a snack',      type:'emoji', emoji:'🍎', category:'daily' },
+    ]
+  },
+  {
+    id:'pack_classroom',
+    name:'Classroom Communication',
+    desc:'Requesting help, materials, and turns',
+    symbols:[
+      { id:'p3_1', label:'pencil',     speech:'I need a pencil',     type:'emoji', emoji:'✏️', category:'academic' },
+      { id:'p3_2', label:'paper',      speech:'I need paper',        type:'emoji', emoji:'📄', category:'academic' },
+      { id:'p3_3', label:'my turn',    speech:'It is my turn',       type:'emoji', emoji:'☝️', category:'academic' },
+      { id:'p3_4', label:'your turn',  speech:'It is your turn',     type:'emoji', emoji:'👉', category:'academic' },
+      { id:'p3_5', label:'repeat',     speech:'Please repeat that',  type:'emoji', emoji:'🔁', category:'academic' },
+      { id:'p3_6', label:'I know',     speech:'I know the answer',   type:'emoji', emoji:'💡', category:'academic' },
+    ]
+  },
+];
+
+// ─── STATE ──────────────────────────────────
+
+let state = {
+  profiles: {},
+  currentProfile: 'Default',
+  voiceSettings: { voiceURI:'', rate:1, pitch:1, volume:1 },
+  locked: false,
+  editMode: false,
+  autoSpeak: false,
+  currentCat: 'all',
+  sentence: [],
+  history: [],
+  tileSize: 'md'
+};
+
+let selectedArasaacId = null;
+let selectedEmoji     = null;
+let uploadedImageData = null;
+let voices            = [];
+let scanMode          = false;
+let scanIndex         = 0;
+let scanItems         = [];
+
+// ─── UNDO / REDO STATE ───────────────────────
+let sentenceHistory = [];  // array of past sentence arrays
+let sentenceRedo    = [];  // array of undone sentence arrays
+
+// ─── DOM CACHE ──────────────────────────────
+const el = {};
+function cacheDOM() {
+  el.sentenceDisplay = document.getElementById('sentence-display');
+  el.symbolGrid      = document.getElementById('symbol-grid');
+  el.coreStrip       = document.getElementById('core-strip');
+  el.catTabs         = document.getElementById('cat-tabs');
+  el.toast           = document.getElementById('toast');
+  el.autoBtn         = document.getElementById('auto-btn');
+  el.editBtn         = document.getElementById('edit-btn');
+  el.lockBtn         = document.getElementById('lock-btn');
+  el.undoBtn         = document.getElementById('btn-undo');
+  el.redoBtn         = document.getElementById('btn-redo');
+  el.tmplBtn         = document.getElementById('tmpl-btn');
+  el.predStrip       = document.getElementById('prediction-strip');
+  el.tmplStrip       = document.getElementById('template-strip');
+  el.profileSelect   = document.getElementById('profile-select');
+}
+
+// ─── DEBOUNCED SAVE ──────────────────────────
+let _saveTimer;
+function saveStateDebounced() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveState, 300);
+}
+
+// ─── PROFILE HELPERS ────────────────────────
+
+function emptyProfile() {
+  return {
+    categories: JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)),
+    symbols:    JSON.parse(JSON.stringify(DEFAULT_SYMBOLS)),
+    usage: {}
+  };
+}
+
+function getProfile() { return state.profiles[state.currentProfile]; }
+
+// ─── STORAGE ────────────────────────────────
+
+function saveState() {
+  localStorage.setItem('talktiles_v2', JSON.stringify({
+    profiles:      state.profiles,
+    currentProfile:state.currentProfile,
+    voiceSettings: state.voiceSettings,
+    history:       state.history,
+    tileSize:      state.tileSize
+  }));
+}
+
+function loadState() {
+  const raw = localStorage.getItem('talktiles_v2');
+  if (raw) {
+    const d = JSON.parse(raw);
+    state.profiles       = d.profiles       || {};
+    state.currentProfile = d.currentProfile || 'Default';
+    state.voiceSettings  = d.voiceSettings  || state.voiceSettings;
+    state.history        = d.history        || [];
+    state.tileSize       = d.tileSize       || 'md';
+  }
+  if (!state.profiles[state.currentProfile]) {
+    state.profiles[state.currentProfile] = emptyProfile();
+  }
+}
+
+// ─── INIT ────────────────────────────────────
+
+function init() {
+  cacheDOM();
+  loadState();
+  setSize(state.tileSize, false);
+  populateVoices();
+  loadVoiceSettings();
+  renderCoreStrip();
+  renderCategoryTabs();
+  renderGrid();
+  renderCategorySelect();
+  populateEmojiPicker();
+  renderProfileSelect();
+  renderLibraryPacks();
+  checkURLImport();
+  initHoldToSpeak();
+  updateUndoRedoBtns();
+}
+
+// ─── CORE WORD STRIP ────────────────────────
+
+function renderCoreStrip() {
+  el.coreStrip.innerHTML = CORE_WORDS.map(w =>
+    `<button class="core-word" onclick="addToSentence('${w.replace(/'/g,"\\'")}','${w.replace(/'/g,"\\'")}')">
+      ${w}
+    </button>`
+  ).join('');
+}
+
+// ─── CATEGORY TABS ──────────────────────────
+
+function renderCategoryTabs() {
+  const p = getProfile();
+  let html = `<button class="cat-tab ${state.currentCat==='all'?'active':''}" onclick="switchCat('all')">All</button>`;
+  html += p.categories.map(c => {
+    const active = state.currentCat === c.id;
+    return `<button class="cat-tab ${active?'active':''}"
+      onclick="switchCat('${c.id}')"
+      style="${active?`border-bottom-color:${c.color};color:${c.color}`:''}">
+      ${c.emoji} ${c.name}
+    </button>`;
+  }).join('');
+  html += `<button class="cat-tab" onclick="openModal('modal-cats')">⚙️</button>`;
+  document.getElementById('cat-tabs').innerHTML = html;}
+
+function switchCat(id) {
+  state.currentCat = id;
+  renderCategoryTabs();
+  renderGrid();
+}
+
+// ─── SYMBOL GRID ────────────────────────────
+
+function renderGrid() {
+  const p = getProfile();
+  const filtered = state.currentCat === 'all'
+    ? p.symbols
+    : p.symbols.filter(s => s.category === state.currentCat);
+
+  let html = filtered.map(sym => {
+    const cat = p.categories.find(c => c.id === sym.category);
+    const dot = cat ? cat.color : '#94a3b8';
+    return `<div class="symbol-tile" data-id="${sym.id}" onclick="tileClicked('${sym.id}')">
+      <button class="tile-edit-btn" onclick="event.stopPropagation();editSymbol('${sym.id}')">✏️ Edit</button>
+      ${tileVisual(sym)}
+      <div class="tile-label">${sym.label}</div>
+      <div class="tile-cat-dot" style="background:${dot}"></div>
+      ${sym.type==='arasaac'?'<div class="arasaac-badge">ARASAAC</div>':''}
+    </div>`;
+  }).join('');
+
+  if (!state.locked) {
+    html += `<div class="symbol-tile add-tile" onclick="openAddSymbol()">
+      <div style="font-size:2rem;line-height:1">➕</div>
+      <div class="tile-label">Add Symbol</div>
+    </div>`;
+  }
+
+  document.getElementById('symbol-grid').innerHTML = html;
+  refreshScanItems();
+}
+
+function tileVisual(sym) {
+  if (sym.type === 'arasaac') {
+    const url = `https://static.arasaac.org/pictograms/${sym.arasaacId}/${sym.arasaacId}_500.png`;
+    return `<img class="tile-img-el" src="${url}" alt="${sym.label}" loading="lazy">`;
+  }
+  if (sym.type === 'url' || sym.type === 'upload') {
+    return `<img class="tile-img-el" src="${sym.imageUrl}" alt="${sym.label}" loading="lazy">`;
+  }
+  return `<div class="tile-emoji">${sym.emoji || '❓'}</div>`;
+}
+
+// ─── TILE INTERACTION ───────────────────────
+
+function tileClicked(id) {
+  const sym = getProfile().symbols.find(s => s.id === id);
+  if (!sym) return;
+  addToSentence(sym.label, sym.speech || sym.label);
+  trackUsage(id);
+}
+
+function addToSentence(label, speech) {
+  pushSentenceHistory();
+  state.sentence = [...state.sentence, { label, speech }];
+  renderSentence();
+  renderPredictions();
+  if (state.autoSpeak) speak(speech);
+}
+
+function renderSentence() {
+  el.sentenceDisplay.innerHTML = state.sentence.map(w =>
+    `<span class="sentence-word">${w.label}</span>`
+  ).join('');
+  updateUndoRedoBtns();
+}
+
+function speakSentence() {
+  if (!state.sentence.length) return;
+  const text = state.sentence.map(w => w.speech).join(' ');
+  addToHistory(text);
+  speakWithHighlight(state.sentence);
+}
+
+// ── Visual word-by-word playback ──────────────
+function speakWithHighlight(words) {
+  speechSynthesis.cancel();
+  const chips = el.sentenceDisplay.querySelectorAll('.sentence-word');
+  chips.forEach(c => c.classList.remove('speaking'));
+
+  words.forEach((word, i) => {
+    const u = makeUtterance(word.speech);
+    u.onstart = () => {
+      chips.forEach(c => c.classList.remove('speaking'));
+      chips[i]?.classList.add('speaking');
+    };
+    if (i === words.length - 1) {
+      u.onend = () => chips.forEach(c => c.classList.remove('speaking'));
+    }
+    speechSynthesis.speak(u);
+  });
+}
+
+function makeUtterance(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  const v = voices.find(x => x.voiceURI === state.voiceSettings.voiceURI);
+  if (v) u.voice = v;
+  u.rate   = parseFloat(state.voiceSettings.rate)   || 1;
+  u.pitch  = parseFloat(state.voiceSettings.pitch)  || 1;
+  u.volume = parseFloat(state.voiceSettings.volume) || 1;
+  return u;
+}
+
+function clearSentence() {
+  if (!state.sentence.length) return;
+  pushSentenceHistory();
+  state.sentence = [];
+  renderSentence();
+  renderPredictions();
+}
+
+function deleteLastWord() {
+  if (!state.sentence.length) return;
+  pushSentenceHistory();
+  state.sentence = state.sentence.slice(0, -1);
+  renderSentence();
+  renderPredictions();
+}
+
+function toggleAuto() {
+  state.autoSpeak = !state.autoSpeak;
+  el.autoBtn.textContent = state.autoSpeak ? '🔊 Auto On' : '🔇 Auto Off';
+  el.autoBtn.classList.toggle('on', state.autoSpeak);
+}
+
+// ─── SPEECH ─────────────────────────────────
+
+function populateVoices() {
+  function load() {
+    voices = speechSynthesis.getVoices();
+    const sel = document.getElementById('voice-select');
+    sel.innerHTML = voices.map(v =>
+      `<option value="${v.voiceURI}">${v.name} (${v.lang})</option>`
+    ).join('');
+    if (state.voiceSettings.voiceURI) sel.value = state.voiceSettings.voiceURI;
+  }
+  load();
+  speechSynthesis.onvoiceschanged = load;
+}
+
+function speak(text) {
+  speechSynthesis.cancel();
+  speechSynthesis.speak(makeUtterance(text));
+}
+
+function saveVoiceSettings() {
+  state.voiceSettings = {
+    voiceURI: document.getElementById('voice-select').value,
+    rate:     document.getElementById('voice-rate').value,
+    pitch:    document.getElementById('voice-pitch').value,
+    volume:   document.getElementById('voice-vol').value,
+  };
+  saveState();
+}
+
+function loadVoiceSettings() {
+  document.getElementById('voice-rate').value  = state.voiceSettings.rate;
+  document.getElementById('voice-pitch').value = state.voiceSettings.pitch;
+  document.getElementById('voice-vol').value   = state.voiceSettings.volume;
+  document.getElementById('rate-val').textContent  = parseFloat(state.voiceSettings.rate).toFixed(1);
+  document.getElementById('pitch-val').textContent = parseFloat(state.voiceSettings.pitch).toFixed(1);
+  document.getElementById('vol-val').textContent   = parseFloat(state.voiceSettings.volume).toFixed(2);
+}
+
+function testVoice() { speak('Hello! I use TalkTiles to communicate.'); }
+
+// ─── PROFILES ────────────────────────────────
+
+function renderProfileSelect() {
+  el.profileSelect.innerHTML = Object.keys(state.profiles).map(n =>
+    `<option value="${n}" ${n===state.currentProfile?'selected':''}>${n}</option>`
+  ).join('');
+}
+
+function renderProfilesList() {
+  document.getElementById('profiles-list').innerHTML = Object.keys(state.profiles).map(name => `
+    <div class="profile-item">
+      <span>${name === state.currentProfile ? '✅ ' : ''}${name}</span>
+      <button class="action-btn btn-primary" style="padding:5px 10px;font-size:0.75rem"
+        onclick="activateProfile('${name}')">Use</button>
+      ${Object.keys(state.profiles).length > 1
+        ? `<button class="action-btn btn-danger" style="padding:5px 10px;font-size:0.75rem"
+            onclick="deleteProfile('${name}')">🗑</button>` : ''}
+    </div>`
+  ).join('');
+}
+
+function activateProfile(name) {
+  state.currentProfile = name;
+  el.profileSelect.value = name;
+  saveState();
+  renderProfilesList();
+  renderCategoryTabs();
+  renderGrid();
+  renderCategorySelect();
+  showToast(`Switched to "${name}"`);
+}
+
+function switchProfile() {
+  activateProfile(el.profileSelect.value);
+}
+
+function addProfile() {
+  const name = document.getElementById('new-profile-name').value.trim();
+  if (!name) return;
+  if (state.profiles[name]) { showToast('Name already exists!'); return; }
+  state.profiles[name] = emptyProfile();
+  activateProfile(name);
+  renderProfileSelect();
+  document.getElementById('new-profile-name').value = '';
+  showToast(`Profile "${name}" created!`);
+}
+
+function deleteProfile(name) {
+  if (!confirm(`Delete profile "${name}"? This cannot be undone.`)) return;
+  delete state.profiles[name];
+  if (state.currentProfile === name) state.currentProfile = Object.keys(state.profiles)[0];
+  saveState();
+  renderProfileSelect();
+  renderProfilesList();
+  renderCategoryTabs();
+  renderGrid();
+}
+
+// ─── ADD / EDIT SYMBOL ──────────────────────
+
+function openAddSymbol() {
+  selectedArasaacId = null; selectedEmoji = null; uploadedImageData = null;
+  document.getElementById('edit-symbol-id').value = '';
+  document.getElementById('sym-label').value = '';
+  document.getElementById('sym-speech').value = '';
+  document.getElementById('sym-url').value = '';
+  document.getElementById('sym-file').value = '';
+  document.getElementById('arasaac-results').innerHTML = '';
+  document.getElementById('delete-sym-btn').style.display = 'none';
+  document.querySelectorAll('.emoji-opt').forEach(e => e.classList.remove('selected'));
+  renderCategorySelect();
+  openModal('modal-add');
+}
+
+function editSymbol(id) {
+  const sym = getProfile().symbols.find(s => s.id === id);
+  if (!sym) return;
+  selectedArasaacId = null; selectedEmoji = null; uploadedImageData = null;
+  document.getElementById('edit-symbol-id').value = id;
+  document.getElementById('sym-label').value   = sym.label;
+  document.getElementById('sym-speech').value  = sym.speech || '';
+  document.getElementById('sym-url').value     = sym.imageUrl || '';
+  document.getElementById('arasaac-results').innerHTML = '';
+  document.getElementById('delete-sym-btn').style.display = 'inline-flex';
+  renderCategorySelect(sym.category);
+  openModal('modal-add');
+}
+
+function renderCategorySelect(selected) {
+  const p = getProfile();
+  document.getElementById('sym-category').innerHTML = p.categories.map(c =>
+    `<option value="${c.id}" ${c.id===selected?'selected':''}>${c.emoji} ${c.name}</option>`
+  ).join('');
+}
+
+function searchArasaac() {
+  const q = document.getElementById('arasaac-search').value.trim();
+  if (!q) return;
+  const div = document.getElementById('arasaac-results');
+  div.innerHTML = '<p style="font-size:0.8rem;color:#64748b;padding:8px">Searching ARASAAC…</p>';
+  fetch(`https://api.arasaac.org/api/pictograms/en/search/${encodeURIComponent(q)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (!data || !data.length) { div.innerHTML = '<p style="font-size:0.8rem;color:#94a3b8;padding:8px">No results found.</p>'; return; }
+      div.innerHTML = data.slice(0,16).map(item => {
+        const kw = item.keywords?.[0]?.keyword || '';
+        return `<div class="arasaac-result" data-id="${item._id}" onclick="selectArasaac(${item._id},this)">
+          <img src="https://static.arasaac.org/pictograms/${item._id}/${item._id}_500.png" alt="${kw}" loading="lazy">
+          <span>${kw}</span>
+        </div>`;
+      }).join('');
+    })
+    .catch(() => { div.innerHTML = '<p style="font-size:0.8rem;color:#ef4444;padding:8px">Search failed. Check connection.</p>'; });
+}
+
+function selectArasaac(id, el) {
+  selectedArasaacId = id; selectedEmoji = null; uploadedImageData = null;
+  document.querySelectorAll('.arasaac-result').forEach(e => e.classList.remove('selected'));
+  document.querySelectorAll('.emoji-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('sym-url').value = '';
+}
+
+function populateEmojiPicker() {
+  const emojis = ['🍕','🥪','🍎','🍔','🥤','🍦','🐶','🐱','🐠','🐦','🎮','📺','🎵','⚽','🎨',
+    '📚','🏠','🏫','🌳','🏖️','😊','😢','😡','😴','🌟','❤️','✋','👋','🌍','🏆','💪','✏️',
+    '🎂','🎈','🚿','💊','🏥','🚌','✈️','🎒','📱','💻','⏰','📅','🌞','🌙','❄️','🌧️',
+    '🏃','🧘','🎭','🎤','🎧','🎹','⚾','🏀','🎯','♟️','🃏','🧩','🌈','🦋','🌺'];
+  document.getElementById('emoji-picker').innerHTML = emojis.map(e =>
+    `<span class="emoji-opt" onclick="selectEmoji('${e}',this)">${e}</span>`
+  ).join('');
+}
+
+function selectEmoji(emoji, el) {
+  selectedEmoji = emoji; selectedArasaacId = null; uploadedImageData = null;
+  document.querySelectorAll('.emoji-opt').forEach(e => e.classList.remove('selected'));
+  document.querySelectorAll('.arasaac-result').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('sym-url').value = '';
+}
+
+function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { uploadedImageData = ev.target.result; selectedArasaacId = null; selectedEmoji = null; };
+  reader.readAsDataURL(file);
+}
+
+function saveSymbol() {
+  const p       = getProfile();
+  const label   = document.getElementById('sym-label').value.trim();
+  const speech  = document.getElementById('sym-speech').value.trim() || label;
+  const catId   = document.getElementById('sym-category').value;
+  const urlVal  = document.getElementById('sym-url').value.trim();
+  const editId  = document.getElementById('edit-symbol-id').value;
+  if (!label) { showToast('Please enter a label!'); return; }
+
+  let sym = { label, speech, category: catId };
+
+  if (selectedArasaacId)    { sym.type = 'arasaac'; sym.arasaacId = selectedArasaacId; }
+  else if (uploadedImageData){ sym.type = 'upload';  sym.imageUrl  = uploadedImageData; }
+  else if (urlVal)           { sym.type = 'url';     sym.imageUrl  = urlVal; }
+  else if (selectedEmoji)    { sym.type = 'emoji';   sym.emoji     = selectedEmoji; }
+  else if (editId) {
+    const ex = p.symbols.find(s => s.id === editId);
+    if (ex) { sym.type = ex.type; sym.emoji = ex.emoji; sym.imageUrl = ex.imageUrl; sym.arasaacId = ex.arasaacId; }
+    else    { sym.type = 'emoji'; sym.emoji = '❓'; }
+  } else { sym.type = 'emoji'; sym.emoji = '❓'; }
+
+  if (editId) {
+    const idx = p.symbols.findIndex(s => s.id === editId);
+    if (idx !== -1) p.symbols[idx] = { id: editId, ...sym };
+  } else {
+    sym.id = crypto.randomUUID();
+    p.symbols.push(sym);
+  }
+
+  saveState(); closeModal('modal-add'); renderGrid();
+  showToast(editId ? 'Symbol updated!' : 'Symbol added!');
+}
+
+function deleteSymbol() {
+  const id = document.getElementById('edit-symbol-id').value;
+  if (!id || !confirm('Delete this symbol?')) return;
+  const p = getProfile();
+  p.symbols = p.symbols.filter(s => s.id !== id);
+  saveState(); closeModal('modal-add'); renderGrid();
+  showToast('Symbol deleted.');
+}
+
+// ─── CATEGORIES ─────────────────────────────
+
+function addCategory() {
+  const p     = getProfile();
+  const name  = document.getElementById('new-cat-name').value.trim();
+  const emoji = document.getElementById('new-cat-emoji').value.trim() || '📁';
+  const color = document.getElementById('new-cat-color').value;
+  if (!name) return;
+  p.categories.push({ id: crypto.randomUUID(), name, emoji, color });
+  saveState(); renderCategoryTabs(); renderCategorySelect();
+  document.getElementById('new-cat-name').value = '';
+  showToast(`"${name}" added!`);
+}
+
+function renderCatManageList() {
+  const p = getProfile();
+  document.getElementById('cat-list').innerHTML = p.categories.map(c => `
+    <div class="cat-manage-item">
+      <div class="cat-color-dot" style="background:${c.color}"></div>
+      <span>${c.emoji} ${c.name}</span>
+      ${p.categories.length > 1
+        ? `<button class="action-btn btn-danger" style="padding:4px 9px;font-size:0.72rem"
+             onclick="deleteCategory('${c.id}')">🗑</button>` : ''}
+    </div>`
+  ).join('');
+}
+
+function deleteCategory(id) {
+  const p = getProfile();
+  if (p.categories.length <= 1) { showToast('Must keep at least one category.'); return; }
+  if (!confirm('Delete this category? Symbols in it will not be deleted.')) return;
+  p.categories = p.categories.filter(c => c.id !== id);
+  if (state.currentCat === id) state.currentCat = 'all';
+  saveState(); renderCategoryTabs(); renderCategorySelect(); renderCatManageList();
+}
+
+// ─── LOCK / EDIT ─────────────────────────────
+
+function toggleLock() {
+  state.locked = !state.locked;
+  document.body.classList.toggle('locked', state.locked);
+  el.lockBtn.innerHTML = state.locked ? '🔒 <span>Unlock</span>' : '🔓 <span>Lock</span>';
+  el.lockBtn.classList.toggle('locked', state.locked);
+  if (state.locked && state.editMode) toggleEdit();
+  renderGrid();
+  showToast(state.locked ? '🔒 Kiosk mode — controls hidden' : '🔓 Unlocked');
+}
+
+function toggleEdit() {
+  state.editMode = !state.editMode;
+  document.body.classList.toggle('edit-mode', state.editMode);
+  el.editBtn.classList.toggle('active', state.editMode);
+  showToast(state.editMode ? 'Edit mode ON — tap ✏️ on any tile' : 'Edit mode OFF');
+}
+
+// ─── TILE SIZE ───────────────────────────────
+
+function setSize(size, doSave=true) {
+  state.tileSize = size;
+  ['sm','md','lg'].forEach(s => {
+    document.body.classList.toggle('size-'+s, s===size);
+    document.getElementById('size-'+s)?.classList.toggle('active', s===size);
+  });
+  if (doSave) saveState();
+}
+
+// ─── HISTORY ─────────────────────────────────
+
+function addToHistory(text) {
+  state.history.unshift({ text, time: new Date().toLocaleTimeString() });
+  if (state.history.length > 50) state.history.pop();
+  saveState();
+}
+
+function renderHistory() {
+  const ul = document.getElementById('history-list');
+  if (!state.history.length) {
+    ul.innerHTML = '<li style="color:#94a3b8;font-size:0.85rem;list-style:none">No history yet.</li>';
+    return;
+  }
+  ul.innerHTML = state.history.map((h,i) => `
+    <li>
+      <div><span>${h.text}</span><span class="h-time">${h.time}</span></div>
+      <button onclick="speak(state.history[${i}].text)">🔊</button>
+    </li>`
+  ).join('');
+}
+
+function clearHistory() {
+  state.history = []; saveState(); renderHistory();
+}
+
+// ─── USAGE TRACKING ──────────────────────────
+
+function trackUsage(symId) {
+  const p = getProfile();
+  p.usage[symId] = (p.usage[symId] || 0) + 1;
+  saveStateDebounced();
+}
+
+function renderUsage() {
+  const p = getProfile();
+  document.getElementById('usage-profile-name').textContent = state.currentProfile;
+
+  const entries = Object.entries(p.usage).sort((a,b) => b[1]-a[1]).slice(0,15);
+  const max = entries[0]?.[1] || 1;
+  const div = document.getElementById('usage-bars');
+  if (!entries.length) {
+    div.innerHTML = '<p style="color:#94a3b8;font-size:0.85rem">No usage data yet.</p>';
+    return;
+  }
+  div.innerHTML = entries.map(([id, count]) => {
+    const sym = p.symbols.find(s => s.id === id);
+    return `<div class="usage-bar-row">
+      <span class="u-label">${sym?.label || id}</span>
+      <div class="usage-bar"><div class="usage-bar-fill" style="width:${(count/max)*100}%"></div></div>
+      <span class="usage-count">${count}</span>
+    </div>`;
+  }).join('');
+}
+
+function clearUsage() {
+  if (!confirm('Reset all usage stats?')) return;
+  getProfile().usage = {}; saveState(); renderUsage();
+}
+
+// ─── PRINT ───────────────────────────────────
+
+function printBoard() { window.print(); }
+
+// ─── SHARE / QR ──────────────────────────────
+
+function generateQR() {
+  const p     = getProfile();
+  const scope = document.getElementById('share-scope').value;
+  const data  = scope === 'cat'
+    ? { categories: p.categories.filter(c => c.id===state.currentCat), symbols: p.symbols.filter(s => s.category===state.currentCat) }
+    : { categories: p.categories, symbols: p.symbols };
+
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  const url     = window.location.href.split('?')[0] + '?import=' + encoded;
+  document.getElementById('share-link-input').value = url;
+  document.getElementById('share-link-area').style.display = 'block';
+
+  const canvas = document.getElementById('qr-canvas');
+  canvas.style.display = 'block';
+  const img = new Image(); img.crossOrigin = 'anonymous';
+  img.onload = () => { const ctx = canvas.getContext('2d'); canvas.width=img.width; canvas.height=img.height; ctx.drawImage(img,0,0); };
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+  showToast('QR code generated!');
+}
+
+function copyShareLink() {
+  navigator.clipboard.writeText(document.getElementById('share-link-input').value)
+    .then(() => showToast('Link copied!'));
+}
+
+function checkURLImport() {
+  const params = new URLSearchParams(window.location.search);
+  const raw    = params.get('import');
+  if (!raw) return;
+  try {
+    const data = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if (confirm('Import shared vocabulary pack?')) {
+      const p = getProfile();
+      (data.categories||[]).forEach(c => { if (!p.categories.find(x=>x.id===c.id)) p.categories.push(c); });
+      (data.symbols   ||[]).forEach(s => { if (!p.symbols.find(x=>x.id===s.id))    p.symbols.push(s); });
+      saveState(); renderCategoryTabs(); renderGrid();
+      showToast('Vocabulary imported!');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  } catch(e) { console.error('Import error', e); }
+}
+
+// ─── COMMUNITY LIBRARY ───────────────────────
+
+function renderLibraryPacks() {
+  document.getElementById('lib-packs').innerHTML = COMMUNITY_PACKS.map(pack => `
+    <div style="border:2px solid #e2e8f0;border-radius:10px;padding:13px">
+      <strong>${pack.name}</strong>
+      <p style="font-size:0.78rem;color:#64748b;margin:4px 0 9px">${pack.desc} (${pack.symbols.length} tiles)</p>
+      <button class="action-btn btn-primary" style="font-size:0.78rem;padding:7px 12px"
+        onclick="installPack('${pack.id}')">⬇ Install Pack</button>
+    </div>`
+  ).join('');
+}
+
+function installPack(packId) {
+  const pack = COMMUNITY_PACKS.find(p => p.id === packId);
+  if (!pack) return;
+  const p = getProfile();
+  let added = 0;
+  pack.symbols.forEach(s => {
+    if (!p.symbols.find(x => x.id === s.id)) { p.symbols.push(s); added++; }
+  });
+  saveState(); renderGrid();
+  showToast(`Installed ${added} new tiles!`);
+}
+
+// ─── EXPORT / IMPORT ─────────────────────────
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(getProfile(), null, 2)], { type:'application/json' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `talktiles-${state.currentProfile}-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importData(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if (d.categories && d.symbols) {
+        state.profiles[state.currentProfile] = d;
+        saveState(); renderCategoryTabs(); renderGrid();
+        showToast('Vocabulary imported!');
+      } else showToast('Invalid file format.');
+    } catch { showToast('Error reading file.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ─── SWITCH SCANNING ─────────────────────────
+
+function refreshScanItems() {
+  const tiles = document.querySelectorAll('.symbol-tile:not(.add-tile)');
+  const core  = document.querySelectorAll('.core-word');
+  scanItems   = [...core, ...tiles];
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === ' ') {
+    e.preventDefault();
+    if (!scanMode) { scanMode = true; scanIndex = 0; highlightScan(); }
+    else { scanIndex = (scanIndex + 1) % scanItems.length; highlightScan(); }
+  } else if (e.key === 'Enter' && scanMode) {
+    e.preventDefault();
+    scanItems[scanIndex]?.click();
+  } else if (e.key === 'Escape' && scanMode) {
+    stopScan();
+  }
+});
+
+function highlightScan() {
+  refreshScanItems();
+  scanItems.forEach((el,i) => el.classList.toggle('scanning', i===scanIndex));
+  scanItems[scanIndex]?.scrollIntoView({ block:'nearest', behavior:'smooth' });
+}
+
+function stopScan() {
+  scanMode = false;
+  scanItems.forEach(el => el.classList.remove('scanning'));
+}
+
+// ─── MODALS ──────────────────────────────────
+
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  if (id === 'modal-history')  renderHistory();
+  if (id === 'modal-usage')    renderUsage();
+  if (id === 'modal-profiles') renderProfilesList();
+  if (id === 'modal-cats')     renderCatManageList();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  selectedArasaacId = null; selectedEmoji = null; uploadedImageData = null;
+}
+
+document.querySelectorAll('.modal-backdrop').forEach(b =>
+  b.addEventListener('click', e => { if (e.target === b) closeModal(b.id); })
+);
+
+// ─── TOAST ───────────────────────────────────
+
+function showToast(msg) {
+  el.toast.textContent = msg;
+  el.toast.classList.add('show');
+  setTimeout(() => el.toast.classList.remove('show'), 2600);
+}
+
+// ─── UNDO / REDO ─────────────────────────────
+
+function pushSentenceHistory() {
+  sentenceHistory.push(JSON.parse(JSON.stringify(state.sentence)));
+  sentenceRedo = [];
+}
+
+function undoSentence() {
+  if (!sentenceHistory.length) return;
+  sentenceRedo.push(JSON.parse(JSON.stringify(state.sentence)));
+  state.sentence = sentenceHistory.pop();
+  renderSentence();
+  renderPredictions();
+}
+
+function redoSentence() {
+  if (!sentenceRedo.length) return;
+  sentenceHistory.push(JSON.parse(JSON.stringify(state.sentence)));
+  state.sentence = sentenceRedo.pop();
+  renderSentence();
+  renderPredictions();
+}
+
+function updateUndoRedoBtns() {
+  if (!el.undoBtn) return;
+  el.undoBtn.disabled = !sentenceHistory.length;
+  el.redoBtn.disabled = !sentenceRedo.length;
+}
+
+// ─── SYMBOL PREDICTIONS ──────────────────────
+
+function renderPredictions() {
+  if (!el.predStrip) return;
+  if (!state.sentence.length) {
+    el.predStrip.classList.remove('visible');
+    el.predStrip.innerHTML = '';
+    return;
+  }
+  const p = getProfile();
+  const usedLabels = new Set(state.sentence.map(w => w.label.toLowerCase()));
+
+  const candidates = p.symbols
+    .filter(s => !usedLabels.has(s.label.toLowerCase()))
+    .map(s => ({ sym: s, count: p.usage[s.id] || 0 }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+
+  if (!candidates.length) {
+    el.predStrip.classList.remove('visible');
+    return;
+  }
+
+  const icon = s => s.type === 'emoji' ? s.emoji + ' ' : '';
+  el.predStrip.innerHTML =
+    `<span class="pred-label">💡 Next:</span>` +
+    candidates.map(({ sym }) =>
+      `<button class="pred-chip" onclick="tileClicked('${sym.id}')">${icon(sym)}${sym.label}</button>`
+    ).join('');
+  el.predStrip.classList.add('visible');
+}
+
+// ─── SENTENCE TEMPLATES ──────────────────────
+
+function useTemplate(words) {
+  if (state.sentence.length) pushSentenceHistory();
+  sentenceRedo = [];
+  state.sentence = words.map(w =>
+    typeof w === 'string' ? { label: w, speech: w } : w
+  );
+  renderSentence();
+  renderPredictions();
+  showToast('Template loaded — tap tiles to complete!');
+}
+
+function toggleTemplates() {
+  const visible = el.tmplStrip.classList.toggle('visible');
+  el.tmplBtn.classList.toggle('on', visible);
+}
+
+// ─── HOLD-TO-SPEAK ───────────────────────────
+
+function initHoldToSpeak() {
+  // Tiles are dynamically created so we use event delegation on the grid
+  document.getElementById('symbol-grid').addEventListener('mousedown', e => {
+    const tile = e.target.closest('.symbol-tile:not(.add-tile)');
+    if (!tile) return;
+    const id = tile.dataset.id;
+    const sym = getProfile().symbols.find(s => s.id === id);
+    if (sym) speak(sym.speech || sym.label);
+  });
+
+  const stopHold = () => speechSynthesis.cancel();
+
+  document.getElementById('symbol-grid').addEventListener('mouseup',    stopHold);
+  document.getElementById('symbol-grid').addEventListener('mouseleave', stopHold);
+
+  // Touch support
+  document.getElementById('symbol-grid').addEventListener('touchstart', e => {
+    const tile = e.target.closest('.symbol-tile:not(.add-tile)');
+    if (!tile) return;
+    const id = tile.dataset.id;
+    const sym = getProfile().symbols.find(s => s.id === id);
+    if (sym) speak(sym.speech || sym.label);
+  }, { passive: true });
+
+  document.getElementById('symbol-grid').addEventListener('touchend', stopHold, { passive: true });
+}
+
+// ─── START ───────────────────────────────────
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
