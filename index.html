@@ -1,0 +1,2600 @@
+<!DOCTYPE html>
+<!--
+  TalkTiles — Open Source Picture Communication System
+  MIT License — Free to use, modify, and share
+  https://github.com/your-username/talktiles
+
+  ADDING YOUR OWN SYMBOLS:
+  Edit the VOCAB object below. Each symbol needs:
+    id: unique string
+    label: text shown under the picture
+    speech: what the app says aloud
+    svg: inline SVG string OR imgUrl: a web/data image URL
+
+  ADDING CATEGORIES:
+  Add a new object to VOCAB.categories with:
+    id, label, color, emoji, symbols: [...]
+
+  CONTRIBUTING:
+  Fork on GitHub, add symbols or categories, and open a Pull Request!
+  Community vocabulary packs can be imported via the Import button.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<!-- PWA: Install as home screen app on iPhone, iPad, Android, or desktop -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TalkTiles">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1E293B">
+<meta name="description" content="TalkTiles — Free, open-source picture communication board for AAC users. Works on any device, no install required.">
+<!-- PWA Manifest (inline) -->
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22TalkTiles%22%2C%22short_name%22%3A%22TalkTiles%22%2C%22description%22%3A%22Free%20open-source%20picture%20communication%20board%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F0F4FF%22%2C%22theme_color%22%3A%22%231E293B%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520viewBox%3D'0%25200%2520100%2520100'%2520xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%253E%253Crect%2520width%3D'100'%2520height%3D'100'%2520rx%3D'20'%2520fill%3D'%25231E293B'%2F%253E%253Ctext%2520x%3D'50'%2520y%3D'68'%2520text-anchor%3D'middle'%2520font-size%3D'52'%253E%25F0%259F%2597%25A3%25EF%25B8%258F%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<title>TalkTiles — Free Picture Communication</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F0F4FF;
+  --sentence-bg: #1E293B;
+  --card: #fff;
+  --radius: 20px;
+  --shadow: 0 4px 18px rgba(0,0,0,0.13);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.18);
+  --font: 'Nunito Sans', sans-serif;
+  --font-display: 'Nunito', sans-serif;
+  --core-h: 116px;
+  --sentence-h: 110px;
+  --cat-h: 72px;
+  --top-h: 68px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--font);}
+body{display:flex;flex-direction:column;}
+
+/* ── TOP BAR ── */
+#topbar{
+  height:var(--top-h);
+  background:#1E293B;
+  display:flex;align-items:center;
+  padding:0 14px;gap:8px;
+  flex-shrink:0;
+}
+#topbar-title{
+  font-family:var(--font-display);
+  font-weight:900;font-size:22px;
+  color:white;flex:1;
+  letter-spacing:-0.3px;
+}
+.topbar-btn{
+  background:rgba(255,255,255,0.12);
+  border:none;border-radius:12px;
+  color:white;
+  font-family:var(--font-display);
+  font-weight:800;font-size:15px;
+  padding:10px 16px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+  transition:background 0.15s;
+  white-space:nowrap;
+}
+.topbar-btn:active{background:rgba(255,255,255,0.25);}
+.topbar-btn.edit-active{background:#F59E0B;color:#1E293B;}
+
+/* ── SENTENCE BAR ── */
+#sentence-area{
+  background:#0F172A;
+  padding:12px 12px 8px;
+  flex-shrink:0;
+  min-height:var(--sentence-h);
+}
+#sentence-chips{
+  display:flex;flex-wrap:nowrap;
+  overflow-x:auto;gap:8px;
+  padding-bottom:8px;
+  scrollbar-width:none;
+  min-height:50px;align-items:center;
+}
+#sentence-chips::-webkit-scrollbar{display:none;}
+.chip{
+  background:rgba(255,255,255,0.15);
+  border-radius:50px;
+  padding:9px 18px;
+  color:white;
+  font-family:var(--font-display);
+  font-weight:800;font-size:18px;
+  white-space:nowrap;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  flex-shrink:0;
+  transition:background 0.12s;
+}
+.chip:active{background:rgba(255,100,100,0.4);}
+.chip-emoji{font-size:20px;}
+#sentence-controls{
+  display:flex;gap:8px;align-items:center;
+  padding-top:4px;
+}
+.sentence-btn{
+  background:none;border:none;cursor:pointer;
+  border-radius:10px;padding:6px 12px;
+  font-family:var(--font-display);font-weight:800;
+  font-size:16px;color:rgba(255,255,255,0.65);
+  display:flex;align-items:center;gap:5px;
+  transition:color 0.15s;
+}
+.sentence-btn:active{color:white;}
+#speak-btn{
+  background:#10B981;
+  color:white;
+  font-size:17px;
+  padding:9px 22px;
+  border-radius:50px;
+  margin-left:auto;
+}
+#speak-btn:active{background:#059669;}
+#speak-btn.speaking{background:#F59E0B;}
+.placeholder-text{
+  color:rgba(255,255,255,0.3);
+  font-size:18px;font-style:italic;
+  font-family:var(--font);padding-left:4px;
+}
+
+/* ── CATEGORY NAV ── */
+#cat-nav{
+  height:var(--cat-h);
+  background:#fff;
+  border-bottom:3px solid #E2E8F0;
+  display:flex;align-items:center;
+  overflow-x:auto;gap:6px;
+  padding:0 10px;
+  flex-shrink:0;
+  scrollbar-width:none;
+}
+#cat-nav::-webkit-scrollbar{display:none;}
+.cat-tab{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 20px;
+  border-radius:50px;
+  cursor:pointer;
+  font-family:var(--font-display);
+  font-weight:800;font-size:17px;
+  white-space:nowrap;
+  border:none;background:none;
+  color:#64748B;
+  transition:background 0.15s,color 0.15s;
+  flex-shrink:0;
+}
+.cat-tab.active{color:white;}
+.cat-tab:active{opacity:0.8;}
+.cat-emoji{font-size:22px;}
+
+/* ── SYMBOL GRID ── */
+#symbol-area{
+  flex:1;overflow-y:auto;
+  padding:14px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:14px;
+  align-content:start;
+}
+.sym-btn{
+  background:var(--card);
+  border:3px solid transparent;
+  border-radius:var(--radius);
+  cursor:pointer;
+  display:flex;flex-direction:column;
+  align-items:center;
+  padding:12px 8px 14px;
+  box-shadow:var(--shadow);
+  transition:transform 0.1s,box-shadow 0.1s;
+  position:relative;
+  min-height:160px;
+  user-select:none;
+}
+.sym-btn:active{transform:scale(0.94);box-shadow:none;}
+.sym-btn.edit-mode{border-style:dashed;cursor:grab;}
+.sym-btn svg,.sym-btn img{
+  width:96px;height:96px;
+  object-fit:contain;
+  border-radius:12px;
+  flex-shrink:0;
+}
+.sym-label{
+  font-family:var(--font-display);
+  font-weight:800;font-size:16px;
+  color:#1E293B;text-align:center;
+  margin-top:8px;line-height:1.2;
+  max-width:100%;word-break:break-word;
+}
+.sym-delete{
+  position:absolute;top:-10px;right:-10px;
+  background:#EF4444;color:white;
+  border:none;border-radius:50%;
+  width:30px;height:30px;
+  font-size:17px;cursor:pointer;
+  display:none;align-items:center;justify-content:center;
+  font-weight:900;line-height:1;
+  z-index:10;
+}
+.edit-mode .sym-delete{display:flex;}
+#add-sym-btn{
+  background:rgba(99,102,241,0.07);
+  border:3px dashed #A5B4FC;
+  border-radius:var(--radius);
+  min-height:160px;
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  cursor:pointer;gap:8px;
+  color:#6366F1;font-family:var(--font-display);
+  font-weight:800;font-size:16px;
+}
+#add-sym-btn:active{background:rgba(99,102,241,0.15);}
+
+/* ── CORE WORD STRIP ── */
+#core-strip{
+  height:var(--core-h);
+  background:#1E293B;
+  display:flex;align-items:center;
+  gap:8px;padding:0 10px;
+  overflow-x:auto;flex-shrink:0;
+  scrollbar-width:none;
+}
+#core-strip::-webkit-scrollbar{display:none;}
+.core-btn{
+  display:flex;flex-direction:column;
+  align-items:center;gap:4px;
+  cursor:pointer;
+  flex-shrink:0;
+  padding:6px;border:none;background:none;
+}
+.core-btn svg,.core-btn img{
+  width:68px;height:68px;
+  border-radius:12px;
+  display:block;
+}
+.core-label{
+  font-family:var(--font-display);
+  font-weight:800;font-size:13px;
+  color:rgba(255,255,255,0.85);
+  text-align:center;
+}
+.core-btn:active svg,.core-btn:active img{opacity:0.7;}
+
+/* ── EDIT PANEL ── */
+#edit-panel{
+  position:fixed;bottom:0;left:0;right:0;
+  background:white;
+  border-radius:24px 24px 0 0;
+  padding:20px 20px 36px;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.2);
+  transform:translateY(110%);
+  transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:100;
+  max-height:70vh;overflow-y:auto;
+}
+#edit-panel.open{transform:translateY(0);}
+#edit-panel h2{
+  font-family:var(--font-display);
+  font-weight:900;font-size:24px;
+  color:#1E293B;margin-bottom:16px;
+}
+.edit-section{
+  background:#F8FAFC;border-radius:14px;
+  padding:18px;margin-bottom:12px;
+}
+.edit-section h3{
+  font-family:var(--font-display);
+  font-weight:800;font-size:16px;
+  color:#475569;text-transform:uppercase;
+  letter-spacing:0.06em;margin-bottom:12px;
+}
+.form-row{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.form-label{font-family:var(--font-display);font-weight:800;font-size:15px;color:#374151;}
+.form-input{
+  font-family:var(--font);font-size:17px;
+  border:2px solid #E2E8F0;border-radius:10px;
+  padding:12px 16px;outline:none;
+  transition:border-color 0.15s;
+}
+.form-input:focus{border-color:#6366F1;}
+.edit-btn{
+  font-family:var(--font-display);font-weight:800;
+  font-size:17px;border:none;border-radius:12px;
+  padding:14px 20px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  width:100%;justify-content:center;
+  margin-top:6px;transition:opacity 0.15s;
+}
+.edit-btn:active{opacity:0.8;}
+.btn-indigo{background:#6366F1;color:white;}
+.btn-green{background:#10B981;color:white;}
+.btn-red{background:#EF4444;color:white;}
+.btn-gray{background:#E2E8F0;color:#374151;}
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.4);
+  z-index:99;display:none;
+}
+.overlay.show{display:block;}
+
+#lib-header{
+  background:#1E293B;
+  padding:16px 18px 14px;
+  flex-shrink:0;
+}
+#lib-header-top {
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+}
+#lib-title {
+  font-family:var(--font-display);font-weight:900;
+  font-size:22px;color:white;flex:1;
+}
+#lib-close {
+  background:rgba(255,255,255,0.12);border:none;
+  border-radius:12px;color:white;padding:10px 16px;
+  font-family:var(--font-display);font-weight:800;
+  font-size:16px;cursor:pointer;
+}
+#lib-search-row {
+  display:flex;gap:8px;
+}
+#lib-search {
+  flex:1;font-family:var(--font-display);font-weight:700;
+  font-size:17px;background:rgba(255,255,255,0.1);
+  border:2px solid rgba(255,255,255,0.15);
+  border-radius:12px;padding:13px 18px;color:white;
+  outline:none;
+}
+#lib-search::placeholder { color:rgba(255,255,255,0.4); }
+#lib-search:focus { border-color:#6366F1; }
+#lib-search-btn {
+  background:#6366F1;border:none;border-radius:12px;
+  color:white;font-family:var(--font-display);font-weight:800;
+  font-size:16px;padding:13px 20px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;white-space:nowrap;
+  transition:background 0.15s;
+}
+#lib-search-btn:active { background:#4F46E5; }
+#lib-search-btn.loading { background:#475569;cursor:wait; }
+#lib-body {
+  flex:1;overflow-y:auto;padding:16px;
+  display:flex;flex-direction:column;gap:16px;
+}
+.lib-section-title {
+  font-family:var(--font-display);font-weight:900;
+  font-size:15px;text-transform:uppercase;
+  letter-spacing:0.08em;color:#64748B;
+  margin-bottom:6px;
+}
+.pack-card {
+  background:#1E293B;border-radius:18px;
+  padding:18px 20px;cursor:pointer;
+  border:2px solid transparent;
+  transition:border-color 0.15s,transform 0.1s;
+  position:relative;
+}
+.pack-card:active { transform:scale(0.98); }
+.pack-card.selected { border-color:#6366F1; }
+.pack-card-top {
+  display:flex;align-items:flex-start;gap:14px;margin-bottom:12px;
+}
+.pack-icon {
+  width:58px;height:58px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;flex-shrink:0;
+}
+.pack-info { flex:1; }
+.pack-name {
+  font-family:var(--font-display);font-weight:900;
+  font-size:19px;color:white;line-height:1.2;margin-bottom:4px;
+}
+.pack-meta {
+  font-size:14px;color:#64748B;font-weight:600;
+}
+.pack-desc {
+  font-size:15px;color:#94A3B8;line-height:1.5;margin-bottom:12px;
+}
+.pack-symbols {
+  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;
+}
+.pack-sym-chip {
+  background:rgba(99,102,241,0.15);
+  border-radius:50px;padding:5px 14px;
+  font-size:14px;color:#A5B4FC;
+  font-family:var(--font-display);font-weight:700;
+}
+.pack-install-btn {
+  width:100%;background:#6366F1;color:white;
+  border:none;border-radius:12px;padding:14px;
+  font-family:var(--font-display);font-weight:800;
+  font-size:17px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background 0.15s;
+}
+.pack-install-btn:active { background:#4F46E5; }
+.pack-install-btn.installed { background:#10B981; }
+.gen-spinner {
+  width:52px;height:52px;border:5px solid rgba(99,102,241,0.3);
+  border-top-color:#6366F1;border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+.gen-text {
+  font-family:var(--font-display);font-weight:800;
+  font-size:18px;color:white;
+}
+.gen-sub { font-size:15px;color:#64748B; }
+.grade-chips {
+  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;
+}
+.grade-chip {
+  background:rgba(255,255,255,0.07);border:none;
+  border-radius:50px;padding:8px 16px;
+  font-family:var(--font-display);font-weight:700;
+  font-size:14px;color:#94A3B8;cursor:pointer;
+  transition:background 0.12s,color 0.12s;
+}
+.grade-chip.active { background:#6366F1;color:white; }
+
+/* ── FOCUS MODE ── */
+#focus-setup-screen, #focus-play-screen {
+  position:fixed;inset:0;z-index:160;display:none;flex-direction:column;
+}
+#focus-setup-screen.open, #focus-play-screen.open { display:flex; }
+
+/* Setup screen */
+#focus-setup-screen { background:#0F172A; overflow-y:auto; }
+#focus-setup-header {
+  background:#1E293B;padding:16px 18px;flex-shrink:0;
+  display:flex;align-items:center;gap:12px;
+}
+#focus-setup-title {
+  font-family:var(--font-display);font-weight:900;font-size:22px;color:white;flex:1;
+}
+.focus-close-btn {
+  background:rgba(255,255,255,0.1);border:none;border-radius:12px;
+  color:white;font-family:var(--font-display);font-weight:800;
+  font-size:16px;padding:10px 18px;cursor:pointer;
+}
+#focus-setup-body { padding:18px;display:flex;flex-direction:column;gap:16px; }
+.focus-section {
+  background:#1E293B;border-radius:18px;padding:18px;
+}
+.focus-section-title {
+  font-family:var(--font-display);font-weight:900;font-size:16px;
+  color:white;margin-bottom:14px;
+  text-transform:uppercase;letter-spacing:0.06em;
+}
+.focus-scene-list { display:flex;flex-direction:column;gap:8px; }
+.focus-scene-card {
+  background:#0F172A;border-radius:14px;padding:14px 18px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+  border:2px solid transparent;transition:border-color 0.15s;
+}
+.focus-scene-card:active { border-color:#10B981; }
+.focus-scene-emoji { font-size:28px;flex-shrink:0; }
+.focus-scene-info { flex:1; }
+.focus-scene-name {
+  font-family:var(--font-display);font-weight:800;font-size:17px;color:white;
+}
+.focus-scene-choices {
+  font-size:14px;color:#64748B;margin-top:3px;
+}
+.focus-scene-launch {
+  background:#10B981;border:none;border-radius:10px;
+  color:white;font-family:var(--font-display);font-weight:800;
+  font-size:14px;padding:8px 16px;cursor:pointer;white-space:nowrap;
+}
+.focus-picker-grid {
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+  gap:10px;margin-top:10px;
+}
+.focus-picker-btn {
+  background:#0F172A;border:3px solid rgba(255,255,255,0.08);
+  border-radius:14px;padding:10px 6px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  transition:border-color 0.15s,background 0.15s;min-height:100px;
+}
+.focus-picker-btn.selected {
+  border-color:#10B981;background:rgba(16,185,129,0.15);
+}
+.focus-picker-btn svg, .focus-picker-btn img {
+  width:56px;height:56px;border-radius:10px;
+}
+.focus-picker-label {
+  font-family:var(--font-display);font-weight:800;font-size:13px;
+  color:white;text-align:center;line-height:1.2;
+}
+.focus-cat-select {
+  width:100%;font-family:var(--font-display);font-size:16px;font-weight:700;
+  background:#0F172A;border:2px solid rgba(255,255,255,0.15);
+  border-radius:12px;padding:12px 16px;color:white;outline:none;
+  margin-bottom:12px;cursor:pointer;
+}
+.focus-selected-count {
+  font-size:14px;color:#10B981;font-family:var(--font-display);font-weight:800;
+  margin-bottom:10px;
+}
+.focus-launch-big {
+  background:#10B981;border:none;border-radius:16px;
+  color:white;font-family:var(--font-display);font-weight:900;
+  font-size:22px;padding:18px;cursor:pointer;width:100%;
+  margin-top:6px;box-shadow:0 4px 20px rgba(16,185,129,0.4);
+  transition:transform 0.1s,box-shadow 0.1s;
+}
+.focus-launch-big:active { transform:scale(0.97);box-shadow:none; }
+.focus-launch-big:disabled { background:#334155;color:#64748B;box-shadow:none;cursor:not-allowed; }
+.focus-name-input {
+  width:100%;font-family:var(--font-display);font-weight:700;font-size:17px;
+  background:#0F172A;border:2px solid rgba(255,255,255,0.15);
+  border-radius:12px;padding:12px 16px;color:white;outline:none;margin-bottom:10px;
+}
+.focus-name-input::placeholder { color:rgba(255,255,255,0.3); }
+
+/* Play screen — the actual Focus Mode display */
+#focus-play-screen { background:#0F172A; }
+#focus-play-header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;background:#1E293B;flex-shrink:0;
+}
+#focus-play-title {
+  font-family:var(--font-display);font-weight:900;font-size:20px;color:white;
+}
+#focus-exit-btn {
+  background:rgba(255,255,255,0.1);border:none;border-radius:12px;
+  color:white;font-family:var(--font-display);font-weight:800;
+  font-size:16px;padding:10px 18px;cursor:pointer;
+}
+#focus-play-sentence {
+  background:#0A0F1E;padding:10px 18px;
+  font-family:var(--font-display);font-weight:800;font-size:20px;
+  color:white;min-height:52px;display:flex;align-items:center;
+  gap:10px;flex-wrap:wrap;flex-shrink:0;overflow-x:auto;
+}
+#focus-play-sentence.empty { color:rgba(255,255,255,0.25);font-style:italic;font-size:17px; }
+#focus-controls {
+  display:flex;gap:10px;padding:10px 18px;background:#0A0F1E;flex-shrink:0;
+}
+.focus-ctrl-btn {
+  background:rgba(255,255,255,0.08);border:none;border-radius:10px;
+  color:rgba(255,255,255,0.7);font-family:var(--font-display);font-weight:800;
+  font-size:16px;padding:10px 18px;cursor:pointer;
+}
+#focus-speak-btn {
+  background:#10B981;color:white;border:none;border-radius:10px;
+  font-family:var(--font-display);font-weight:800;font-size:17px;
+  padding:10px 22px;cursor:pointer;margin-left:auto;
+}
+#focus-grid {
+  flex:1;display:grid;gap:14px;padding:14px;overflow:hidden;
+}
+
+/* ── COMMUNITY LIBRARY ── */
+#library-screen {
+  position:fixed;inset:0;
+  background:#0F172A;
+  z-index:150;
+  display:none;
+  flex-direction:column;
+  overflow:hidden;
+}
+#library-screen.open { display:flex; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+@media(min-width:600px){
+  #symbol-area{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+  .sym-btn{min-height:180px;}
+  .sym-btn svg,.sym-btn img{width:110px;height:110px;}
+  .sym-label{font-size:17px;}
+}
+@media(min-width:900px){
+  #symbol-area{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));}
+  .sym-btn svg,.sym-btn img{width:120px;height:120px;}
+}
+#branch-panel {
+  position:fixed;bottom:0;left:0;right:0;
+  background:#1E293B;
+  border-radius:24px 24px 0 0;
+  padding:0 0 24px;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.4);
+  transform:translateY(110%);
+  transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:120;
+  max-height:72vh;
+  display:flex;flex-direction:column;
+}
+#branch-panel.open{transform:translateY(0);}
+#branch-header{padding:18px 18px 12px;flex-shrink:0;}
+#branch-breadcrumb{
+  display:flex;align-items:center;gap:6px;
+  flex-wrap:wrap;margin-bottom:12px;
+}
+.crumb{font-family:var(--font-display);font-weight:800;font-size:16px;color:rgba(255,255,255,0.45);}
+.crumb.active{color:white;}
+.crumb-sep{color:rgba(255,255,255,0.25);font-size:16px;}
+#branch-title-row{display:flex;align-items:center;gap:12px;}
+#branch-back{
+  background:rgba(255,255,255,0.1);border:none;border-radius:12px;
+  color:white;font-family:var(--font-display);font-weight:800;
+  font-size:16px;padding:10px 18px;cursor:pointer;
+}
+#branch-back:active{background:rgba(255,255,255,0.2);}
+#branch-title{font-family:var(--font-display);font-weight:900;font-size:22px;color:white;flex:1;}
+#branch-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:12px;padding:12px 18px 0;overflow-y:auto;flex:1;
+}
+.branch-sym-btn{
+  background:#0F172A;border:2px solid rgba(255,255,255,0.06);border-radius:16px;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;
+  padding:14px 8px 14px;transition:transform 0.1s;min-height:140px;position:relative;
+}
+.branch-sym-btn:active{transform:scale(0.94);}
+.branch-sym-btn svg,.branch-sym-btn img{width:78px;height:78px;border-radius:12px;}
+.branch-sym-btn .sym-label{color:rgba(255,255,255,0.88);font-size:15px;}
+.branch-has-children{border-color:rgba(99,102,241,0.6);}
+.branch-arrow{
+  position:absolute;top:6px;right:6px;background:#6366F1;border-radius:50%;
+  width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:white;
+}
+#branch-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:119;display:none;}
+#branch-overlay.show{display:block;}
+.sym-btn.has-branch::after{
+  content:'▶';position:absolute;bottom:5px;right:7px;
+  font-size:9px;color:#818CF8;font-weight:900;
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div id="topbar-title">🗣️ TalkTiles</div>
+  <button class="topbar-btn" id="focus-btn" onclick="openFocusSetup()" style="background:#10B981;color:white;">⭐ Focus</button>
+  <button class="topbar-btn" id="library-btn" onclick="openLibrary()" style="background:#6366F1;color:white;">🌐 Library</button>
+  <button class="topbar-btn" onclick="showQR()">📲 QR</button>
+  <button class="topbar-btn" onclick="exportVocab()">⬆ Export</button>
+  <label class="topbar-btn" style="cursor:pointer;">
+    ⬇ Import<input type="file" accept=".json" style="display:none" onchange="importVocab(event)">
+  </label>
+  <button class="topbar-btn" id="edit-toggle" onclick="toggleEditMode()">✏️ Edit</button>
+</div>
+
+<div id="sentence-area">
+  <div id="sentence-chips"><span class="placeholder-text">Tap pictures to build a sentence…</span></div>
+  <div id="sentence-controls">
+    <button class="sentence-btn" onclick="clearSentence()">✕ Clear</button>
+    <button class="sentence-btn" onclick="backspace()">⌫ Delete</button>
+    <button class="sentence-btn" id="autospeak-btn" onclick="toggleAutoSpeak()">🔇 Auto</button>
+    <button class="sentence-btn" id="speak-btn" onclick="speakSentence()">🔊 Speak</button>
+  </div>
+</div>
+
+<div id="cat-nav"></div>
+
+<div id="symbol-area">
+  <button id="add-sym-btn" onclick="openAddSymbol()">
+    <span style="font-size:28px;">＋</span>
+    <span>Add Symbol</span>
+  </button>
+</div>
+
+<div id="core-strip"></div>
+
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div id="edit-panel">
+  <h2 id="panel-title">Add New Symbol</h2>
+  <div class="edit-section">
+    <h3>Symbol Info</h3>
+    <div class="form-row">
+      <div class="form-label">Label (shown under picture)</div>
+      <input class="form-input" id="f-label" placeholder="e.g. Pizza" oninput="previewSvg()">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Speech text (what the app says)</div>
+      <input class="form-input" id="f-speech" placeholder="e.g. I want pizza">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Image URL (optional — leave blank to use emoji/color)</div>
+      <input class="form-input" id="f-imgurl" placeholder="https://…" oninput="previewSvg()">
+    </div>
+    <div class="form-row">
+      <div class="form-label">OR choose an emoji symbol</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="emoji-picker">
+        🍕🥪🍎🍔🥤🍦🐶🐱🐠🐦🎮📺🎵⚽🎨📚🏠🏫🌳🏖️😊😢😡😴🌟❤️✋👋🌍🏆💪✏️🎂🎈
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Emoji (selected)</div>
+      <input class="form-input" id="f-emoji" placeholder="Click emoji above or type one">
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin:12px 0;">
+      <div id="sym-preview" style="width:80px;height:80px;border-radius:12px;background:#E2E8F0;display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;flex-shrink:0;">?</div>
+      <div style="flex:1;font-size:13px;color:#64748B;font-family:var(--font);">Preview will appear here. You can also upload a photo below.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">OR upload an image from your device</div>
+      <input type="file" accept="image/*" class="form-input" id="f-upload" onchange="handleUpload(event)" style="padding:6px;">
+    </div>
+  </div>
+  <div class="edit-section">
+    <h3>Category</h3>
+    <div class="form-row">
+      <select class="form-input" id="f-category"></select>
+    </div>
+  </div>
+  <button class="edit-btn btn-indigo" onclick="saveSymbol()">💾 Save Symbol</button>
+  <button class="edit-btn btn-gray" onclick="closePanel()" style="margin-top:8px;">Cancel</button>
+  <div style="height:12px;"></div>
+
+  <div class="edit-section" id="cat-mgmt">
+    <h3>Manage Categories</h3>
+    <div class="form-row">
+      <div class="form-label">New category name</div>
+      <input class="form-input" id="f-catname" placeholder="e.g. Sports">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Emoji icon for category</div>
+      <input class="form-input" id="f-catemoji" placeholder="e.g. ⚽">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Color (hex)</div>
+      <input class="form-input" id="f-catcolor" placeholder="#3B82F6" value="#3B82F6">
+    </div>
+    <button class="edit-btn btn-green" onclick="addCategory()">＋ Add Category</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// SVG SYMBOL LIBRARY — hand-crafted pictographs, open for community editing
+// ═══════════════════════════════════════════════════════════════════════════
+function makeSvg(bg, content) {
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${bg}"/>${content}</svg>`;
+}
+
+const S = {
+  // ── CORE ──
+  yes: makeSvg('#10B981','<polyline points="20,52 42,74 80,26" stroke="white" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'),
+  no: makeSvg('#EF4444','<line x1="26" y1="26" x2="74" y2="74" stroke="white" stroke-width="11" stroke-linecap="round"/><line x1="74" y1="26" x2="26" y2="74" stroke="white" stroke-width="11" stroke-linecap="round"/>'),
+  me: makeSvg('#3B82F6','<circle cx="50" cy="28" r="16" fill="white"/><path d="M22,84 Q22,54 50,54 Q78,54 78,84Z" fill="white"/><line x1="50" y1="62" x2="26" y2="50" stroke="white" stroke-width="6" stroke-linecap="round"/><circle cx="21" cy="47" r="7" fill="#FCD34D"/>'),
+  want: makeSvg('#8B5CF6','<rect x="28" y="52" width="44" height="28" rx="10" fill="white"/><rect x="28" y="32" width="9" height="23" rx="5" fill="white"/><rect x="41" y="25" width="9" height="29" rx="5" fill="white"/><rect x="54" y="27" width="9" height="27" rx="5" fill="white"/><rect x="67" y="32" width="9" height="22" rx="5" fill="white"/>'),
+  like: makeSvg('#EC4899','<path d="M50,78 L22,52 Q12,38 26,28 Q38,20 50,36 Q62,20 74,28 Q88,38 78,52Z" fill="white"/>'),
+  help: makeSvg('#F59E0B','<rect x="10" y="44" width="34" height="14" rx="7" fill="white"/><rect x="56" y="44" width="34" height="14" rx="7" fill="white"/><circle cx="50" cy="51" r="12" fill="white"/><line x1="44" y1="51" x2="56" y2="51" stroke="#F59E0B" stroke-width="3"/>'),
+  more: makeSvg('#14B8A6','<line x1="50" y1="22" x2="50" y2="50" stroke="white" stroke-width="8" stroke-linecap="round"/><line x1="36" y1="36" x2="64" y2="36" stroke="white" stroke-width="8" stroke-linecap="round"/><line x1="50" y1="56" x2="50" y2="78" stroke="white" stroke-width="8" stroke-linecap="round"/><line x1="36" y1="67" x2="64" y2="67" stroke="white" stroke-width="8" stroke-linecap="round"/>'),
+  stop: makeSvg('#DC2626','<polygon points="35,14 65,14 86,35 86,65 65,86 35,86 14,65 14,35" fill="#B91C1C"/><line x1="50" y1="30" x2="50" y2="58" stroke="white" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="70" r="5" fill="white"/>'),
+  go: makeSvg('#22C55E','<polygon points="30,20 78,50 30,80" fill="white"/>'),
+  finish: makeSvg('#0EA5E9','<polyline points="18,50 38,70 82,26" stroke="white" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="18" y1="82" x2="82" y2="82" stroke="white" stroke-width="6" stroke-linecap="round"/>'),
+  // ── FEELINGS ──
+  happy: makeSvg('#FBBF24','<circle cx="50" cy="50" r="38" fill="#FCD34D"/><circle cx="37" cy="42" r="5" fill="#1E293B"/><circle cx="63" cy="42" r="5" fill="#1E293B"/><path d="M32,60 Q50,78 68,60" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/>'),
+  sad: makeSvg('#60A5FA','<circle cx="50" cy="50" r="38" fill="#93C5FD"/><circle cx="37" cy="42" r="5" fill="#1E293B"/><circle cx="63" cy="42" r="5" fill="#1E293B"/><path d="M32,68 Q50,52 68,68" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/><line x1="37" y1="48" x2="33" y2="60" stroke="#60A5FA" stroke-width="3" stroke-linecap="round"/>'),
+  angry: makeSvg('#EF4444','<circle cx="50" cy="52" r="38" fill="#FCA5A5"/><circle cx="37" cy="44" r="5" fill="#1E293B"/><circle cx="63" cy="44" r="5" fill="#1E293B"/><path d="M32,70 Q50,56 68,70" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/><line x1="28" y1="30" x2="44" y2="40" stroke="#DC2626" stroke-width="5" stroke-linecap="round"/><line x1="72" y1="30" x2="56" y2="40" stroke="#DC2626" stroke-width="5" stroke-linecap="round"/>'),
+  tired: makeSvg('#94A3B8','<circle cx="50" cy="50" r="38" fill="#CBD5E1"/><path d="M30,42 Q37,36 44,42" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M56,42 Q63,36 70,42" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M36,64 Q50,72 64,64" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/><text x="74" y="28" font-size="18" fill="#475569" font-family="sans-serif">z</text>'),
+  excited: makeSvg('#F59E0B','<circle cx="50" cy="50" r="38" fill="#FDE68A"/><circle cx="37" cy="42" r="6" fill="#1E293B"/><circle cx="63" cy="42" r="6" fill="#1E293B"/><path d="M30,60 Q50,82 70,60" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/><text x="18" y="26" font-size="18" fill="#F59E0B" font-family="sans-serif">★</text><text x="68" y="24" font-size="14" fill="#F59E0B" font-family="sans-serif">★</text>'),
+  scared: makeSvg('#8B5CF6','<circle cx="50" cy="50" r="38" fill="#DDD6FE"/><circle cx="37" cy="44" r="7" fill="#1E293B"/><circle cx="63" cy="44" r="7" fill="#1E293B"/><circle cx="37" cy="44" r="3" fill="white"/><circle cx="63" cy="44" r="3" fill="white"/><path d="M35,65 Q42,60 50,65 Q58,70 65,65" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/>'),
+  sick: makeSvg('#86EFAC','<circle cx="50" cy="50" r="38" fill="#BBF7D0"/><circle cx="37" cy="42" r="5" fill="#1E293B"/><circle cx="63" cy="42" r="5" fill="#1E293B"/><path d="M35,66 Q50,58 65,66" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/><text x="36" y="88" font-size="13" fill="#16A34A" font-family="sans-serif">+(  +(</text>'),
+  okay: makeSvg('#6EE7B7','<circle cx="50" cy="50" r="38" fill="#A7F3D0"/><circle cx="37" cy="42" r="5" fill="#1E293B"/><circle cx="63" cy="42" r="5" fill="#1E293B"/><line x1="34" y1="65" x2="66" y2="65" stroke="#1E293B" stroke-width="5" stroke-linecap="round"/>'),
+  loved: makeSvg('#F472B6','<circle cx="50" cy="50" r="38" fill="#FBCFE8"/><circle cx="37" cy="40" r="5" fill="#1E293B"/><circle cx="63" cy="40" r="5" fill="#1E293B"/><path d="M32,58 Q50,76 68,58" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M44,22 Q46,16 50,22 Q54,16 56,22" stroke="#EC4899" stroke-width="3" fill="none" stroke-linecap="round"/>'),
+  // ── FOOD ──
+  pizza: makeSvg('#F59E0B','<polygon points="50,14 88,82 12,82" fill="#FCD34D"/><polygon points="50,14 88,82 12,82" fill="none" stroke="#B45309" stroke-width="3"/><circle cx="50" cy="56" r="6" fill="#EF4444"/><circle cx="36" cy="68" r="5" fill="#EF4444"/><circle cx="64" cy="68" r="5" fill="#EF4444"/>'),
+  sandwich: makeSvg('#D97706','<rect x="14" y="26" width="72" height="14" rx="7" fill="#FDE68A"/><rect x="18" y="40" width="64" height="8" rx="2" fill="#86EFAC"/><rect x="18" y="48" width="64" height="8" rx="2" fill="#FCA5A5"/><rect x="18" y="56" width="64" height="8" rx="2" fill="#FDE68A"/><rect x="14" y="64" width="72" height="14" rx="7" fill="#FDE68A"/>'),
+  apple: makeSvg('#EF4444','<ellipse cx="50" cy="56" rx="32" ry="30" fill="#FCA5A5"/><path d="M50,26 Q60,16 66,20" stroke="#16A34A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M36,30 Q50,20 64,30" stroke="#FCA5A5" stroke-width="2" fill="none"/>'),
+  water: makeSvg('#3B82F6','<rect x="28" y="24" width="44" height="58" rx="10" fill="#BFDBFE"/><rect x="28" y="24" width="44" height="16" rx="8" fill="#93C5FD"/><line x1="50" y1="16" x2="50" y2="24" stroke="#3B82F6" stroke-width="5" stroke-linecap="round"/><line x1="44" y1="18" x2="56" y2="18" stroke="#3B82F6" stroke-width="5" stroke-linecap="round"/><path d="M36,50 Q44,44 52,50 Q60,56 68,50" stroke="#60A5FA" stroke-width="3" fill="none" stroke-linecap="round"/>'),
+  pasta: makeSvg('#CA8A04','<ellipse cx="50" cy="72" rx="36" ry="16" fill="#FDE68A"/><path d="M28,72 Q32,48 38,55 Q44,62 50,48 Q56,34 62,48 Q68,62 72,55" stroke="#FCD34D" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="50" cy="72" rx="36" ry="6" fill="none" stroke="#B45309" stroke-width="2"/>'),
+  icecream: makeSvg('#F9A8D4','<polygon points="50,88 28,42 72,42" fill="#FDE68A"/><ellipse cx="50" cy="38" rx="22" ry="20" fill="#FBCFE8"/><ellipse cx="38" cy="32" rx="14" ry="12" fill="#FEE2E2"/><circle cx="44" cy="28" r="4" fill="#FCA5A5"/>'),
+  snack: makeSvg('#92400E','<rect x="22" y="22" width="56" height="56" rx="6" fill="none" stroke="#FDE68A" stroke-width="4"/><rect x="30" y="30" width="18" height="18" rx="4" fill="#FDE68A"/><rect x="52" y="30" width="18" height="18" rx="4" fill="#FDE68A"/><rect x="30" y="52" width="18" height="18" rx="4" fill="#FDE68A"/><rect x="52" y="52" width="18" height="18" rx="4" fill="#FDE68A"/>'),
+  burger: makeSvg('#B45309','<rect x="16" y="20" width="68" height="16" rx="10" fill="#FDE68A"/><rect x="16" y="36" width="68" height="10" rx="2" fill="#86EFAC"/><rect x="16" y="46" width="68" height="10" rx="2" fill="#FCA5A5"/><rect x="16" y="56" width="68" height="10" rx="2" fill="#FDE68A"/><rect x="16" y="66" width="68" height="14" rx="6" fill="#FCD34D"/>'),
+  fruit: makeSvg('#16A34A','<circle cx="36" cy="58" r="20" fill="#FCA5A5"/><circle cx="64" cy="58" r="20" fill="#86EFAC"/><circle cx="50" cy="46" r="20" fill="#FDE68A"/><path d="M50,26 Q54,18 58,20" stroke="#16A34A" stroke-width="3" fill="none" stroke-linecap="round"/>'),
+  // ── FUN & ACTIVITIES ──
+  videogame: makeSvg('#6366F1','<rect x="12" y="30" width="76" height="46" rx="16" fill="#818CF8"/><line x1="36" y1="53" x2="36" y2="45" stroke="white" stroke-width="5" stroke-linecap="round"/><line x1="32" y1="49" x2="40" y2="49" stroke="white" stroke-width="5" stroke-linecap="round"/><circle cx="64" cy="45" r="5" fill="white"/><circle cx="72" cy="52" r="5" fill="white"/><rect x="44" y="44" width="12" height="18" rx="4" fill="rgba(255,255,255,0.2)"/>'),
+  tv: makeSvg('#1E293B','<rect x="12" y="18" width="76" height="52" rx="10" fill="#334155"/><rect x="18" y="24" width="64" height="40" rx="6" fill="#0EA5E9"/><rect x="36" y="70" width="28" height="8" rx="2" fill="#475569"/><circle cx="50" cy="44" r="14" fill="rgba(255,255,255,0.15)"/><polygon points="44,36 62,44 44,52" fill="white"/>'),
+  music: makeSvg('#7C3AED','<ellipse cx="36" cy="72" rx="12" ry="10" fill="#A78BFA"/><ellipse cx="70" cy="64" rx="12" ry="10" fill="#A78BFA"/><line x1="48" y1="72" x2="48" y2="28" stroke="#A78BFA" stroke-width="7" stroke-linecap="round"/><line x1="82" y1="64" x2="82" y2="20" stroke="#A78BFA" stroke-width="7" stroke-linecap="round"/><line x1="48" y1="28" x2="82" y2="20" stroke="#A78BFA" stroke-width="7" stroke-linecap="round"/>'),
+  sports: makeSvg('#065F46','<circle cx="50" cy="50" r="36" fill="white" stroke="#16A34A" stroke-width="4"/><path d="M50,14 Q62,30 62,50 Q62,70 50,86" stroke="#1E293B" stroke-width="3" fill="none"/><path d="M14,50 Q30,38 50,38 Q70,38 86,50" stroke="#1E293B" stroke-width="3" fill="none"/><path d="M14,50 Q30,62 50,62 Q70,62 86,50" stroke="#1E293B" stroke-width="3" fill="none"/>'),
+  art: makeSvg('#0EA5E9','<ellipse cx="50" cy="58" rx="30" ry="20" fill="#BAE6FD"/><circle cx="28" cy="50" r="10" fill="#FCA5A5"/><circle cx="50" cy="40" r="10" fill="#FDE68A"/><circle cx="72" cy="50" r="10" fill="#A7F3D0"/><circle cx="50" cy="60" r="10" fill="#DDD6FE"/><circle cx="50" cy="52" r="8" fill="white"/>'),
+  outside: makeSvg('#16A34A','<rect x="0" y="60" width="100" height="40" fill="#86EFAC" rx="0"/><circle cx="72" cy="30" r="18" fill="#FCD34D"/><path d="M20,60 Q20,20 50,20 Q30,20 30,60Z" fill="#15803D"/><path d="M38,60 Q38,28 60,28 Q46,28 46,60Z" fill="#166534"/>'),
+  read: makeSvg('#0369A1','<rect x="14" y="20" width="34" height="62" rx="4" fill="#BFDBFE"/><rect x="52" y="20" width="34" height="62" rx="4" fill="#BFDBFE"/><line x1="50" y1="22" x2="50" y2="80" stroke="#93C5FD" stroke-width="4"/><line x1="20" y1="36" width="22" y2="36" x2="42" stroke="#60A5FA" stroke-width="3" stroke-linecap="round"/><line x1="20" y1="46" x2="42" y2="46" stroke="#60A5FA" stroke-width="3" stroke-linecap="round"/><line x1="58" y1="36" x2="80" y2="36" stroke="#60A5FA" stroke-width="3" stroke-linecap="round"/><line x1="58" y1="46" x2="80" y2="46" stroke="#60A5FA" stroke-width="3" stroke-linecap="round"/>'),
+  swim: makeSvg('#0284C7','<path d="M10,50 Q25,38 40,50 Q55,62 70,50 Q85,38 100,50" stroke="#BAE6FD" stroke-width="6" fill="none"/><path d="M10,64 Q25,52 40,64 Q55,76 70,64 Q85,52 100,64" stroke="#93C5FD" stroke-width="6" fill="none"/><circle cx="50" cy="28" r="10" fill="#FDE68A"/><path d="M40,38 L26,52" stroke="#FDE68A" stroke-width="5" stroke-linecap="round"/><path d="M60,38 L74,44" stroke="#FDE68A" stroke-width="5" stroke-linecap="round"/>'),
+  dance: makeSvg('#DB2777','<circle cx="55" cy="18" r="10" fill="#FDE68A"/><path d="M55,28 L48,50 L36,60" stroke="#FBCFE8" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M55,28 L66,48 L76,44" stroke="#FBCFE8" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M48,50 L40,72 L28,78" stroke="#FBCFE8" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M55,50 L60,72 L72,80" stroke="#FBCFE8" stroke-width="6" fill="none" stroke-linecap="round"/>'),
+  // ── ANIMALS ──
+  dog: makeSvg('#B45309','<ellipse cx="50" cy="54" rx="30" ry="26" fill="#FDE68A"/><circle cx="50" cy="38" r="20" fill="#FDE68A"/><ellipse cx="32" cy="30" rx="10" ry="16" fill="#D97706"/><ellipse cx="68" cy="30" rx="10" ry="16" fill="#D97706"/><circle cx="42" cy="36" r="4" fill="#1E293B"/><circle cx="58" cy="36" r="4" fill="#1E293B"/><ellipse cx="50" cy="46" rx="8" ry="5" fill="#FCA5A5"/><circle cx="44" cy="44" r="2" fill="#1E293B"/><circle cx="56" cy="44" r="2" fill="#1E293B"/>'),
+  cat: makeSvg('#F97316','<ellipse cx="50" cy="54" rx="30" ry="26" fill="#FED7AA"/><circle cx="50" cy="38" r="20" fill="#FED7AA"/><polygon points="30,22 22,8 38,18" fill="#F97316"/><polygon points="70,22 78,8 62,18" fill="#F97316"/><circle cx="42" cy="36" r="4" fill="#1E293B"/><circle cx="58" cy="36" r="4" fill="#1E293B"/><ellipse cx="50" cy="46" rx="6" ry="4" fill="#FBBF24"/><line x1="30" y1="44" x2="10" y2="40" stroke="#D97706" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="48" x2="10" y2="48" stroke="#D97706" stroke-width="2" stroke-linecap="round"/><line x1="70" y1="44" x2="90" y2="40" stroke="#D97706" stroke-width="2" stroke-linecap="round"/>'),
+  fish: makeSvg('#0284C7','<ellipse cx="48" cy="50" rx="32" ry="20" fill="#7DD3FC"/><path d="M80,50 L96,36 L96,64Z" fill="#38BDF8"/><circle cx="32" cy="44" r="5" fill="#1E293B"/><circle cx="31" cy="43" r="2" fill="white"/><path d="M38,56 Q48,62 58,56" stroke="#0369A1" stroke-width="2" fill="none"/>'),
+  bird: makeSvg('#EAB308','<ellipse cx="50" cy="52" rx="24" ry="22" fill="#FDE68A"/><circle cx="50" cy="34" r="16" fill="#FDE68A"/><ellipse cx="50" cy="44" rx="8" ry="5" fill="#F97316"/><circle cx="44" cy="30" r="4" fill="#1E293B"/><circle cx="43" cy="29" r="2" fill="white"/><path d="M28,50 Q16,44 18,36 Q20,30 28,36Z" fill="#FCD34D"/><path d="M72,50 Q84,44 82,36 Q80,30 72,36Z" fill="#FCD34D"/>'),
+  rabbit: makeSvg('#94A3B8','<ellipse cx="50" cy="58" rx="26" ry="24" fill="#E2E8F0"/><circle cx="50" cy="40" r="18" fill="#E2E8F0"/><ellipse cx="37" cy="18" rx="7" ry="18" fill="#E2E8F0"/><ellipse cx="63" cy="18" rx="7" ry="18" fill="#E2E8F0"/><ellipse cx="37" cy="18" rx="4" ry="14" fill="#FCA5A5"/><ellipse cx="63" cy="18" rx="4" ry="14" fill="#FCA5A5"/><circle cx="43" cy="38" r="4" fill="#1E293B"/><circle cx="57" cy="38" r="4" fill="#1E293B"/><ellipse cx="50" cy="46" rx="5" ry="4" fill="#FCA5A5"/>'),
+  nopet: makeSvg('#EF4444','<circle cx="50" cy="50" r="36" fill="#FEE2E2"/><path d="M30,34 Q36,26 44,30 Q38,38 34,50 Q30,62 36,70 Q28,66 26,56 Q22,44 30,34Z" fill="#FCA5A5"/><path d="M70,34 Q64,26 56,30 Q62,38 66,50 Q70,62 64,70 Q72,66 74,56 Q78,44 70,34Z" fill="#FCA5A5"/><circle cx="50" cy="56" r="16" fill="#FCA5A5"/><line x1="20" y1="80" x2="80" y2="20" stroke="#EF4444" stroke-width="8" stroke-linecap="round"/>'),
+  turtle: makeSvg('#16A34A','<ellipse cx="50" cy="56" rx="34" ry="26" fill="#86EFAC"/><circle cx="50" cy="50" r="22" fill="#4ADE80"/><ellipse cx="34" cy="26" rx="10" ry="14" fill="#86EFAC"/><ellipse cx="66" cy="26" rx="10" ry="14" fill="#86EFAC"/><ellipse cx="20" cy="58" rx="12" ry="8" fill="#86EFAC"/><ellipse cx="80" cy="58" rx="12" ry="8" fill="#86EFAC"/><ellipse cx="50" cy="76" rx="10" ry="8" fill="#86EFAC"/><path d="M34,38 Q42,34 50,38 Q58,34 66,38" stroke="#16A34A" stroke-width="2" fill="none"/><path d="M34,50 Q42,46 50,50 Q58,46 66,50" stroke="#16A34A" stroke-width="2" fill="none"/>'),
+  // ── PLACES ──
+  home: makeSvg('#0369A1','<polygon points="50,14 84,44 84,84 16,84 16,44" fill="#BFDBFE"/><polygon points="50,14 16,44 84,44" fill="#3B82F6"/><rect x="38" y="54" width="24" height="30" rx="4" fill="#1D4ED8"/><rect x="28" y="50" width="14" height="14" rx="2" fill="#FDE68A"/>'),
+  school: makeSvg('#7C3AED','<rect x="14" y="38" width="72" height="48" rx="4" fill="#DDD6FE"/><rect x="36" y="18" width="28" height="20" rx="4" fill="#A78BFA"/><rect x="44" y="22" width="12" height="16" rx="2" fill="#7C3AED"/><rect x="22" y="52" width="14" height="14" rx="2" fill="#A78BFA"/><rect x="42" y="52" width="16" height="20" rx="2" fill="#1E293B"/><rect x="64" y="52" width="14" height="14" rx="2" fill="#A78BFA"/>'),
+  park: makeSvg('#16A34A','<rect x="0" y="62" width="100" height="38" rx="0" fill="#86EFAC"/><circle cx="34" cy="46" r="22" fill="#4ADE80"/><rect x="30" y="46" width="8" height="20" rx="2" fill="#92400E"/><circle cx="70" cy="50" r="16" fill="#4ADE80"/><rect x="66" y="50" width="8" height="16" rx="2" fill="#92400E"/><rect x="44" y="70" width="24" height="10" rx="4" fill="#78716C"/>'),
+  beach: makeSvg('#0EA5E9','<rect x="0" y="50" width="100" height="50" rx="0" fill="#FDE68A"/><rect x="0" y="0" width="100" height="54" rx="0" fill="#BAE6FD"/><circle cx="75" cy="24" r="16" fill="#FCD34D"/><path d="M0,54 Q25,42 50,54 Q75,42 100,54" stroke="#7DD3FC" stroke-width="6" fill="none"/>'),
+  mountains: makeSvg('#475569','<rect x="0" y="60" width="100" height="40" rx="0" fill="#86EFAC"/><polygon points="50,12 18,60 82,60" fill="#94A3B8"/><polygon points="50,12 34,42 66,42" fill="white"/><polygon points="24,28 4,60 44,60" fill="#64748B"/><polygon points="76,32 56,60 96,60" fill="#64748B"/>'),
+  city: makeSvg('#334155','<rect x="0" y="50" width="100" height="50" rx="0" fill="#475569"/><rect x="8" y="26" width="20" height="74" rx="2" fill="#64748B"/><rect x="14" y="32" width="8" height="8" rx="1" fill="#FCD34D"/><rect x="14" y="44" width="8" height="8" rx="1" fill="#FCD34D"/><rect x="32" y="14" width="20" height="86" rx="2" fill="#94A3B8"/><rect x="38" y="20" width="8" height="8" rx="1" fill="#FCD34D"/><rect x="38" y="32" width="8" height="8" rx="1" fill="#FCD34D"/><rect x="56" y="32" width="20" height="68" rx="2" fill="#64748B"/><rect x="62" y="38" width="8" height="8" rx="1" fill="#FCD34D"/><rect x="76" y="20" width="16" height="80" rx="2" fill="#94A3B8"/>'),
+  anywhere: makeSvg('#0EA5E9','<circle cx="50" cy="50" r="36" fill="#BAE6FD"/><ellipse cx="50" cy="50" rx="18" ry="36" fill="none" stroke="#7DD3FC" stroke-width="3"/><line x1="14" y1="50" x2="86" y2="50" stroke="#7DD3FC" stroke-width="3"/><path d="M19,32 Q50,24 81,32" stroke="#7DD3FC" stroke-width="2" fill="none"/><path d="M19,68 Q50,76 81,68" stroke="#7DD3FC" stroke-width="2" fill="none"/>'),
+  store: makeSvg('#F59E0B','<rect x="10" y="36" width="80" height="50" rx="4" fill="#FDE68A"/><rect x="10" y="28" width="80" height="16" rx="4" fill="#F59E0B"/><line x1="30" y1="28" x2="30" y2="16" stroke="#B45309" stroke-width="4" stroke-linecap="round"/><line x1="70" y1="28" x2="70" y2="16" stroke="#B45309" stroke-width="4" stroke-linecap="round"/><rect x="36" y="52" width="28" height="34" rx="4" fill="#D97706"/><rect x="22" y="50" width="18" height="16" rx="2" fill="#93C5FD"/>'),
+  // ── PEOPLE ──
+  friend: makeSvg('#EC4899','<circle cx="36" cy="30" r="14" fill="#FBCFE8"/><path d="M14,72 Q14,48 36,48 Q58,48 58,72Z" fill="#FBCFE8"/><circle cx="64" cy="30" r="14" fill="#FBCFE8"/><path d="M42,72 Q42,48 64,48 Q86,48 86,72Z" fill="#FBCFE8"/>'),
+  teacher: makeSvg('#0369A1','<circle cx="50" cy="26" r="14" fill="#FDE68A"/><path d="M28,70 Q28,48 50,48 Q72,48 72,70Z" fill="#BFDBFE"/><rect x="18" y="56" width="40" height="30" rx="4" fill="#F1F5F9"/><line x1="22" y1="66" x2="50" y2="66" stroke="#CBD5E1" stroke-width="2"/><line x1="22" y1="74" x2="44" y2="74" stroke="#CBD5E1" stroke-width="2"/><line x1="15" y1="50" x2="15" y2="86" stroke="#0369A1" stroke-width="4" stroke-linecap="round"/>'),
+  mom: makeSvg('#EC4899','<circle cx="50" cy="26" r="16" fill="#FDE68A"/><path d="M24,82 Q24,52 50,52 Q76,52 76,82Z" fill="#FBCFE8"/><path d="M34,26 Q40,12 50,14 Q60,12 66,26" fill="#8B5CF6" stroke="none"/><path d="M50,8 Q60,10 66,24 Q70,16 68,8 Q60,2 50,8Z" fill="#8B5CF6"/>'),
+  dad: makeSvg('#3B82F6','<circle cx="50" cy="26" r="16" fill="#FDE68A"/><path d="M24,82 Q24,52 50,52 Q76,52 76,82Z" fill="#BFDBFE"/><rect x="34" y="10" width="32" height="20" rx="6" fill="#1E293B"/>'),
+  family: makeSvg('#0D9488','<circle cx="26" cy="28" r="12" fill="#FDE68A"/><path d="M10,64 Q10,44 26,44 Q42,44 42,64Z" fill="#CCFBF1"/><circle cx="74" cy="24" r="14" fill="#FDE68A"/><path d="M56,64 Q56,42 74,42 Q92,42 92,64Z" fill="#CCFBF1"/><circle cx="50" cy="56" r="10" fill="#FDE68A"/><path d="M36,84 Q36,68 50,68 Q64,68 64,84Z" fill="#CCFBF1"/>'),
+  baby: makeSvg('#FCD34D','<circle cx="50" cy="36" r="22" fill="#FDE68A"/><ellipse cx="34" cy="38" rx="6" ry="8" fill="#FCD34D"/><ellipse cx="66" cy="38" rx="6" ry="8" fill="#FCD34D"/><circle cx="43" cy="32" r="4" fill="#1E293B"/><circle cx="57" cy="32" r="4" fill="#1E293B"/><path d="M40,46 Q50,54 60,46" stroke="#1E293B" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="28" y="58" width="44" height="30" rx="12" fill="#FDE68A"/>'),
+  doctor: makeSvg('#0284C7','<circle cx="50" cy="26" r="16" fill="#FDE68A"/><path d="M24,82 Q24,52 50,52 Q76,52 76,82Z" fill="white"/><rect x="40" y="60" width="20" height="6" rx="2" fill="#EF4444"/><rect x="47" y="54" width="6" height="18" rx="2" fill="#EF4444"/><circle cx="72" cy="72" r="12" fill="none" stroke="#0284C7" stroke-width="4"/><line x1="80" y1="80" x2="88" y2="88" stroke="#0284C7" stroke-width="4" stroke-linecap="round"/>'),
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// OPEN-SOURCE VOCABULARY DATA — edit freely, fork, and share!
+// ═══════════════════════════════════════════════════════════════════════════
+let VOCAB = {
+  version: "1.0",
+  appName: "TalkTiles",
+  categories: [
+    {
+      id: "feelings", label: "Feelings", color: "#FBBF24", emoji: "😊",
+      symbols: [
+        {id:"happy",label:"Happy",speech:"Happy",svg:S.happy},
+        {id:"sad",label:"Sad",speech:"Sad",svg:S.sad},
+        {id:"angry",label:"Angry",speech:"Angry",svg:S.angry},
+        {id:"tired",label:"Tired",speech:"Tired",svg:S.tired},
+        {id:"excited",label:"Excited",speech:"Excited",svg:S.excited},
+        {id:"scared",label:"Scared",speech:"Scared",svg:S.scared},
+        {id:"sick",label:"Sick",speech:"I feel sick",svg:S.sick},
+        {id:"okay",label:"Okay",speech:"Okay",svg:S.okay},
+        {id:"loved",label:"Loved",speech:"I feel loved",svg:S.loved},
+      ]
+    },
+    {
+      id: "food", label: "Food & Drink", color: "#F97316", emoji: "🍕",
+      symbols: [
+        {id:"pizza",label:"Pizza",speech:"Pizza",svg:S.pizza},
+        {id:"sandwich",label:"Sandwich",speech:"Sandwich",svg:S.sandwich},
+        {id:"apple",label:"Apple",speech:"Apple",svg:S.apple},
+        {id:"water",label:"Water",speech:"Water",svg:S.water},
+        {id:"pasta",label:"Pasta",speech:"Pasta",svg:S.pasta},
+        {id:"icecream",label:"Ice Cream",speech:"Ice cream",svg:S.icecream},
+        {id:"snack",label:"Snack",speech:"A snack",svg:S.snack},
+        {id:"burger",label:"Burger",speech:"Burger",svg:S.burger},
+        {id:"fruit",label:"Fruit",speech:"Fruit",svg:S.fruit},
+      ]
+    },
+    {
+      id: "activities", label: "Fun & Activities", color: "#6366F1", emoji: "🎮",
+      symbols: [
+        {id:"videogame",label:"Video Game",speech:"Video game",svg:S.videogame},
+        {id:"tv",label:"TV / Movie",speech:"Watch TV",svg:S.tv},
+        {id:"music",label:"Music",speech:"Music",svg:S.music},
+        {id:"sports",label:"Sports",speech:"Sports",svg:S.sports},
+        {id:"art",label:"Art",speech:"Art",svg:S.art},
+        {id:"outside",label:"Outside",speech:"Go outside",svg:S.outside},
+        {id:"read",label:"Read",speech:"Read a book",svg:S.read},
+        {id:"swim",label:"Swim",speech:"Swim",svg:S.swim},
+        {id:"dance",label:"Dance",speech:"Dance",svg:S.dance},
+      ]
+    },
+    {
+      id: "animals", label: "Animals", color: "#16A34A", emoji: "🐾",
+      symbols: [
+        {id:"dog",label:"Dog",speech:"Dog",svg:S.dog},
+        {id:"cat",label:"Cat",speech:"Cat",svg:S.cat},
+        {id:"fish",label:"Fish",speech:"Fish",svg:S.fish},
+        {id:"bird",label:"Bird",speech:"Bird",svg:S.bird},
+        {id:"rabbit",label:"Rabbit",speech:"Rabbit",svg:S.rabbit},
+        {id:"nopet",label:"No Pet",speech:"I do not have a pet",svg:S.nopet},
+        {id:"turtle",label:"Turtle",speech:"Turtle",svg:S.turtle},
+      ]
+    },
+    {
+      id: "places", label: "Places", color: "#0284C7", emoji: "🌍",
+      symbols: [
+        {id:"home",label:"Home",speech:"Home",svg:S.home},
+        {id:"school",label:"School",speech:"School",svg:S.school},
+        {id:"park",label:"Park",speech:"The park",svg:S.park},
+        {id:"beach",label:"Beach",speech:"The beach",svg:S.beach},
+        {id:"mountains",label:"Mountains",speech:"The mountains",svg:S.mountains},
+        {id:"city",label:"City",speech:"The city",svg:S.city},
+        {id:"store",label:"Store",speech:"The store",svg:S.store},
+        {id:"anywhere",label:"Anywhere",speech:"Anywhere",svg:S.anywhere},
+      ]
+    },
+    {
+      id: "people", label: "People", color: "#DB2777", emoji: "👥",
+      symbols: [
+        {id:"me",label:"Me / I",speech:"I",svg:S.me},
+        {id:"friend",label:"Friend",speech:"My friend",svg:S.friend},
+        {id:"teacher",label:"Teacher",speech:"My teacher",svg:S.teacher},
+        {id:"mom",label:"Mom",speech:"My mom",svg:S.mom},
+        {id:"dad",label:"Dad",speech:"My dad",svg:S.dad},
+        {id:"family",label:"Family",speech:"My family",svg:S.family},
+        {id:"baby",label:"Baby",speech:"A baby",svg:S.baby},
+        {id:"doctor",label:"Doctor",speech:"The doctor",svg:S.doctor},
+      ]
+    },
+  ],
+
+  // Core words always visible at bottom
+  core: [
+    {id:"yes",label:"Yes",speech:"Yes",svg:S.yes},
+    {id:"no",label:"No",speech:"No",svg:S.no},
+    {id:"want",label:"Want",speech:"I want",svg:S.want},
+    {id:"like",label:"Like",speech:"I like",svg:S.like},
+    {id:"help",label:"Help",speech:"I need help",svg:S.help},
+    {id:"more",label:"More",speech:"More",svg:S.more},
+    {id:"stop",label:"Stop",speech:"Stop",svg:S.stop},
+    {id:"go",label:"Go",speech:"Go",svg:S.go},
+    {id:"finish",label:"Finish",speech:"I am finished",svg:S.finish},
+  ]
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════════════════════════════════════════════
+let sentence = [];
+let currentCat = 0;
+let editMode = false;
+let autoSpeak = false;
+let uploadedDataUrl = null;
+let selectedEmoji = '';
+
+// Persist custom vocab to localStorage
+function saveVocab() {
+  try { localStorage.setItem('openaac_vocab', JSON.stringify(VOCAB)); } catch(e) {}
+}
+function loadVocab() {
+  try {
+    const saved = localStorage.getItem('openaac_vocab');
+    if (saved) VOCAB = JSON.parse(saved);
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════════════════
+function render() {
+  renderCatNav();
+  renderSymbols();
+  renderCore();
+}
+
+function renderCatNav() {
+  const nav = document.getElementById('cat-nav');
+  nav.innerHTML = '';
+  VOCAB.categories.forEach((cat, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-tab' + (i === currentCat ? ' active' : '');
+    if (i === currentCat) btn.style.background = cat.color;
+    btn.innerHTML = `<span class="cat-emoji">${cat.emoji}</span>${cat.label}`;
+    btn.onclick = () => { currentCat = i; renderCatNav(); renderSymbols(); };
+    nav.appendChild(btn);
+  });
+}
+
+function renderSymbols() {
+  const area = document.getElementById('symbol-area');
+  const addBtn = document.getElementById('add-sym-btn');
+  area.innerHTML = '';
+  area.appendChild(addBtn);
+  addBtn.style.display = editMode ? 'flex' : 'none';
+
+  const cat = VOCAB.categories[currentCat];
+  if (!cat) return;
+
+  cat.symbols.forEach((sym, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'sym-btn' + (editMode ? ' edit-mode' : '') + (sym.branch?.length ? ' has-branch' : '');
+    btn.style.borderColor = editMode ? cat.color : 'transparent';
+
+    const img = sym.imgUrl
+      ? `<img src="${sym.imgUrl}" alt="${sym.label}" onerror="this.style.display='none'">`
+      : sym.svg || `<div style="font-size:52px;line-height:74px;text-align:center;">${sym.emoji||'?'}</div>`;
+
+    const del = `<button class="sym-delete" onclick="deleteSymbol(event,${idx})">×</button>`;
+    const branchEdit = editMode && sym.branch?.length
+      ? `<div style="position:absolute;bottom:28px;right:6px;font-size:9px;color:#818CF8;font-weight:900;">⬡ ${sym.branch.length}</div>` : '';
+    btn.innerHTML = `${del}${img}<span class="sym-label">${sym.label}</span>${branchEdit}`;
+    btn.onclick = () => {
+      if (editMode) { openEditSymbol(idx); return; }
+      tapSymbol(sym);
+    };
+    area.appendChild(btn);
+  });
+}
+
+function renderCore() {
+  const strip = document.getElementById('core-strip');
+  strip.innerHTML = '';
+  VOCAB.core.forEach(sym => {
+    const btn = document.createElement('button');
+    btn.className = 'core-btn';
+    const img = sym.imgUrl
+      ? `<img src="${sym.imgUrl}" alt="${sym.label}">`
+      : sym.svg || `<div style="font-size:36px;line-height:52px;">${sym.emoji||'?'}</div>`;
+    btn.innerHTML = `${img}<span class="core-label">${sym.label}</span>`;
+    btn.onclick = () => tapSymbol(sym);
+    strip.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SENTENCE BAR
+// ═══════════════════════════════════════════════════════════════════════════
+function tapSymbol(sym) {
+  if (sym.branch && sym.branch.length > 0) {
+    openBranch(sym);
+    return;
+  }
+  sentence.push(sym);
+  renderSentence();
+  if (autoSpeak) speakWord(sym.speech);
+  const chips = document.getElementById('sentence-chips');
+  chips.scrollLeft = chips.scrollWidth;
+}
+
+function renderSentence() {
+  const chips = document.getElementById('sentence-chips');
+  if (sentence.length === 0) {
+    chips.innerHTML = '<span class="placeholder-text">Tap pictures to build a sentence…</span>';
+    return;
+  }
+  chips.innerHTML = '';
+  sentence.forEach((sym, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = `<span style="font-size:18px;">${sym.emoji||''}</span>${sym.label}`;
+    chip.title = 'Tap to remove';
+    chip.onclick = () => { sentence.splice(i, 1); renderSentence(); };
+    chips.appendChild(chip);
+  });
+}
+
+function clearSentence() { sentence = []; renderSentence(); }
+function backspace() { sentence.pop(); renderSentence(); }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SPEECH
+// ═══════════════════════════════════════════════════════════════════════════
+function speakSentence() {
+  if (!sentence.length) return;
+  const text = sentence.map(s => s.speech).join(' ');
+  speakText(text);
+  const btn = document.getElementById('speak-btn');
+  btn.classList.add('speaking');
+  btn.textContent = '⏸ Speaking…';
+  setTimeout(() => { btn.classList.remove('speaking'); btn.innerHTML = '🔊 Speak'; }, text.length * 65 + 500);
+}
+
+function speakWord(text) { speakText(text); }
+
+function speakText(text) {
+  if (!('speechSynthesis' in window)) { alert('Text-to-speech not supported in this browser.'); return; }
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 0.9; utt.pitch = 1.1; utt.volume = 1;
+  window.speechSynthesis.speak(utt);
+}
+
+function toggleAutoSpeak() {
+  autoSpeak = !autoSpeak;
+  const btn = document.getElementById('autospeak-btn');
+  btn.textContent = autoSpeak ? '🔊 Auto ON' : '🔇 Auto';
+  btn.style.color = autoSpeak ? '#10B981' : '';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EDIT MODE
+// ═══════════════════════════════════════════════════════════════════════════
+function toggleEditMode() {
+  editMode = !editMode;
+  const btn = document.getElementById('edit-toggle');
+  btn.textContent = editMode ? '✅ Done' : '✏️ Edit';
+  btn.classList.toggle('edit-active', editMode);
+  renderSymbols();
+}
+
+function deleteSymbol(e, idx) {
+  e.stopPropagation();
+  if (!confirm('Remove this symbol?')) return;
+  VOCAB.categories[currentCat].symbols.splice(idx, 1);
+  saveVocab(); renderSymbols();
+}
+
+function openAddSymbol() {
+  document.getElementById('panel-title').textContent = 'Add New Symbol';
+  document.getElementById('f-label').value = '';
+  document.getElementById('f-speech').value = '';
+  document.getElementById('f-imgurl').value = '';
+  document.getElementById('f-emoji').value = '';
+  document.getElementById('f-upload').value = '';
+  document.getElementById('sym-preview').innerHTML = '?';
+  document.getElementById('sym-preview').style.fontSize = '40px';
+  uploadedDataUrl = null;
+  selectedEmoji = '';
+
+  // Populate category select
+  const sel = document.getElementById('f-category');
+  sel.innerHTML = VOCAB.categories.map((c,i)=>`<option value="${i}">${c.emoji} ${c.label}</option>`).join('');
+  sel.value = currentCat;
+
+  document.getElementById('edit-panel').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closePanel() {
+  document.getElementById('edit-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function previewSvg() {
+  const label = document.getElementById('f-label').value || '?';
+  const imgUrl = document.getElementById('f-imgurl').value;
+  const preview = document.getElementById('sym-preview');
+  if (uploadedDataUrl) {
+    preview.innerHTML = `<img src="${uploadedDataUrl}" style="width:80px;height:80px;object-fit:contain;border-radius:10px;">`;
+  } else if (imgUrl) {
+    preview.innerHTML = `<img src="${imgUrl}" style="width:80px;height:80px;object-fit:contain;border-radius:10px;" onerror="this.parentElement.textContent='❌'">`;
+  } else if (selectedEmoji) {
+    preview.innerHTML = selectedEmoji;
+    preview.style.fontSize = '52px';
+  } else {
+    preview.innerHTML = label.slice(0,2) || '?';
+    preview.style.fontSize = '28px';
+    preview.style.color = '#94A3B8';
+    preview.style.fontWeight = '900';
+    preview.style.fontFamily = 'var(--font-display)';
+  }
+}
+
+function handleUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    uploadedDataUrl = ev.target.result;
+    previewSvg();
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveSymbol() {
+  const label = document.getElementById('f-label').value.trim();
+  const speech = document.getElementById('f-speech').value.trim() || label;
+  const imgUrl = document.getElementById('f-imgurl').value.trim();
+  const catIdx = parseInt(document.getElementById('f-category').value);
+
+  if (!label) { alert('Please enter a label.'); return; }
+
+  const sym = {
+    id: 'custom_' + Date.now(),
+    label,
+    speech,
+  };
+
+  if (uploadedDataUrl) {
+    sym.imgUrl = uploadedDataUrl;
+  } else if (imgUrl) {
+    sym.imgUrl = imgUrl;
+  } else if (selectedEmoji) {
+    sym.svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${VOCAB.categories[catIdx]?.color||'#6366F1'}"/><text x="50" y="65" text-anchor="middle" font-size="52">${selectedEmoji}</text></svg>`;
+  } else {
+    // Generate a color tile with initials
+    const color = VOCAB.categories[catIdx]?.color || '#6366F1';
+    const initials = label.slice(0,2).toUpperCase();
+    sym.svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${color}"/><text x="50" y="62" text-anchor="middle" font-size="34" font-weight="900" fill="white" font-family="sans-serif">${initials}</text></svg>`;
+  }
+
+  VOCAB.categories[catIdx].symbols.push(sym);
+  currentCat = catIdx;
+  saveVocab(); render(); closePanel();
+}
+
+function addCategory() {
+  const name = document.getElementById('f-catname').value.trim();
+  const emoji = document.getElementById('f-catemoji').value.trim() || '📌';
+  const color = document.getElementById('f-catcolor').value.trim() || '#6366F1';
+  if (!name) { alert('Please enter a category name.'); return; }
+  VOCAB.categories.push({ id: 'cat_'+Date.now(), label: name, color, emoji, symbols: [] });
+  saveVocab(); render();
+  document.getElementById('f-catname').value = '';
+  document.getElementById('f-catemoji').value = '';
+}
+
+// Emoji picker
+document.getElementById('emoji-picker').addEventListener('click', e => {
+  if (!e.target.textContent.trim()) return;
+  selectedEmoji = e.target.textContent.trim();
+  document.getElementById('f-emoji').value = selectedEmoji;
+  previewSvg();
+});
+document.getElementById('f-emoji').addEventListener('input', e => {
+  selectedEmoji = e.target.value;
+  previewSvg();
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// IMPORT / EXPORT
+// ═══════════════════════════════════════════════════════════════════════════
+function exportVocab() {
+  const blob = new Blob([JSON.stringify(VOCAB, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'openaac_vocab.json';
+  a.click();
+}
+
+function importVocab(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.categories) throw new Error('Invalid format');
+      VOCAB = data;
+      saveVocab(); currentCat = 0; render();
+      alert('✅ Vocabulary imported successfully!');
+    } catch(err) {
+      alert('❌ Could not import: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COMMUNITY LIBRARY — 25 Research-Backed Vocabulary Packs
+// Sources: Beukelman & Light (2020), ASHA Practice Portal, PrAACtical AAC,
+//          Bean et al. (2019), Binger et al. (2024), Moorcroft et al. (2019)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function mkSym(label, speech, emoji) {
+  return { id:'lib_'+label.replace(/\s/g,'_').toLowerCase()+'_'+Math.random().toString(36).slice(2), label, speech:speech||label, emoji };
+}
+
+const LIBRARY_PACKS = [
+  // ── TIER 1: DAILY LIFE ─────────────────────────────────────────────────
+  { name:"Morning Routine", emoji:"☀️", color:"#F59E0B", tier:"Daily Life",
+    grade:"All ages", research:"Beukelman & Light (2020) — behavioral regulation vocabulary",
+    desc:"Start every day with independence. Self-care, readiness, and daily schedule vocabulary for home and school.",
+    symbols:[mkSym("Good morning","Good morning","☀️"),mkSym("I am ready","I am ready","✅"),mkSym("Get dressed","Time to get dressed","👕"),mkSym("Brush teeth","Brush my teeth","🪥"),mkSym("Eat breakfast","Eat breakfast","🥣"),mkSym("Take medicine","Take my medicine","💊"),mkSym("Pack my bag","Pack my bag","🎒"),mkSym("I need help","I need help","🙋"),mkSym("I feel sick","I do not feel well","🤒"),mkSym("Bathroom","I need the bathroom","🚽"),mkSym("Almost ready","I am almost ready","⏰"),mkSym("Let us go","Let us go","🚪")]},
+  { name:"Ordering Food", emoji:"🍔", color:"#F97316", tier:"Daily Life",
+    grade:"All ages", research:"Beukelman & Light (2020) — community and restaurant settings",
+    desc:"Restaurant, cafeteria, fast food, and cafe vocabulary. Supports community outings and life skills independence.",
+    symbols:[mkSym("I want","I want","🙋"),mkSym("Small","Small please","🤏"),mkSym("Medium","Medium please","✋"),mkSym("Large","Large please","👐"),mkSym("Please","Please","🙏"),mkSym("Thank you","Thank you","😊"),mkSym("To go","To go please","🥡"),mkSym("No onions","No onions please","🧅"),mkSym("More napkins","More napkins please","🧻"),mkSym("Check please","Check please","🧾"),mkSym("Delicious","This is delicious","😋"),mkSym("Too spicy","Too spicy","🌶️"),mkSym("Combo meal","Combo meal","🍟"),mkSym("Diet drink","Diet drink please","🥤")]},
+  { name:"Doctor Visit", emoji:"🏥", color:"#0284C7", tier:"Daily Life",
+    grade:"All ages", research:"ASHA Practice Portal — medical settings are a priority AAC context",
+    desc:"Medical appointment vocabulary for self-advocacy. Pain scale, symptoms, and questions for doctor visits.",
+    symbols:[mkSym("It hurts here","It hurts here","🤕"),mkSym("My head hurts","My head hurts","🧠"),mkSym("My stomach hurts","My stomach hurts","🫃"),mkSym("I feel dizzy","I feel dizzy","😵"),mkSym("I am allergic","I am allergic to this","⚠️"),mkSym("Pain level 3","Pain level three","3️⃣"),mkSym("Pain level 7","Pain level seven","7️⃣"),mkSym("I take medicine","I take this medicine","💊"),mkSym("Getting worse","It is getting worse","📈"),mkSym("Getting better","It is getting better","📉"),mkSym("I have a question","I have a question","❓"),mkSym("I understand","I understand","👍"),mkSym("Since yesterday","Since yesterday","📅"),mkSym("Call my family","Please call my family","📞")]},
+  { name:"Financial Literacy", emoji:"💰", color:"#16A34A", tier:"Daily Life",
+    grade:"Grades 6-Adult", research:"ASHA — transition planning; functional math in IEP literature",
+    desc:"Money, banking, budgeting, and spending vocabulary. Critical for transition planning and life skills independence.",
+    symbols:[mkSym("How much","How much does it cost","💲"),mkSym("I want to buy","I want to buy this","🛍️"),mkSym("Too expensive","That is too expensive","😬"),mkSym("On sale","Is this on sale","🏷️"),mkSym("My budget","My budget is","💵"),mkSym("Save money","I want to save money","🏦"),mkSym("Check my balance","Check my account balance","📱"),mkSym("I need change","I need change please","🪙"),mkSym("Receipt please","May I have a receipt","🧾"),mkSym("I cannot afford it","I cannot afford that right now","❌"),mkSym("Pay with card","I will pay with my card","💳"),mkSym("ATM","I need to find an ATM","🏧"),mkSym("Budget plan","Let us make a budget plan","📊"),mkSym("Bill is due","A bill is due","📄")]},
+  { name:"Emergency Communication", emoji:"🆘", color:"#DC2626", tier:"Daily Life",
+    grade:"All ages", research:"Safety vocabulary — highest-priority functional communication in all AAC literature",
+    desc:"Critical safety vocabulary for emergencies. Call for help, describe danger, and communicate urgent needs immediately.",
+    symbols:[mkSym("Help","Help me please","🆘"),mkSym("Call 911","Please call 911","📞"),mkSym("I am lost","I am lost","😨"),mkSym("I am hurt","I am hurt","🩹"),mkSym("Fire","Fire","🔥"),mkSym("I need medicine","I need my medicine now","💊"),mkSym("Go away","Go away","🚫"),mkSym("I feel unsafe","I feel unsafe","⚠️"),mkSym("Take me home","Please take me home","🏠"),mkSym("Call my mom","Please call my mom","📱"),mkSym("Call my teacher","Please call my teacher","👩‍🏫"),mkSym("I need a doctor","I need a doctor","🏥"),mkSym("I cannot breathe","I cannot breathe well","😮‍💨"),mkSym("My name is","My name is","🪪")]},
+  { name:"Public Transportation", emoji:"🚌", color:"#7C3AED", tier:"Daily Life",
+    grade:"Grades 6-Adult", research:"ASHA — transition to adulthood; community mobility vocabulary",
+    desc:"Bus, subway, train, and rideshare vocabulary. Supports independent community travel and transition goals.",
+    symbols:[mkSym("Bus stop","Where is the bus stop","🚏"),mkSym("How much is the fare","How much is the fare","💲"),mkSym("Next stop","What is the next stop","🗺️"),mkSym("I missed my stop","I missed my stop","😟"),mkSym("Transfer","Do I need to transfer","🔄"),mkSym("Which platform","Which platform","🚉"),mkSym("Round trip","Round trip please","↩️"),mkSym("Student discount","Student discount please","🎒"),mkSym("Is this seat taken","Is this seat taken","💺"),mkSym("Wheelchair accessible","Is this wheelchair accessible","♿"),mkSym("I need to get off","I need to get off here","🛎️"),mkSym("Schedule","Where is the schedule","📋")]},
+  { name:"Shopping and Stores", emoji:"🛒", color:"#0891B2", tier:"Daily Life",
+    grade:"All ages", research:"Beukelman & Light (2020) — community participation vocabulary",
+    desc:"Grocery store, clothing store, and general shopping vocabulary for community outings and independence.",
+    symbols:[mkSym("Where is","Where is","❓"),mkSym("I am looking for","I am looking for","👀"),mkSym("Do you have","Do you have","🤔"),mkSym("Out of stock","Is this out of stock","📦"),mkSym("What size","What size is this","📏"),mkSym("I want to return","I would like to return this","↩️"),mkSym("Exchange","I would like to exchange this","🔄"),mkSym("Gift wrap","Gift wrap please","🎁"),mkSym("Which aisle","Which aisle","🛣️"),mkSym("Bag please","May I have a bag please","🛍️"),mkSym("Manager","May I speak to a manager","👤"),mkSym("Self checkout","Where is self checkout","🖥️")]},
+
+  // ── TIER 2: SOCIAL AND EMOTIONAL ──────────────────────────────────────
+  { name:"Conflict Resolution", emoji:"🤝", color:"#DB2777", tier:"Social",
+    grade:"All ages", research:"ASHA — social participation; behavioral regulation vocabulary priority",
+    desc:"Navigate disagreements and express frustration appropriately. Supports SEL and behavioral IEP goals.",
+    symbols:[mkSym("I feel frustrated","I feel frustrated","😤"),mkSym("That is not fair","That is not fair","😒"),mkSym("I need a break","I need a break","⏸️"),mkSym("Can we talk","Can we talk about this","🗣️"),mkSym("I disagree","I disagree with that","🙅"),mkSym("I am sorry","I am sorry","😔"),mkSym("It was an accident","It was an accident","🙈"),mkSym("Let us compromise","Let us find a compromise","🤝"),mkSym("I forgive you","I forgive you","💛"),mkSym("Give me space","I need some space right now","🫷"),mkSym("Start over","Can we start over","🔄"),mkSym("It bothers me","That bothers me","😣")]},
+  { name:"Self-Advocacy", emoji:"💪", color:"#0D9488", tier:"Social",
+    grade:"Grades 4-Adult", research:"ASHA — self-advocacy is a named IEP communication goal area; Light and McNaughton (2014)",
+    desc:"Express needs, preferences, and rights. Essential for IEP meetings, school participation, and adult independence.",
+    symbols:[mkSym("I need support","I need support with this","🙋"),mkSym("I learn better when","I learn better when","🧠"),mkSym("Please repeat that","Please repeat that","🔁"),mkSym("I need more time","I need more time please","⏰"),mkSym("Too loud","That is too loud","🔇"),mkSym("Too much","There is too much going on","😵"),mkSym("I prefer","I prefer","⭐"),mkSym("I can do this","I can do this myself","💪"),mkSym("I have a right to","I have a right to","📜"),mkSym("Who can help me","Who can help me","🤔"),mkSym("My IEP says","My IEP says I get","📋"),mkSym("Please write it down","Please write that down for me","📝")]},
+  { name:"Friendship and Social Skills", emoji:"👫", color:"#EC4899", tier:"Social",
+    grade:"All ages", research:"ASHA — social communication; peer interaction named priority in AAC literature",
+    desc:"Start conversations, make friends, and navigate social situations. Supports inclusion and peer relationships.",
+    symbols:[mkSym("Want to play","Do you want to play","🎮"),mkSym("My name is","Hi my name is","👋"),mkSym("That is funny","That is really funny","😄"),mkSym("Can I join","Can I join you","🙋"),mkSym("Nice to meet you","Nice to meet you","🤝"),mkSym("What is your name","What is your name","❓"),mkSym("I like that too","I like that too","⭐"),mkSym("Want to be friends","Do you want to be friends","💛"),mkSym("That was not nice","That was not nice","😢"),mkSym("Good game","Good game","🏆"),mkSym("You go first","You go first","👉"),mkSym("Let us take turns","Let us take turns","🔄"),mkSym("See you later","See you later","👋")]},
+  { name:"Mental Health and Wellbeing", emoji:"🧠", color:"#8B5CF6", tier:"Social",
+    grade:"Grades 4-Adult", research:"Behavioral regulation vocabulary — ASHA, PODD research; high-interest personal vocabulary per Bean et al. (2019)",
+    desc:"Express mental and emotional states and ask for support. Supports counseling and wellness goals.",
+    symbols:[mkSym("I feel overwhelmed","I feel overwhelmed","😵"),mkSym("I need to calm down","I need to calm down","🧘"),mkSym("I feel anxious","I feel anxious","😰"),mkSym("Can we talk privately","Can we talk privately","🗣️"),mkSym("I need quiet time","I need quiet time","🤫"),mkSym("I feel lonely","I feel lonely","😔"),mkSym("I am proud of myself","I am proud of myself","🌟"),mkSym("Something feels wrong","Something feels wrong","⚠️"),mkSym("I need a hug","I could use a hug","🫂"),mkSym("Deep breath","Let me take a deep breath","🌬️"),mkSym("Tomorrow is better","Tomorrow will be better","🌅"),mkSym("I need my counselor","I need to see my counselor","💙"),mkSym("Sensory break","I need a sensory break","🎧")]},
+
+  // ── TIER 3: ACADEMIC CURRICULUM ──────────────────────────────────────
+  { name:"American Revolution", emoji:"🦅", color:"#1D4ED8", tier:"Academic",
+    grade:"Grades 4-8", research:"Most-requested Social Studies fringe vocabulary in AAC classroom practice",
+    desc:"Key vocabulary for the American Revolution. Supports participation in Social Studies class discussions and assessments.",
+    symbols:[mkSym("Colonists","The colonists","🏘️"),mkSym("King George","King George the Third","👑"),mkSym("Unfair taxes","Unfair taxes","💰"),mkSym("Boston Tea Party","The Boston Tea Party","🍵"),mkSym("Declaration","The Declaration of Independence","📜"),mkSym("Freedom","Freedom and independence","🗽"),mkSym("George Washington","George Washington","⭐"),mkSym("Revolution","The American Revolution","🔔"),mkSym("Continental Army","The Continental Army","⚔️"),mkSym("Loyalists","The Loyalists stayed loyal","🏴"),mkSym("Patriots","The Patriots wanted freedom","🦅"),mkSym("No taxation","No taxation without representation","✊"),mkSym("Battle","Important battle","💥"),mkSym("1776","The year 1776","📅")]},
+  { name:"US Government and Democracy", emoji:"🏛️", color:"#1E3A8A", tier:"Academic",
+    grade:"Grades 5-Adult", research:"Civics curriculum vocabulary cited in AAC fringe literature; ASHA — community participation",
+    desc:"Branches of government, voting, rights, and civic vocabulary. Supports civics class and community engagement.",
+    symbols:[mkSym("President","The President","🇺🇸"),mkSym("Congress","Congress makes laws","🏛️"),mkSym("Supreme Court","The Supreme Court","⚖️"),mkSym("Vote","The right to vote","🗳️"),mkSym("Bill becomes law","How a bill becomes a law","📜"),mkSym("Constitution","The Constitution","📖"),mkSym("Amendment","Constitutional amendment","✏️"),mkSym("Democracy","Our democracy","🕊️"),mkSym("Our rights","Our rights","✊"),mkSym("I am a citizen","I am a citizen","🆔"),mkSym("Election","The election","🗓️"),mkSym("Executive branch","Executive branch","🏠"),mkSym("Checks and balances","Checks and balances","⚖️"),mkSym("Senate","The Senate","🏛️")]},
+  { name:"Civil War", emoji:"⚔️", color:"#374151", tier:"Academic",
+    grade:"Grades 5-8", research:"Commonly included in AAC Social Studies fringe packs; classroom vocabulary research",
+    desc:"Civil War vocabulary for Social Studies class. Key people, events, causes, and outcomes of the Civil War.",
+    symbols:[mkSym("Abraham Lincoln","Abraham Lincoln","🎩"),mkSym("The Union","The Union","🔵"),mkSym("The Confederacy","The Confederacy","⚔️"),mkSym("Slavery","The end of slavery","⛓️"),mkSym("Emancipation","The Emancipation Proclamation","📜"),mkSym("Battle of Gettysburg","Battle of Gettysburg","⚔️"),mkSym("Reconstruction","Reconstruction period","🔨"),mkSym("Underground Railroad","The Underground Railroad","🚂"),mkSym("Causes of the war","Causes of the Civil War","❓"),mkSym("States rights","States rights debate","🗺️"),mkSym("Freed people","Freed enslaved people","✊"),mkSym("1865","The year 1865","📅"),mkSym("End of the war","End of the Civil War","🕊️")]},
+  { name:"Water Cycle and Weather", emoji:"🌧️", color:"#0369A1", tier:"Academic",
+    grade:"Grades 3-8", research:"Most common science fringe vocabulary topic in AAC practice; ASHA — curriculum access mandate",
+    desc:"Water cycle, weather patterns, and climate vocabulary. Supports science class participation and discussions.",
+    symbols:[mkSym("Evaporation","Evaporation","☀️"),mkSym("Condensation","Condensation forms clouds","💧"),mkSym("Precipitation","Precipitation falls as rain","🌧️"),mkSym("Collection","Water collection","🌊"),mkSym("Water vapor","Water vapor rises","💨"),mkSym("Cloud formation","Cloud formation","☁️"),mkSym("Rain","Rain falls","🌧️"),mkSym("Snow","Snow falls","❄️"),mkSym("Drought","Drought conditions","🏜️"),mkSym("Flood","Flood warning","🌊"),mkSym("Temperature","Temperature today","🌡️"),mkSym("Climate vs weather","Climate versus weather","🌍"),mkSym("Humidity","High humidity","💦"),mkSym("Weather forecast","Weather forecast","📱")]},
+  { name:"Solar System and Space", emoji:"🚀", color:"#312E81", tier:"Academic",
+    grade:"Grades 3-8", research:"Second most common science fringe AAC vocabulary topic; high-interest motivating vocabulary per Bean et al. (2019)",
+    desc:"Planets, stars, and space exploration vocabulary. Supports science class and inspires curiosity and communication.",
+    symbols:[mkSym("The Sun","The Sun","☀️"),mkSym("Mercury","Mercury","⬛"),mkSym("Venus","Venus","🟡"),mkSym("Earth","Earth","🌍"),mkSym("Mars","Mars","🔴"),mkSym("Jupiter","Jupiter","🟠"),mkSym("Saturn","Saturn with rings","🪐"),mkSym("The Moon","The Moon","🌕"),mkSym("Orbit","Planets orbit the Sun","🔄"),mkSym("Gravity","Gravity pulls objects","⬇️"),mkSym("Astronaut","An astronaut","👨‍🚀"),mkSym("Galaxy","Our galaxy","🌌"),mkSym("Telescope","Look through a telescope","🔭"),mkSym("Space exploration","Space exploration","🚀")]},
+  { name:"Human Body Systems", emoji:"🫀", color:"#BE123C", tier:"Academic",
+    grade:"Grades 4-8", research:"Science curriculum plus medical self-advocacy crossover; ASHA — health vocabulary priority",
+    desc:"Body systems, organs, and health vocabulary. Supports science class and medical self-advocacy at the same time.",
+    symbols:[mkSym("Heart","The heart pumps blood","🫀"),mkSym("Lungs","The lungs help me breathe","🫁"),mkSym("Brain","The brain controls everything","🧠"),mkSym("Stomach","The stomach digests food","🫃"),mkSym("Skeleton","The skeleton supports the body","🦴"),mkSym("Muscles","Muscles help me move","💪"),mkSym("Blood vessels","Blood vessels carry blood","🩸"),mkSym("Digestive system","The digestive system","🔄"),mkSym("Nervous system","The nervous system","⚡"),mkSym("Immune system","The immune system fights disease","🛡️"),mkSym("Good nutrition","Good nutrition helps my body","🥦"),mkSym("Exercise","Exercise keeps me healthy","🏃"),mkSym("Cells","Cells are building blocks","🔬")]},
+  { name:"Scientific Method", emoji:"🔬", color:"#065F46", tier:"Academic",
+    grade:"Grades 3-Adult", research:"Lab participation vocabulary; ASHA — curriculum access for AAC users in science settings",
+    desc:"Hypothesis, experiment, data, and results vocabulary. Lets AAC users fully participate in any science investigation.",
+    symbols:[mkSym("My question is","My scientific question is","❓"),mkSym("My hypothesis","My hypothesis is","💡"),mkSym("I need materials","I need these materials","🧪"),mkSym("I observe that","I observe that","👁️"),mkSym("I will measure","I will measure","📏"),mkSym("Record the data","Record the data","📊"),mkSym("My results show","My results show","📈"),mkSym("My conclusion is","My conclusion is","✅"),mkSym("The variable is","The variable is","🔢"),mkSym("Control group","The control group","⚖️"),mkSym("Repeat it","Let us repeat the experiment","🔄"),mkSym("I predict that","I predict that","🎯"),mkSym("This proves","This proves that","💥")]},
+
+  // ── TIER 4: SCHOOL PARTICIPATION ─────────────────────────────────────
+  { name:"Classroom Language", emoji:"🙋", color:"#CA8A04", tier:"School",
+    grade:"All ages", research:"ASHA — asking and answering questions is a core IEP goal; Beukelman and Light (2020) school participation",
+    desc:"Ask questions, answer the teacher, and participate fully in class. The most universally needed school vocabulary.",
+    symbols:[mkSym("I have a question","I have a question","🙋"),mkSym("I know the answer","I know the answer","✋"),mkSym("I do not understand","I do not understand","🤔"),mkSym("Can you repeat","Can you repeat that please","🔁"),mkSym("I need help","I need help with this","🙏"),mkSym("I am finished","I am finished","✅"),mkSym("I need more time","I need more time please","⏰"),mkSym("May I use the bathroom","May I use the bathroom","🚽"),mkSym("I agree","I agree","👍"),mkSym("I disagree","I disagree","👎"),mkSym("My answer is","My answer is","📝"),mkSym("On page","On page number","📖"),mkSym("I can try","I can try","💪"),mkSym("Group work","I am ready for group work","👥")]},
+  { name:"PE and Sports", emoji:"⚽", color:"#16A34A", tier:"School",
+    grade:"All ages", research:"ASHA — leisure and play settings are named key AAC contexts; high-interest fringe vocabulary",
+    desc:"Physical education, team sports, and fitness vocabulary. Supports full participation in PE class and recreational activities.",
+    symbols:[mkSym("On my team","On my team","👥"),mkSym("Pass to me","Pass to me","🙌"),mkSym("Good shot","Good shot","⭐"),mkSym("My turn","My turn","👉"),mkSym("Time out","Time out","⏸️"),mkSym("What is the score","What is the score","🏆"),mkSym("I am tired","I am tired","😮‍💨"),mkSym("Water break","Water break please","💧"),mkSym("I am injured","I am injured","🩹"),mkSym("Let us stretch","Let us stretch first","🤸"),mkSym("Warm up","Time to warm up","🔥"),mkSym("Great job team","Great job team","🌟"),mkSym("Offense","On offense","⚔️"),mkSym("Defense","On defense","🛡️")]},
+  { name:"Art Class", emoji:"🎨", color:"#DC2626", tier:"School",
+    grade:"All ages", research:"Activity-based vocabulary; ASHA — play and leisure participation; motivating fringe vocabulary",
+    desc:"Art supplies, techniques, and creative expression vocabulary. Supports participation in art class and creative activities.",
+    symbols:[mkSym("Paint","Paint","🎨"),mkSym("Pencil","Pencil","✏️"),mkSym("I want to draw","I want to draw","✏️"),mkSym("I need scissors","I need scissors","✂️"),mkSym("Pass the glue","Pass the glue","🔫"),mkSym("More paper","More paper please","📄"),mkSym("I need help","I need help with this","🙋"),mkSym("I like my work","I like my work","❤️"),mkSym("Start over","I want to start over","🔄"),mkSym("Almost done","I am almost done","⏰"),mkSym("Can I see yours","Can I see yours","👀"),mkSym("What color","What color should I use","🌈"),mkSym("I am finished","I am finished with my art","✅")]},
+  { name:"Lunchroom and Recess", emoji:"🍱", color:"#B45309", tier:"School",
+    grade:"All ages", research:"ASHA Practice Portal explicitly names lunchroom and hallways as critical AAC participation settings",
+    desc:"Cafeteria and playground vocabulary. ASHA research identifies these as among the most critical AAC settings in school.",
+    symbols:[mkSym("Sit with me","Will you sit with me","🙋"),mkSym("What is for lunch","What is for lunch today","🍽️"),mkSym("I am allergic","I am allergic to this","⚠️"),mkSym("More please","More please","🙏"),mkSym("I do not like this","I do not like this","👎"),mkSym("Where is the trash","Where is the trash","🗑️"),mkSym("May I go outside","May I go outside","🌤️"),mkSym("Play with me","Do you want to play","🎮"),mkSym("I want the swings","I want the swings","🎭"),mkSym("Too cold today","It is too cold today","🥶"),mkSym("I dropped my food","I dropped my food","😬"),mkSym("I saved your seat","I saved your seat","💺")]},
+
+  // ── TIER 5: TRANSITION ────────────────────────────────────────────────
+  { name:"Job Interview Skills", emoji:"💼", color:"#0D9488", tier:"Transition",
+    grade:"Grades 9-Adult", research:"ASHA — vocational settings; transition planning literature; Beukelman and Light (2020)",
+    desc:"Professional communication for job applications and interviews. Supports transition IEP goals and employment readiness.",
+    symbols:[mkSym("My name is","My name is","👤"),mkSym("I am applying for","I am applying for this position","💼"),mkSym("My strengths are","My strengths are","⭐"),mkSym("I work well with others","I work well with others","🤝"),mkSym("I am dependable","I am dependable","🏅"),mkSym("I can learn quickly","I can learn new things quickly","🧠"),mkSym("I need support with","I may need some support with","🙋"),mkSym("I have a question","I have a question","❓"),mkSym("When do I start","When would I start","📅"),mkSym("Part time","I am looking for part time","⏰"),mkSym("Thank you for your time","Thank you for your time","🙏"),mkSym("I am very interested","I am very interested in this job","✅")]},
+  { name:"Workplace Communication", emoji:"🏢", color:"#1E40AF", tier:"Transition",
+    grade:"Grades 9-Adult", research:"ASHA — employment settings; IDEA transition planning; postsecondary communication needs",
+    desc:"On-the-job communication for employees. Greet coworkers, ask for help, report problems, and navigate the workplace.",
+    symbols:[mkSym("Good morning","Good morning","👋"),mkSym("I have a question","I have a quick question","❓"),mkSym("I finished my task","I finished my task","✅"),mkSym("What should I do next","What should I do next","🤔"),mkSym("I need more supplies","I need more supplies","📦"),mkSym("There is a problem","There is a problem I need to report","⚠️"),mkSym("When is my break","When is my break","⏰"),mkSym("I will be late","I will be a few minutes late","🕐"),mkSym("I am sick today","I cannot come in today I am sick","🤒"),mkSym("Can I see my schedule","Can I see my schedule","🗓️"),mkSym("I work hard","I work very hard","💪"),mkSym("I enjoy my job","I enjoy working here","😊")]},
+  { name:"Independent Living", emoji:"🏠", color:"#6D28D9", tier:"Transition",
+    grade:"Grades 9-Adult", research:"Beukelman and Light (2020) — independent living; ASHA transition to adulthood vocabulary priority",
+    desc:"Cooking, cleaning, bills, and home management vocabulary. Supports independent and semi-independent living goals.",
+    symbols:[mkSym("Grocery list","Add to grocery list","🛒"),mkSym("Set the oven","Set the oven to","🍳"),mkSym("Is it done cooking","Is it done cooking","🔥"),mkSym("Clean the dishes","Clean the dishes","🍽️"),mkSym("Do laundry","Time to do laundry","🧺"),mkSym("Pay a bill","I need to pay a bill","💸"),mkSym("Call my landlord","I need to call my landlord","📞"),mkSym("I am locked out","I am locked out","🔑"),mkSym("Put this in recycling","Put this in recycling","♻️"),mkSym("Out of food","I am out of food","🥫"),mkSym("Maintenance request","I need to submit a maintenance request","🔧"),mkSym("Talk to my roommate","Talk to my roommate","🤝")]},
+];
+
+// ── LIBRARY STATE ──────────────────────────────────────────────────────────
+let libFilterCat = 'All';
+let libSearchQuery = '';
+let savedApiKey = '';
+
+function openLibrary() {
+  document.getElementById('library-screen').classList.add('open');
+  try { savedApiKey = localStorage.getItem('talktiles_apikey') || ''; } catch(e){}
+  if (savedApiKey) document.getElementById('lib-apikey').value = savedApiKey;
+  renderLibrary();
+}
+
+function closeLibrary() {
+  document.getElementById('library-screen').classList.remove('open');
+}
+
+function filterCat(btn, cat) {
+  document.querySelectorAll('#cat-filter-chips .grade-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  libFilterCat = cat;
+  renderLibrary();
+}
+
+function filterLibrary() {
+  libSearchQuery = document.getElementById('lib-search').value.toLowerCase();
+  renderLibrary();
+}
+
+function renderLibrary() {
+  let packs = LIBRARY_PACKS;
+  if (libFilterCat !== 'All') packs = packs.filter(p => p.tier === libFilterCat);
+  if (libSearchQuery) packs = packs.filter(p =>
+    p.name.toLowerCase().includes(libSearchQuery) ||
+    p.desc.toLowerCase().includes(libSearchQuery) ||
+    p.tier.toLowerCase().includes(libSearchQuery) ||
+    p.symbols.some(s => s.label.toLowerCase().includes(libSearchQuery))
+  );
+
+  const countEl = document.getElementById('lib-pack-count');
+  countEl.textContent = packs.length === LIBRARY_PACKS.length
+    ? `📚 ${LIBRARY_PACKS.length} Research-Backed Packs — tap any to install`
+    : `🔍 ${packs.length} pack${packs.length !== 1 ? 's' : ''} found`;
+
+  const list = document.getElementById('lib-pack-list');
+  list.innerHTML = '';
+
+  if (packs.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:#64748B;">
+      <div style="font-size:36px;margin-bottom:12px;">🔍</div>
+      <div style="font-family:var(--font-display);font-weight:800;font-size:16px;color:white;">No packs match that search</div>
+      <div style="font-size:13px;margin-top:6px;">Try a different word or clear the search</div>
+      ${savedApiKey ? `<button onclick="aiGenerateFromSearch()" style="margin-top:16px;background:#6366F1;border:none;border-radius:12px;color:white;font-family:var(--font-display);font-weight:800;font-size:14px;padding:12px 20px;cursor:pointer;">✨ AI Generate Pack for this topic</button>` : ''}
+    </div>`;
+    return;
+  }
+
+  const tierColors = {'Daily Life':'#F97316','Social':'#EC4899','Academic':'#3B82F6','School':'#CA8A04','Transition':'#0D9488','AI Generated':'#6366F1'};
+
+  packs.forEach((pack, i) => {
+    const card = document.createElement('div');
+    card.className = 'pack-card';
+    card.style.marginBottom = '12px';
+    const symPreview = pack.symbols.slice(0,5).map(s => `<span class="pack-sym-chip">${s.emoji} ${s.label}</span>`).join('');
+    const more = pack.symbols.length > 5 ? `<span class="pack-sym-chip">+${pack.symbols.length-5} more</span>` : '';
+    const tc = tierColors[pack.tier] || '#6366F1';
+    const packIdx = LIBRARY_PACKS.indexOf(pack);
+    card.innerHTML = `
+      <div class="pack-card-top">
+        <div class="pack-icon" style="background:${pack.color}22;font-size:28px;">${pack.emoji}</div>
+        <div class="pack-info">
+          <div class="pack-name">${pack.name}</div>
+          <div class="pack-meta" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;">
+            <span style="background:${tc}22;color:${tc};border-radius:50px;padding:2px 8px;font-size:11px;font-weight:800;">${pack.tier}</span>
+            <span style="color:#475569;font-size:11px;">· ${pack.grade}</span>
+          </div>
+        </div>
+      </div>
+      <div class="pack-desc">${pack.desc}</div>
+      <div style="font-size:10px;color:#475569;font-style:italic;margin-bottom:8px;line-height:1.4;">📖 ${pack.research}</div>
+      <div class="pack-symbols">${symPreview}${more}</div>
+      <button class="pack-install-btn" id="lib-install-${packIdx}" onclick="installLibraryPack(${packIdx})">
+        ⬇ Install into TalkTiles
+      </button>`;
+    list.appendChild(card);
+  });
+
+  // AI section
+  const aiResult = document.getElementById('lib-ai-result');
+  if (savedApiKey) {
+    aiResult.innerHTML = `<div style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:14px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:24px;">✨</span>
+      <div style="flex:1;"><div style="font-family:var(--font-display);font-weight:800;font-size:14px;color:white;">AI Generator Active</div>
+      <div style="font-size:12px;color:#94A3B8;">Search any topic above — if not found, AI will create a custom pack</div></div>
+      <button onclick="aiGenerateFromSearch()" style="background:#6366F1;border:none;border-radius:10px;color:white;font-family:var(--font-display);font-weight:800;font-size:13px;padding:8px 14px;cursor:pointer;white-space:nowrap;">Generate ✨</button>
+    </div>`;
+  } else {
+    aiResult.innerHTML = `<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:12px;margin-bottom:14px;font-size:12px;color:#64748B;line-height:1.5;">
+      💡 <strong style="color:#94A3B8;">Want AI-generated packs?</strong> Paste an Anthropic API key in the field above. Free accounts get $5 credit — enough for thousands of custom packs.
+    </div>`;
+  }
+}
+
+function testAndSaveApiKey() {
+  const key = document.getElementById('lib-apikey').value.trim();
+  if (!key.startsWith('sk-ant-')) { showToast('⚠️ Key should start with sk-ant-'); return; }
+  try { localStorage.setItem('talktiles_apikey', key); } catch(e){}
+  savedApiKey = key;
+  showToast('✅ API key saved — AI generation enabled!');
+  renderLibrary();
+}
+
+async function aiGenerateFromSearch() {
+  const query = document.getElementById('lib-search').value.trim() || 'General Communication';
+  if (!savedApiKey) { showToast('⚠️ Add an Anthropic API key first'); return; }
+
+  const aiResult = document.getElementById('lib-ai-result');
+  aiResult.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;padding:28px;gap:12px;text-align:center;background:rgba(99,102,241,0.1);border-radius:14px;margin-bottom:14px;">
+    <div class="gen-spinner"></div>
+    <div style="font-family:var(--font-display);font-weight:800;font-size:15px;color:white;">Building "${query}" pack…</div>
+    <div style="font-size:12px;color:#64748B;">AI selecting the best vocabulary</div>
+  </div>`;
+
+  try {
+    const prompt = `You are an expert AAC specialist. Create a TalkTiles vocabulary pack for: "${query}"
+Respond ONLY with valid JSON:
+{"name":"short name","emoji":"one emoji","color":"hex color","desc":"2 sentences about when to use this","symbols":[{"label":"1-3 words","speech":"full sentence the device says","emoji":"one emoji"}]}
+Rules: 12-14 symbols, functional vocabulary, varied word types (nouns, verbs, adjectives, social phrases).`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':savedApiKey,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message||'API error');
+    const text = data.content.map(b=>b.text||'').join('');
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Could not parse response');
+    const pack = JSON.parse(match[0]);
+    if (!pack.symbols) throw new Error('Invalid format');
+
+    pack.symbols = pack.symbols.map((s,i)=>({
+      id:'ai_'+Date.now()+'_'+i, label:s.label, speech:s.speech||s.label, emoji:s.emoji||'❓',
+      svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${pack.color||'#6366F1'}"/><text x="50" y="65" text-anchor="middle" font-size="48">${s.emoji||'❓'}</text></svg>`
+    }));
+    pack.tier = 'AI Generated'; pack.grade = 'Custom'; pack.research = 'AI-generated custom pack';
+
+    const idx = LIBRARY_PACKS.length;
+    LIBRARY_PACKS.push(pack);
+
+    aiResult.innerHTML = `<div style="margin-bottom:12px;">
+      <div class="lib-section-title" style="margin-bottom:8px;">✨ AI Generated — Ready to Install</div>
+      <div class="pack-card">
+        <div class="pack-card-top">
+          <div class="pack-icon" style="background:${pack.color}22;font-size:28px;">${pack.emoji}</div>
+          <div class="pack-info"><div class="pack-name">${pack.name}</div><div class="pack-meta">AI Generated</div></div>
+        </div>
+        <div class="pack-desc">${pack.desc}</div>
+        <div class="pack-symbols">${pack.symbols.slice(0,5).map(s=>`<span class="pack-sym-chip">${s.emoji} ${s.label}</span>`).join('')}</div>
+        <button class="pack-install-btn" onclick="installLibraryPack(${idx})">⬇ Install into TalkTiles</button>
+      </div>
+    </div>`;
+  } catch(err) {
+    aiResult.innerHTML = `<div style="background:rgba(127,29,29,0.5);border-radius:12px;padding:14px;color:#FCA5A5;font-size:13px;margin-bottom:12px;">
+      ⚠️ AI generation failed: ${err.message}<br><span style="font-size:11px;opacity:0.7;">Check your API key or install one of the 25 built-in packs below.</span>
+    </div>`;
+  }
+}
+
+function installLibraryPack(idx) {
+  const pack = LIBRARY_PACKS[idx];
+  if (!pack) return;
+  const newCat = {
+    id:'lib_'+pack.name.replace(/\s/g,'_').toLowerCase()+'_'+Date.now(),
+    label:pack.name, emoji:pack.emoji, color:pack.color||'#6366F1',
+    symbols:pack.symbols.map((s,i)=>({
+      id:'libsym_'+idx+'_'+i, label:s.label, speech:s.speech||s.label, emoji:s.emoji||'❓',
+      svg:s.svg||`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${pack.color||'#6366F1'}"/><text x="50" y="65" text-anchor="middle" font-size="48">${s.emoji||'❓'}</text></svg>`
+    }))
+  };
+  const existing = VOCAB.categories.findIndex(c=>c.label===newCat.label);
+  if (existing>=0) {
+    if (!confirm(`"${newCat.label}" already exists. Replace it?`)) return;
+    VOCAB.categories[existing]=newCat; currentCat=existing;
+  } else { VOCAB.categories.push(newCat); currentCat=VOCAB.categories.length-1; }
+  saveVocab(); render(); closeLibrary();
+  showToast(`✅ "${newCat.label}" installed!`);
+}
+
+// Legacy stubs
+function installPack(idx) { installLibraryPack(idx); }
+function searchLibrary() { aiGenerateFromSearch(); }
+function toggleGrade() {}
+function renderFeatured() { renderLibrary(); }
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FOCUS MODE — Clean 2-5 choice presentation
+// Research: Light & McNaughton (2014) — reduced choice sets increase speed
+// ═══════════════════════════════════════════════════════════════════════════
+
+const DEFAULT_SCENES = [
+  { name:"Bath or Shower", emoji:"🛁", color:"#0284C7", symbols:[
+    {id:'f_bath',label:'Bath',speech:'I want a bath',emoji:'🛁',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0284C7"/><text x="50" y="65" text-anchor="middle" font-size="52">🛁</text></svg>`},
+    {id:'f_shower',label:'Shower',speech:'I want a shower',emoji:'🚿',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0284C7"/><text x="50" y="65" text-anchor="middle" font-size="52">🚿</text></svg>`},
+  ]},
+  { name:"TV Tonight", emoji:"📺", color:"#6366F1", symbols:[
+    {id:'f_cartoon',label:'Cartoon',speech:'I want to watch cartoons',emoji:'🎨',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#6366F1"/><text x="50" y="65" text-anchor="middle" font-size="52">🎨</text></svg>`},
+    {id:'f_movie',label:'Movie',speech:'I want to watch a movie',emoji:'🎬',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#6366F1"/><text x="50" y="65" text-anchor="middle" font-size="52">🎬</text></svg>`},
+    {id:'f_sportstv',label:'Sports',speech:'I want to watch sports',emoji:'⚽',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#6366F1"/><text x="50" y="65" text-anchor="middle" font-size="52">⚽</text></svg>`},
+    {id:'f_youtube',label:'YouTube',speech:'I want to watch YouTube',emoji:'📱',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#6366F1"/><text x="50" y="65" text-anchor="middle" font-size="52">📱</text></svg>`},
+  ]},
+  { name:"Ready for Bed?", emoji:"😴", color:"#312E81", symbols:[
+    {id:'f_tired',label:'I am Tired',speech:'I am tired and ready for bed',emoji:'😴',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#312E81"/><text x="50" y="65" text-anchor="middle" font-size="52">😴</text></svg>`},
+    {id:'f_notsleepy',label:'Not Yet',speech:'I am not sleepy yet',emoji:'😊',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#312E81"/><text x="50" y="65" text-anchor="middle" font-size="52">😊</text></svg>`},
+    {id:'f_readtome',label:'Read to Me',speech:'Please read me a story',emoji:'📖',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#312E81"/><text x="50" y="65" text-anchor="middle" font-size="52">📖</text></svg>`},
+  ]},
+  { name:"What for Dinner?", emoji:"🍽️", color:"#DC2626", symbols:[
+    {id:'f_dchicken',label:'Chicken',speech:'I want chicken for dinner',emoji:'🍗',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#DC2626"/><text x="50" y="65" text-anchor="middle" font-size="52">🍗</text></svg>`},
+    {id:'f_dpizza',label:'Pizza',speech:'I want pizza for dinner',emoji:'🍕',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#DC2626"/><text x="50" y="65" text-anchor="middle" font-size="52">🍕</text></svg>`},
+    {id:'f_dpasta',label:'Pasta',speech:'I want pasta for dinner',emoji:'🍝',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#DC2626"/><text x="50" y="65" text-anchor="middle" font-size="52">🍝</text></svg>`},
+    {id:'f_dtacos',label:'Tacos',speech:'I want tacos for dinner',emoji:'🌮',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#DC2626"/><text x="50" y="65" text-anchor="middle" font-size="52">🌮</text></svg>`},
+  ]},
+  { name:"Free Time", emoji:"🎮", color:"#0D9488", symbols:[
+    {id:'f_games',label:'Video Games',speech:'I want to play video games',emoji:'🎮',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0D9488"/><text x="50" y="65" text-anchor="middle" font-size="52">🎮</text></svg>`},
+    {id:'f_tvfree',label:'Watch TV',speech:'I want to watch TV',emoji:'📺',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0D9488"/><text x="50" y="65" text-anchor="middle" font-size="52">📺</text></svg>`},
+    {id:'f_music',label:'Music',speech:'I want to listen to music',emoji:'🎵',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0D9488"/><text x="50" y="65" text-anchor="middle" font-size="52">🎵</text></svg>`},
+    {id:'f_outside',label:'Go Outside',speech:'I want to go outside',emoji:'🌳',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0D9488"/><text x="50" y="65" text-anchor="middle" font-size="52">🌳</text></svg>`},
+    {id:'f_read',label:'Read',speech:'I want to read',emoji:'📚',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0D9488"/><text x="50" y="65" text-anchor="middle" font-size="52">📚</text></svg>`},
+  ]},
+  { name:"How Do You Feel?", emoji:"😊", color:"#F59E0B", symbols:[
+    {id:'f_happy2',label:'Happy',speech:'I feel happy',emoji:'😊',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#F59E0B"/><text x="50" y="65" text-anchor="middle" font-size="52">😊</text></svg>`},
+    {id:'f_sad2',label:'Sad',speech:'I feel sad',emoji:'😢',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#F59E0B"/><text x="50" y="65" text-anchor="middle" font-size="52">😢</text></svg>`},
+    {id:'f_angry2',label:'Angry',speech:'I feel angry',emoji:'😠',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#F59E0B"/><text x="50" y="65" text-anchor="middle" font-size="52">😠</text></svg>`},
+    {id:'f_tired2',label:'Tired',speech:'I feel tired',emoji:'😴',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#F59E0B"/><text x="50" y="65" text-anchor="middle" font-size="52">😴</text></svg>`},
+    {id:'f_okay2',label:'Okay',speech:'I feel okay',emoji:'😐',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#F59E0B"/><text x="50" y="65" text-anchor="middle" font-size="52">😐</text></svg>`},
+  ]},
+  { name:"Yes or No", emoji:"👍", color:"#16A34A", symbols:[
+    {id:'f_yes2',label:'YES',speech:'Yes',emoji:'✅',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#16A34A"/><text x="50" y="65" text-anchor="middle" font-size="52">✅</text></svg>`},
+    {id:'f_no2',label:'NO',speech:'No',emoji:'❌',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#DC2626"/><text x="50" y="65" text-anchor="middle" font-size="52">❌</text></svg>`},
+  ]},
+];
+
+let focusSelectedSyms=[], focusCurrentSyms=[], focusSentence=[], focusSavedScenes=[], focusPickerCatIdx=0;
+
+function loadFocusScenes(){try{const s=localStorage.getItem('talktiles_focus_scenes');focusSavedScenes=s?JSON.parse(s):[];}catch(e){focusSavedScenes=[];}}
+function saveFocusScenes(){try{localStorage.setItem('talktiles_focus_scenes',JSON.stringify(focusSavedScenes));}catch(e){}}
+
+function openFocusSetup(){
+  loadFocusScenes(); focusSelectedSyms=[];
+  document.getElementById('focus-setup-screen').classList.add('open');
+  renderFocusScenes(); renderFocusCatSelect(); renderFocusPicker(); updateFocusLaunchBtn();
+}
+function closeFocusSetup(){document.getElementById('focus-setup-screen').classList.remove('open');}
+
+function renderFocusScenes(){
+  const list=document.getElementById('focus-scene-list');
+  const all=[...DEFAULT_SCENES,...focusSavedScenes];
+  list.innerHTML='';
+  all.forEach((scene,i)=>{
+    const card=document.createElement('div');
+    card.className='focus-scene-card';
+    const isCustom=i>=DEFAULT_SCENES.length;
+    card.innerHTML=`
+      <span class="focus-scene-emoji">${scene.emoji}</span>
+      <div class="focus-scene-info">
+        <div class="focus-scene-name">${scene.name}</div>
+        <div class="focus-scene-choices">${scene.symbols.map(s=>s.label).join(' · ')}</div>
+      </div>
+      ${isCustom?`<button onclick="deleteFocusScene(${i-DEFAULT_SCENES.length})" style="background:#EF4444;border:none;border-radius:8px;color:white;font-weight:800;font-size:13px;padding:6px 10px;cursor:pointer;margin-right:6px;">🗑️</button>`:''}
+      <button class="focus-scene-launch" onclick="launchScene(${i})">▶ Launch</button>`;
+    list.appendChild(card);
+  });
+}
+
+function deleteFocusScene(idx){focusSavedScenes.splice(idx,1);saveFocusScenes();renderFocusScenes();}
+
+function launchScene(idx){
+  const all=[...DEFAULT_SCENES,...focusSavedScenes];
+  const scene=all[idx]; if(!scene) return;
+  focusCurrentSyms=scene.symbols; focusSentence=[];
+  document.getElementById('focus-play-title').textContent=`⭐ ${scene.name}`;
+  renderFocusPlayScreen();
+  document.getElementById('focus-setup-screen').classList.remove('open');
+  document.getElementById('focus-play-screen').classList.add('open');
+  updateFocusSentenceBar();
+}
+
+function renderFocusCatSelect(){
+  const sel=document.getElementById('focus-cat-select');
+  sel.innerHTML=VOCAB.categories.map((c,i)=>`<option value="${i}">${c.emoji} ${c.label}</option>`).join('');
+  sel.value=focusPickerCatIdx;
+}
+
+function renderFocusPicker(){
+  const catIdx=parseInt(document.getElementById('focus-cat-select').value);
+  focusPickerCatIdx=catIdx;
+  const cat=VOCAB.categories[catIdx];
+  const grid=document.getElementById('focus-picker-grid');
+  grid.innerHTML='';
+  if(!cat) return;
+  cat.symbols.forEach(sym=>{
+    const btn=document.createElement('button');
+    btn.className='focus-picker-btn'+(focusSelectedSyms.find(s=>s.id===sym.id)?' selected':'');
+    const img=sym.imgUrl?`<img src="${sym.imgUrl}" alt="${sym.label}">`:sym.svg||`<div style="font-size:36px;line-height:56px;">${sym.emoji||'?'}</div>`;
+    btn.innerHTML=`${img}<span class="focus-picker-label">${sym.label}</span>`;
+    btn.onclick=()=>toggleFocusSymbol(sym,btn);
+    grid.appendChild(btn);
+  });
+  updateFocusCount();
+}
+
+function toggleFocusSymbol(sym,btn){
+  const idx=focusSelectedSyms.findIndex(s=>s.id===sym.id);
+  if(idx>=0){focusSelectedSyms.splice(idx,1);btn.classList.remove('selected');}
+  else{
+    if(focusSelectedSyms.length>=5){showToast('⚠️ Maximum 5 choices for Focus Mode');return;}
+    focusSelectedSyms.push(sym);btn.classList.add('selected');
+  }
+  updateFocusCount(); updateFocusLaunchBtn();
+}
+
+function updateFocusCount(){
+  const n=focusSelectedSyms.length;
+  const el=document.getElementById('focus-selected-count');
+  el.textContent=n===0?'Select 2–5 symbols below':n===1?'✅ 1 selected — pick at least 1 more':`✅ ${n} selected — ${n<5?`you can pick ${5-n} more`:'maximum reached'}`;
+  el.style.color=n>=2?'#10B981':'#F59E0B';
+}
+
+function updateFocusLaunchBtn(){
+  const btn=document.getElementById('focus-launch-btn');
+  btn.disabled=focusSelectedSyms.length<2;
+  btn.textContent=focusSelectedSyms.length>=2?`⭐ Launch Focus Mode (${focusSelectedSyms.length} choices)`:'⭐ Launch Focus Mode';
+}
+
+function launchFocus(){
+  if(focusSelectedSyms.length<2) return;
+  const name=document.getElementById('focus-custom-name').value.trim()||'Custom Focus';
+  focusCurrentSyms=[...focusSelectedSyms]; focusSentence=[];
+  document.getElementById('focus-play-title').textContent=`⭐ ${name}`;
+  renderFocusPlayScreen();
+  document.getElementById('focus-setup-screen').classList.remove('open');
+  document.getElementById('focus-play-screen').classList.add('open');
+  updateFocusSentenceBar();
+}
+
+function saveAndLaunchFocus(){
+  if(focusSelectedSyms.length<2){showToast('⚠️ Select at least 2 symbols first');return;}
+  const name=document.getElementById('focus-custom-name').value.trim()||'My Custom Scene';
+  const cat=VOCAB.categories[focusPickerCatIdx];
+  focusSavedScenes.push({name,emoji:cat?.emoji||'⭐',color:cat?.color||'#10B981',symbols:[...focusSelectedSyms]});
+  saveFocusScenes(); launchFocus();
+}
+
+function renderFocusPlayScreen(){
+  const grid=document.getElementById('focus-grid');
+  const n=focusCurrentSyms.length;
+  const layouts={2:'grid-template-columns:1fr 1fr;grid-template-rows:1fr;',3:'grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr;',4:'grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;',5:'grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;'};
+  grid.style.cssText=layouts[n]||layouts[4];
+  grid.innerHTML='';
+
+  focusCurrentSyms.forEach((sym,i)=>{
+    const btn=document.createElement('button');
+    btn.style.cssText=`background:#1E293B;border:4px solid rgba(255,255,255,0.08);border-radius:24px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;transition:transform 0.1s,border-color 0.15s;`;
+    const imgSize=n<=2?'160px':n<=3?'130px':'100px';
+    const fontSize=n<=2?'30px':n<=3?'26px':'22px';
+    const img=sym.imgUrl
+      ?`<img src="${sym.imgUrl}" style="width:${imgSize};height:${imgSize};border-radius:16px;object-fit:contain;">`
+      :sym.svg
+        ?sym.svg.replace('viewBox="0 0 100 100"',`viewBox="0 0 100 100" style="width:${imgSize};height:${imgSize};border-radius:16px;"`)
+        :`<div style="font-size:80px;line-height:${imgSize};">${sym.emoji||'?'}</div>`;
+    btn.innerHTML=`${img}<span style="font-family:var(--font-display);font-weight:900;font-size:${fontSize};color:white;text-align:center;line-height:1.2;">${sym.label}</span>`;
+    btn.addEventListener('touchstart',()=>{btn.style.transform='scale(0.95)';btn.style.borderColor='#10B981';},{passive:true});
+    btn.addEventListener('touchend',()=>{btn.style.transform='';btn.style.borderColor='rgba(255,255,255,0.08)';},{passive:true});
+    btn.onclick=()=>{focusSentence.push(sym);updateFocusSentenceBar();speakWord(sym.speech);};
+    if(n===5&&i===4) btn.style.gridColumn='2';
+    grid.appendChild(btn);
+  });
+}
+
+function updateFocusSentenceBar(){
+  const bar=document.getElementById('focus-play-sentence');
+  if(!focusSentence.length){bar.className='empty';bar.textContent='Tap a picture to speak…';return;}
+  bar.className='';
+  bar.innerHTML=focusSentence.map(s=>`<span style="background:rgba(255,255,255,0.12);border-radius:50px;padding:6px 16px;font-size:18px;white-space:nowrap;">${s.emoji||''} ${s.label}</span>`).join('');
+}
+
+function focusSpeak(){if(!focusSentence.length)return;speakText(focusSentence.map(s=>s.speech).join(' '));}
+function focusClear(){focusSentence=[];updateFocusSentenceBar();}
+function focusBack(){focusSentence.pop();updateFocusSentenceBar();}
+function exitFocus(){document.getElementById('focus-play-screen').classList.remove('open');focusSentence=[];}
+
+loadFocusScenes();
+
+let currentQRLink = '';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BRANCH NAVIGATION — Drill-down hierarchical choices
+// ═══════════════════════════════════════════════════════════════════════════
+let branchStack = [];
+
+function openBranch(sym) {
+  branchStack = [{ sym, symbols: sym.branch }];
+  renderBranchPanel();
+  document.getElementById('branch-panel').classList.add('open');
+  document.getElementById('branch-overlay').classList.add('show');
+}
+
+function drillBranch(sym) {
+  branchStack.push({ sym, symbols: sym.branch });
+  renderBranchPanel();
+}
+
+function branchBack() {
+  if (branchStack.length <= 1) { closeBranch(); return; }
+  branchStack.pop();
+  renderBranchPanel();
+}
+
+function closeBranch() {
+  branchStack = [];
+  document.getElementById('branch-panel').classList.remove('open');
+  document.getElementById('branch-overlay').classList.remove('show');
+}
+
+function renderBranchPanel() {
+  if (!branchStack.length) return;
+  const current = branchStack[branchStack.length - 1];
+  const symbols = current.symbols || [];
+
+  // Breadcrumb
+  const crumbEl = document.getElementById('branch-breadcrumb');
+  crumbEl.innerHTML = branchStack.map((item, i) => {
+    const isLast = i === branchStack.length - 1;
+    return (i > 0 ? '<span class="crumb-sep">›</span>' : '') +
+      `<span class="crumb ${isLast ? 'active' : ''}">${item.sym.label}</span>`;
+  }).join('');
+
+  document.getElementById('branch-title').textContent = current.sym.label;
+  document.getElementById('branch-back').textContent = branchStack.length <= 1 ? '✕ Close' : '← Back';
+
+  const grid = document.getElementById('branch-grid');
+  grid.innerHTML = '';
+
+  symbols.forEach(sym => {
+    const btn = document.createElement('button');
+    const hasSub = sym.branch && sym.branch.length > 0;
+    btn.className = 'branch-sym-btn' + (hasSub ? ' branch-has-children' : '');
+
+    const img = sym.imgUrl
+      ? `<img src="${sym.imgUrl}" alt="${sym.label}">`
+      : sym.svg || `<div style="font-size:44px;line-height:62px;text-align:center;width:62px;">${sym.emoji||'?'}</div>`;
+
+    btn.innerHTML = `${hasSub ? '<div class="branch-arrow">▶</div>' : ''}${img}
+      <span class="sym-label" style="font-size:12px;margin-top:6px;">${sym.label}</span>`;
+
+    btn.onclick = () => {
+      if (hasSub) {
+        drillBranch(sym);
+      } else {
+        sentence.push(sym);
+        renderSentence();
+        if (autoSpeak) speakWord(sym.speech);
+        closeBranch();
+        showToast(`✅ "${sym.label}" added`);
+      }
+    };
+    grid.appendChild(btn);
+  });
+}
+
+// ── EDIT SYMBOL & BRANCH MANAGEMENT ───────────────────────────────────────
+let editingSymIdx = null;
+
+function openEditSymbol(idx) {
+  editingSymIdx = idx;
+  const sym = VOCAB.categories[currentCat].symbols[idx];
+  document.getElementById('panel-title').textContent = `✏️ Edit: ${sym.label}`;
+  document.getElementById('f-label').value = sym.label;
+  document.getElementById('f-speech').value = sym.speech || sym.label;
+  document.getElementById('f-imgurl').value = sym.imgUrl?.startsWith('data:') ? '' : (sym.imgUrl||'');
+  document.getElementById('f-emoji').value = sym.emoji || '';
+  uploadedDataUrl = sym.imgUrl?.startsWith('data:') ? sym.imgUrl : null;
+  selectedEmoji = sym.emoji || '';
+
+  const sel = document.getElementById('f-category');
+  sel.innerHTML = VOCAB.categories.map((c,i)=>`<option value="${i}">${c.emoji} ${c.label}</option>`).join('');
+  sel.value = currentCat;
+
+  renderBranchEditor(sym);
+  document.getElementById('edit-panel').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+  previewSvg();
+}
+
+function renderBranchEditor(sym) {
+  const existing = document.getElementById('branch-editor');
+  if (existing) existing.remove();
+  const branch = sym.branch || [];
+  const div = document.createElement('div');
+  div.id = 'branch-editor';
+  div.className = 'edit-section';
+  div.innerHTML = `
+    <h3>🌿 Branch Choices (${branch.length})</h3>
+    <p style="font-size:13px;color:#64748B;margin-bottom:10px;font-family:var(--font);">
+      Tapping <strong>${sym.label}</strong> will open these choices instead of speaking immediately.
+    </p>
+    <div id="branch-items" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
+      ${branch.map((b,i)=>`
+        <div style="display:flex;align-items:center;gap:8px;background:#F1F5F9;border-radius:10px;padding:8px 12px;">
+          <span style="font-size:22px;">${b.emoji||'❓'}</span>
+          <div style="flex:1;"><div style="font-family:var(--font-display);font-weight:800;font-size:14px;">${b.label}</div>
+          <div style="font-size:11px;color:#64748B;">"${b.speech||b.label}"</div></div>
+          <button onclick="removeBranchItem(${i})" style="background:#EF4444;color:white;border:none;border-radius:8px;padding:4px 10px;font-weight:800;cursor:pointer;">✕</button>
+        </div>`).join('')}
+    </div>
+    <div style="background:#F8FAFC;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+      <div style="font-family:var(--font-display);font-weight:800;font-size:13px;color:#374151;">Add a choice:</div>
+      <div style="display:flex;gap:6px;">
+        <input id="branch-emoji-in" class="form-input" placeholder="🍔" style="width:64px;text-align:center;font-size:20px;">
+        <input id="branch-label-in" class="form-input" style="flex:1;" placeholder="e.g. Meatballs">
+      </div>
+      <input id="branch-speech-in" class="form-input" placeholder='e.g. "I want meatballs please"'>
+      <button class="edit-btn btn-green" onclick="addBranchItem()" style="margin-top:0;">＋ Add This Choice</button>
+    </div>`;
+
+  const saveBtn = document.querySelector('.edit-btn.btn-indigo');
+  if (saveBtn) saveBtn.parentNode.insertBefore(div, saveBtn);
+}
+
+function addBranchItem() {
+  if (editingSymIdx === null) return;
+  const emoji = document.getElementById('branch-emoji-in').value.trim() || '❓';
+  const label = document.getElementById('branch-label-in').value.trim();
+  const speech = document.getElementById('branch-speech-in').value.trim() || label;
+  if (!label) { alert('Please enter a label.'); return; }
+  const sym = VOCAB.categories[currentCat].symbols[editingSymIdx];
+  if (!sym.branch) sym.branch = [];
+  const color = VOCAB.categories[currentCat].color || '#6366F1';
+  sym.branch.push({
+    id: 'b_' + Date.now(), label, speech, emoji,
+    svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${color}"/><text x="50" y="65" text-anchor="middle" font-size="48">${emoji}</text></svg>`
+  });
+  saveVocab(); renderBranchEditor(sym);
+  document.getElementById('branch-emoji-in').value = '';
+  document.getElementById('branch-label-in').value = '';
+  document.getElementById('branch-speech-in').value = '';
+}
+
+function removeBranchItem(idx) {
+  if (editingSymIdx === null) return;
+  const sym = VOCAB.categories[currentCat].symbols[editingSymIdx];
+  if (sym.branch) { sym.branch.splice(idx,1); saveVocab(); renderBranchEditor(sym); }
+}
+
+// ── MEAL PLANNING STARTER CATEGORY ────────────────────────────────────────
+const MEAL_CAT = {
+  id:'meal_planning', label:'Meal Planning', emoji:'🍽️', color:'#DC2626',
+  symbols:[
+    { id:'mp_chicken', label:'Chicken', speech:'Chicken', emoji:'🍗',
+      svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#DC2626"/><text x="50" y="65" text-anchor="middle" font-size="52">🍗</text></svg>`,
+      branch:[
+        {id:'mp_roast',label:'Roast Chicken',speech:'Roast chicken',emoji:'🍗',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#B91C1C"/><text x="50" y="65" text-anchor="middle" font-size="46">🍗</text></svg>`},
+        {id:'mp_csoup',label:'Chicken Soup',speech:'Chicken soup',emoji:'🍲',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#B91C1C"/><text x="50" y="65" text-anchor="middle" font-size="46">🍲</text></svg>`},
+        {id:'mp_cpasta',label:'Chicken Pasta',speech:'Chicken pasta',emoji:'🍝',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#B91C1C"/><text x="50" y="65" text-anchor="middle" font-size="46">🍝</text></svg>`},
+        {id:'mp_cgrilled',label:'Grilled',speech:'Grilled chicken',emoji:'🔥',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#B91C1C"/><text x="50" y="65" text-anchor="middle" font-size="46">🔥</text></svg>`},
+        {id:'mp_ctenders',label:'Tenders',speech:'Chicken tenders',emoji:'🍟',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#B91C1C"/><text x="50" y="65" text-anchor="middle" font-size="46">🍟</text></svg>`},
+      ]},
+    { id:'mp_meat', label:'Meat', speech:'Meat', emoji:'🥩',
+      svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#DC2626"/><text x="50" y="65" text-anchor="middle" font-size="52">🥩</text></svg>`,
+      branch:[
+        {id:'mp_meatball',label:'Meatballs',speech:'Meatballs',emoji:'🍝',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#991B1B"/><text x="50" y="65" text-anchor="middle" font-size="46">🍝</text></svg>`},
+        {id:'mp_burger',label:'Hamburger',speech:'Hamburger',emoji:'🍔',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#991B1B"/><text x="50" y="65" text-anchor="middle" font-size="46">🍔</text></svg>`},
+        {id:'mp_steak',label:'Steak',speech:'Steak',emoji:'🥩',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#991B1B"/><text x="50" y="65" text-anchor="middle" font-size="46">🥩</text></svg>`},
+        {id:'mp_tacos',label:'Tacos',speech:'Tacos',emoji:'🌮',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#991B1B"/><text x="50" y="65" text-anchor="middle" font-size="46">🌮</text></svg>`},
+        {id:'mp_meatloaf',label:'Meatloaf',speech:'Meatloaf',emoji:'🍖',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#991B1B"/><text x="50" y="65" text-anchor="middle" font-size="46">🍖</text></svg>`},
+      ]},
+    { id:'mp_fish', label:'Fish', speech:'Fish', emoji:'🐟',
+      svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0284C7"/><text x="50" y="65" text-anchor="middle" font-size="52">🐟</text></svg>`,
+      branch:[
+        {id:'mp_salmon',label:'Salmon',speech:'Salmon',emoji:'🍣',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0369A1"/><text x="50" y="65" text-anchor="middle" font-size="46">🍣</text></svg>`},
+        {id:'mp_tuna',label:'Tuna',speech:'Tuna',emoji:'🐟',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0369A1"/><text x="50" y="65" text-anchor="middle" font-size="46">🐟</text></svg>`},
+        {id:'mp_fishsticks',label:'Fish Sticks',speech:'Fish sticks',emoji:'🍟',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0369A1"/><text x="50" y="65" text-anchor="middle" font-size="46">🍟</text></svg>`},
+        {id:'mp_shrimp',label:'Shrimp',speech:'Shrimp',emoji:'🍤',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0369A1"/><text x="50" y="65" text-anchor="middle" font-size="46">🍤</text></svg>`},
+      ]},
+    { id:'mp_veggie', label:'Vegetarian', speech:'Vegetarian', emoji:'🥦',
+      svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#16A34A"/><text x="50" y="65" text-anchor="middle" font-size="52">🥦</text></svg>`,
+      branch:[
+        {id:'mp_pasta',label:'Pasta',speech:'Pasta',emoji:'🍝',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#15803D"/><text x="50" y="65" text-anchor="middle" font-size="46">🍝</text></svg>`},
+        {id:'mp_pizza',label:'Pizza',speech:'Pizza',emoji:'🍕',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#15803D"/><text x="50" y="65" text-anchor="middle" font-size="46">🍕</text></svg>`},
+        {id:'mp_salad',label:'Salad',speech:'Salad',emoji:'🥗',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#15803D"/><text x="50" y="65" text-anchor="middle" font-size="46">🥗</text></svg>`},
+        {id:'mp_soup',label:'Soup',speech:'Soup',emoji:'🍲',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#15803D"/><text x="50" y="65" text-anchor="middle" font-size="46">🍲</text></svg>`},
+      ]},
+    { id:'mp_sides', label:'Side Dish', speech:'Side dish', emoji:'🥔',
+      svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#CA8A04"/><text x="50" y="65" text-anchor="middle" font-size="52">🥔</text></svg>`,
+      branch:[
+        {id:'mp_fries',label:'French Fries',speech:'French fries',emoji:'🍟',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#A16207"/><text x="50" y="65" text-anchor="middle" font-size="46">🍟</text></svg>`},
+        {id:'mp_rice',label:'Rice',speech:'Rice',emoji:'🍚',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#A16207"/><text x="50" y="65" text-anchor="middle" font-size="46">🍚</text></svg>`},
+        {id:'mp_corn',label:'Corn',speech:'Corn',emoji:'🌽',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#A16207"/><text x="50" y="65" text-anchor="middle" font-size="46">🌽</text></svg>`},
+        {id:'mp_mashpot',label:'Mashed Potatoes',speech:'Mashed potatoes',emoji:'🥔',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#A16207"/><text x="50" y="65" text-anchor="middle" font-size="46">🥔</text></svg>`},
+        {id:'mp_bread',label:'Bread',speech:'Bread',emoji:'🍞',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#A16207"/><text x="50" y="65" text-anchor="middle" font-size="46">🍞</text></svg>`},
+      ]},
+    { id:'mp_dessert', label:'Dessert', speech:'Dessert', emoji:'🍰',
+      svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#DB2777"/><text x="50" y="65" text-anchor="middle" font-size="52">🍰</text></svg>`,
+      branch:[
+        {id:'mp_icecream',label:'Ice Cream',speech:'Ice cream',emoji:'🍦',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#Be185D"/><text x="50" y="65" text-anchor="middle" font-size="46">🍦</text></svg>`},
+        {id:'mp_cake',label:'Cake',speech:'Cake',emoji:'🎂',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#Be185D"/><text x="50" y="65" text-anchor="middle" font-size="46">🎂</text></svg>`},
+        {id:'mp_cookies',label:'Cookies',speech:'Cookies',emoji:'🍪',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#Be185D"/><text x="50" y="65" text-anchor="middle" font-size="46">🍪</text></svg>`},
+        {id:'mp_fruit',label:'Fruit',speech:'Fruit',emoji:'🍓',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#Be185D"/><text x="50" y="65" text-anchor="middle" font-size="46">🍓</text></svg>`},
+      ]},
+  ]
+};
+
+if (!VOCAB.categories.find(c => c.id === 'meal_planning')) {
+  VOCAB.categories.push(MEAL_CAT);
+  saveVocab();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RESTAURANT MENUS — Red Robin & McDonald's with full branching navigation
+// ═══════════════════════════════════════════════════════════════════════════
+
+function rSym(label, speech, emoji, color) {
+  return {
+    id: 'r_' + label.replace(/\s/g,'_').toLowerCase() + '_' + Math.random().toString(36).slice(2),
+    label, speech: speech || label, emoji,
+    svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${color}"/><text x="50" y="65" text-anchor="middle" font-size="46">${emoji}</text></svg>`
+  };
+}
+
+// ── RED ROBIN ─────────────────────────────────────────────────────────────
+const RED_ROBIN_CAT = {
+  id: 'red_robin', label: 'Red Robin', emoji: '🍔', color: '#CC0000',
+  symbols: [
+    {
+      ...rSym('Burgers', 'I want a burger', '🍔', '#CC0000'),
+      branch: [
+        rSym('Royal Red Robin', 'Royal Red Robin burger with a fried egg', '👑', '#A30000'),
+        rSym('Whiskey River BBQ', 'Whiskey River BBQ Burger', '🥃', '#A30000'),
+        rSym('Burnin Love Burger', 'Burnin Love Burger with jalapeños', '🌶️', '#A30000'),
+        rSym('A.1. Peppercorn', 'A.1. Peppercorn Burger', '🫙', '#A30000'),
+        rSym('Banzai Burger', 'Banzai Burger with pineapple', '🍍', '#A30000'),
+        rSym('Bacon Cheeseburger', 'Classic Bacon Cheeseburger', '🥓', '#A30000'),
+        rSym('Keep It Simple', 'Keep It Simple burger', '✅', '#A30000'),
+        rSym('Create My Own', 'I want to build my own burger', '🛠️', '#A30000'),
+      ]
+    },
+    {
+      ...rSym('Chicken', 'I want a chicken item', '🍗', '#CC0000'),
+      branch: [
+        rSym('Chicken Wings', 'Chicken Wings please', '🍗', '#A30000'),
+        rSym('Crispy Chicken Sandwich', 'Crispy Chicken Sandwich', '🥪', '#A30000'),
+        rSym('Teriyaki Chicken', 'Teriyaki Chicken Sandwich', '🍱', '#A30000'),
+        rSym('Chicken Tenders', 'Crispy Chicken Tenders', '🍟', '#A30000'),
+        rSym('Cluck-a-Doodles', 'Kids Cluck-a-Doodles chicken tenders', '🐔', '#A30000'),
+        rSym('Buffalo Wings', 'Buffalo style wings', '🔥', '#A30000'),
+      ]
+    },
+    {
+      ...rSym('Kids Meals', 'I want a kids meal', '⭐', '#CC0000'),
+      branch: [
+        rSym('Mac It Yours', 'Kids Mac It Yours mac and cheese', '🧀', '#A30000'),
+        rSym('Kids Burger', 'Kids cheeseburger', '🍔', '#A30000'),
+        rSym('Kids Cluck-a-Doodles', 'Kids chicken tenders', '🐔', '#A30000'),
+        rSym('Kids Corn Dog', 'Kids corn dog', '🌭', '#A30000'),
+        rSym('Kids Grilled Cheese', 'Kids grilled cheese sandwich', '🧇', '#A30000'),
+        rSym('Kids Pizza', 'Kids pizza', '🍕', '#A30000'),
+      ]
+    },
+    {
+      ...rSym('Appetizers', 'I want an appetizer', '🧅', '#CC0000'),
+      branch: [
+        rSym('Towering Onion Rings', 'Towering Onion Rings', '🧅', '#A30000'),
+        rSym('Mozzarella Twists', 'Mozzarella Twists', '🧀', '#A30000'),
+        rSym('Pretzel Bites', 'Pretzel Bites with Beer Cheese', '🥨', '#A30000'),
+        rSym('Basket of Fries', 'Basket of Steak Fries', '🍟', '#A30000'),
+        rSym('Chips and Salsa', 'Chips and Salsa', '🫙', '#A30000'),
+        rSym('Campfire Sauce', 'Extra Campfire dipping sauce', '🍯', '#A30000'),
+      ]
+    },
+    {
+      ...rSym('Sides', 'I want a side dish', '🍟', '#CC0000'),
+      branch: [
+        rSym('Bottomless Steak Fries', 'Bottomless Steak Fries please', '🍟', '#A30000'),
+        rSym('Sweet Potato Fries', 'Sweet Potato Fries', '🍠', '#A30000'),
+        rSym('Steamed Broccoli', 'Steamed Broccoli', '🥦', '#A30000'),
+        rSym('Side Salad', 'House Side Salad', '🥗', '#A30000'),
+        rSym('Yukon Chips', 'Yukon Chips', '🥔', '#A30000'),
+        rSym('Coleslaw', 'Coleslaw side', '🥬', '#A30000'),
+        rSym('More Fries Please', 'May I have more fries please', '🙏', '#A30000'),
+      ]
+    },
+    {
+      ...rSym('Salads', 'I want a salad', '🥗', '#CC0000'),
+      branch: [
+        rSym('Avo Cobb O Salad', 'Avo Cobb O salad', '🥑', '#A30000'),
+        rSym('Crispy Chicken Salad', 'Crispy Chicken Tender Salad', '🍗', '#A30000'),
+        rSym('Caesar Salad', 'Caesar salad', '🥬', '#A30000'),
+        rSym('No Dressing', 'No dressing on my salad please', '❌', '#A30000'),
+        rSym('Dressing On Side', 'Dressing on the side please', '🫙', '#A30000'),
+      ]
+    },
+    {
+      ...rSym('Pizza', 'I want pizza', '🍕', '#CC0000'),
+      branch: [
+        rSym('Pepperoni Pizza', 'Pepperoni Donatos pizza', '🍕', '#A30000'),
+        rSym('The Works Pizza', 'The Works Donatos pizza', '🍕', '#A30000'),
+        rSym('Cheese Pizza', 'Just cheese pizza please', '🧀', '#A30000'),
+        rSym('Veggie Pizza', 'Veggie pizza', '🥦', '#A30000'),
+      ]
+    },
+    {
+      ...rSym('Drinks', 'I want a drink', '🥤', '#CC0000'),
+      branch: [
+        rSym('Soft Drink', 'Soft drink please', '🥤', '#A30000'),
+        rSym('Freckled Lemonade', 'Freckled Lemonade', '🍋', '#A30000'),
+        rSym('Milkshake', 'Gourmet Milkshake', '🥛', '#A30000'),
+        rSym('Chocolate Shake', 'Chocolate milkshake', '🍫', '#A30000'),
+        rSym('Vanilla Shake', 'Vanilla milkshake', '🍦', '#A30000'),
+        rSym('Strawberry Shake', 'Strawberry milkshake', '🍓', '#A30000'),
+        rSym('Lemonade', 'Lemonade please', '🍋', '#A30000'),
+        rSym('Water', 'Water please', '💧', '#A30000'),
+        rSym('Juice', 'Juice please', '🧃', '#A30000'),
+      ]
+    },
+    {
+      ...rSym('Desserts', 'I want dessert', '🍰', '#CC0000'),
+      branch: [
+        rSym('Mountain High Mudd Pie', 'Mountain High Mudd Pie', '🥧', '#A30000'),
+        rSym('Cookie Magic Shake', 'Cookie Magic Shake', '🍪', '#A30000'),
+        rSym('Brownie', 'Warm brownie dessert', '🍫', '#A30000'),
+        rSym('Ice Cream', 'Ice cream', '🍦', '#A30000'),
+      ]
+    },
+    rSym('Refill Please', 'May I have a refill please', '🔄', '#CC0000'),
+    rSym('Check Please', 'Check please', '🧾', '#CC0000'),
+    rSym('No Onions', 'No onions please', '🧅', '#CC0000'),
+    rSym('Allergy Alert', 'I have a food allergy', '⚠️', '#CC0000'),
+    rSym('To Go Box', 'May I have a to go box', '📦', '#CC0000'),
+    rSym('More Napkins', 'More napkins please', '🧻', '#CC0000'),
+  ]
+};
+
+// ── McDONALD'S ────────────────────────────────────────────────────────────
+const MCDONALDS_CAT = {
+  id: 'mcdonalds', label: "McDonald's", emoji: '🍟', color: '#DA9B09',
+  symbols: [
+    {
+      ...rSym('Burgers', 'I want a burger', '🍔', '#DA9B09'),
+      branch: [
+        rSym('Big Mac', 'Big Mac please', '🍔', '#C17D00'),
+        rSym('Quarter Pounder', 'Quarter Pounder with Cheese', '🍔', '#C17D00'),
+        rSym('McDouble', 'McDouble please', '🍔', '#C17D00'),
+        rSym('Cheeseburger', 'Cheeseburger please', '🧀', '#C17D00'),
+        rSym('Double Cheeseburger', 'Double Cheeseburger please', '🍔', '#C17D00'),
+        rSym('Hamburger', 'Hamburger please', '🍔', '#C17D00'),
+      ]
+    },
+    {
+      ...rSym('Chicken', 'I want a chicken item', '🍗', '#DA9B09'),
+      branch: [
+        rSym('McNuggets 6 piece', '6 piece McNuggets please', '🍗', '#C17D00'),
+        rSym('McNuggets 10 piece', '10 piece McNuggets please', '🍗', '#C17D00'),
+        rSym('McNuggets 20 piece', '20 piece McNuggets please', '🍗', '#C17D00'),
+        rSym('McChicken', 'McChicken sandwich please', '🥪', '#C17D00'),
+        rSym('Crispy Chicken', 'Crispy Chicken Sandwich', '🥪', '#C17D00'),
+        rSym('Spicy McChicken', 'Spicy McChicken please', '🌶️', '#C17D00'),
+        rSym('Grilled Chicken', 'Grilled Chicken sandwich', '🍗', '#C17D00'),
+      ]
+    },
+    {
+      ...rSym('Dipping Sauce', 'I want dipping sauce', '🫙', '#DA9B09'),
+      branch: [
+        rSym('Sweet and Sour', 'Sweet and Sour sauce', '🍯', '#C17D00'),
+        rSym('BBQ Sauce', 'BBQ dipping sauce', '🫙', '#C17D00'),
+        rSym('Ranch', 'Ranch dipping sauce', '🥛', '#C17D00'),
+        rSym('Honey Mustard', 'Honey Mustard sauce', '🍯', '#C17D00'),
+        rSym('Buffalo Sauce', 'Buffalo dipping sauce', '🔥', '#C17D00'),
+        rSym('No Sauce', 'No dipping sauce please', '❌', '#C17D00'),
+      ]
+    },
+    {
+      ...rSym('Happy Meal', 'I want a Happy Meal', '😊', '#DA9B09'),
+      branch: [
+        rSym('McNuggets Happy Meal', 'McNuggets Happy Meal', '🍗', '#C17D00'),
+        rSym('Cheeseburger Happy Meal', 'Cheeseburger Happy Meal', '🍔', '#C17D00'),
+        rSym('Hamburger Happy Meal', 'Hamburger Happy Meal', '🍔', '#C17D00'),
+        rSym('Apple Slices', 'Apple slices in my Happy Meal', '🍎', '#C17D00'),
+        rSym('Fries in Happy Meal', 'Fries in my Happy Meal', '🍟', '#C17D00'),
+        rSym('Milk', 'Milk in my Happy Meal', '🥛', '#C17D00'),
+        rSym('Apple Juice', 'Apple juice in my Happy Meal', '🧃', '#C17D00'),
+      ]
+    },
+    {
+      ...rSym('Breakfast', 'I want breakfast', '🌅', '#DA9B09'),
+      branch: [
+        rSym('Egg McMuffin', 'Egg McMuffin please', '🥚', '#C17D00'),
+        rSym('Sausage McMuffin', 'Sausage McMuffin please', '🥩', '#C17D00'),
+        rSym('Hotcakes', 'Hotcakes please', '🥞', '#C17D00'),
+        rSym('Hash Browns', 'Hash Browns please', '🥔', '#C17D00'),
+        rSym('Sausage Biscuit', 'Sausage Biscuit please', '🫓', '#C17D00'),
+        rSym('McGriddles', 'McGriddles please', '🥞', '#C17D00'),
+        rSym('Breakfast Burrito', 'Breakfast Burrito please', '🌯', '#C17D00'),
+      ]
+    },
+    {
+      ...rSym('French Fries', 'I want french fries', '🍟', '#DA9B09'),
+      branch: [
+        rSym('Small Fries', 'Small fries please', '🤏', '#C17D00'),
+        rSym('Medium Fries', 'Medium fries please', '✋', '#C17D00'),
+        rSym('Large Fries', 'Large fries please', '👐', '#C17D00'),
+        rSym('No Salt', 'No salt on my fries please', '🚫', '#C17D00'),
+      ]
+    },
+    {
+      ...rSym('Drinks', 'I want a drink', '🥤', '#DA9B09'),
+      branch: [
+        rSym('Small Drink', 'Small drink please', '🤏', '#C17D00'),
+        rSym('Medium Drink', 'Medium drink please', '✋', '#C17D00'),
+        rSym('Large Drink', 'Large drink please', '👐', '#C17D00'),
+        rSym('Coke', 'Coca Cola please', '🥤', '#C17D00'),
+        rSym('Sprite', 'Sprite please', '🥤', '#C17D00'),
+        rSym('Orange Juice', 'Orange juice please', '🍊', '#C17D00'),
+        rSym('Milk', 'Milk please', '🥛', '#C17D00'),
+        rSym('Water', 'Water please', '💧', '#C17D00'),
+        rSym('Sweet Tea', 'Sweet tea please', '🍵', '#C17D00'),
+        rSym('McCafe Coffee', 'McCafe coffee please', '☕', '#C17D00'),
+      ]
+    },
+    {
+      ...rSym('McCafe', 'I want a McCafe drink', '☕', '#DA9B09'),
+      branch: [
+        rSym('Iced Coffee', 'Iced coffee please', '☕', '#C17D00'),
+        rSym('Frappe', 'Frappe please', '🥤', '#C17D00'),
+        rSym('Latte', 'Latte please', '☕', '#C17D00'),
+        rSym('Hot Chocolate', 'Hot chocolate please', '🍫', '#C17D00'),
+        rSym('Mocha', 'Mocha please', '☕', '#C17D00'),
+        rSym('Smoothie', 'Smoothie please', '🥤', '#C17D00'),
+      ]
+    },
+    {
+      ...rSym('Desserts', 'I want dessert', '🍦', '#DA9B09'),
+      branch: [
+        rSym('McFlurry', 'McFlurry please', '🍦', '#C17D00'),
+        rSym('Oreo McFlurry', 'Oreo McFlurry please', '🍪', '#C17D00'),
+        rSym('Ice Cream Cone', 'Ice cream cone please', '🍦', '#C17D00'),
+        rSym('Apple Pie', 'Baked apple pie please', '🥧', '#C17D00'),
+        rSym('Cookies', 'Chocolate chip cookies', '🍪', '#C17D00'),
+      ]
+    },
+    rSym('No Pickles', 'No pickles please', '🥒', '#DA9B09'),
+    rSym('No Onions', 'No onions please', '🧅', '#DA9B09'),
+    rSym('Ketchup', 'Extra ketchup please', '🍅', '#DA9B09'),
+    rSym('To Go', 'To go please', '🥡', '#DA9B09'),
+    rSym('For Here', 'For here please', '🍽️', '#DA9B09'),
+    rSym('Allergy Alert', 'I have a food allergy', '⚠️', '#DA9B09'),
+    rSym('Receipt Please', 'May I have a receipt please', '🧾', '#DA9B09'),
+  ]
+};
+
+// Add restaurant categories if not already present
+if (!VOCAB.categories.find(c => c.id === 'red_robin')) {
+  VOCAB.categories.push(RED_ROBIN_CAT);
+  saveVocab();
+}
+if (!VOCAB.categories.find(c => c.id === 'mcdonalds')) {
+  VOCAB.categories.push(MCDONALDS_CAT);
+  saveVocab();
+}
+
+// Also add both to the Library so users can install them from the Library screen
+if (!LIBRARY_PACKS.find(p => p.name === "Red Robin Menu")) {
+  LIBRARY_PACKS.unshift({
+    name: "Red Robin Menu", emoji: "🍔", color: "#CC0000",
+    tier: "Daily Life", grade: "All ages",
+    research: "Community outing vocabulary — Beukelman & Light (2020) restaurant settings",
+    desc: "Full Red Robin menu with branching navigation. Burgers, chicken, kids meals, sides, drinks, and desserts — all with drill-down choices.",
+    symbols: RED_ROBIN_CAT.symbols.map(s => ({...s}))
+  });
+}
+if (!LIBRARY_PACKS.find(p => p.name === "McDonald's Menu")) {
+  LIBRARY_PACKS.unshift({
+    name: "McDonald's Menu", emoji: "🍟", color: "#DA9B09",
+    tier: "Daily Life", grade: "All ages",
+    research: "Community outing vocabulary — Beukelman & Light (2020) fast food settings",
+    desc: "Full McDonald's menu with branching navigation. Burgers, McNuggets, Happy Meals, breakfast, drinks, McCafe, and desserts.",
+    symbols: MCDONALDS_CAT.symbols.map(s => ({...s}))
+  });
+}
+
+function showQR() {
+  document.getElementById('qr-overlay').style.display = 'flex';
+  document.getElementById('qr-modal').style.display = 'block';
+  document.getElementById('qr-code').innerHTML = '<p style="color:#94A3B8;font-size:14px;font-family:var(--font);">Choose an option above to generate QR code</p>';
+  document.getElementById('qr-url').style.display = 'none';
+  currentQRLink = '';
+}
+
+function closeQR() {
+  document.getElementById('qr-overlay').style.display = 'none';
+  document.getElementById('qr-modal').style.display = 'none';
+}
+
+function generateQR(mode) {
+  // Style active button
+  document.getElementById('qr-btn-cat').style.background = mode === 'category' ? '#EFF6FF' : '#F8FAFC';
+  document.getElementById('qr-btn-cat').style.borderColor = mode === 'category' ? '#3B82F6' : '#E2E8F0';
+  document.getElementById('qr-btn-all').style.background = mode === 'all' ? '#EFF6FF' : '#F8FAFC';
+  document.getElementById('qr-btn-all').style.borderColor = mode === 'all' ? '#3B82F6' : '#E2E8F0';
+
+  // Build lean pack (no heavy SVG data for built-in symbols)
+  let pack;
+  if (mode === 'category') {
+    const cat = VOCAB.categories[currentCat];
+    pack = { v:1, mode:'category', categories: [leanCategory(cat)] };
+    document.getElementById('qr-desc').textContent =
+      `Scanning loads "${cat.label}" vocabulary on any device running TalkTiles.`;
+  } else {
+    pack = { v:1, mode:'all', categories: VOCAB.categories.map(leanCategory) };
+    document.getElementById('qr-desc').textContent =
+      'Scanning loads ALL categories on any device running TalkTiles.';
+  }
+
+  // Encode as URL-safe base64
+  let encoded;
+  try {
+    encoded = btoa(unescape(encodeURIComponent(JSON.stringify(pack))));
+  } catch(e) {
+    alert('This pack is too large for a QR code. Try "This Category Only" instead, or remove uploaded images.');
+    return;
+  }
+
+  // Build the full URL
+  const base = window.location.href.split('?')[0].split('#')[0];
+  const url = base + '?pack=' + encoded;
+  currentQRLink = url;
+
+  if (url.length > 2800) {
+    document.getElementById('qr-code').innerHTML =
+      '<p style="color:#EF4444;font-size:13px;padding:12px;font-family:var(--font);">⚠️ Pack too large for QR code.<br>Use "This Category Only" or share the link directly instead.</p>';
+    document.getElementById('qr-url').style.display = 'block';
+    document.getElementById('qr-url').textContent = url;
+    return;
+  }
+
+  // Generate QR code
+  document.getElementById('qr-code').innerHTML = '';
+  try {
+    new QRCode(document.getElementById('qr-code'), {
+      text: url,
+      width: 220, height: 220,
+      colorDark: '#1E293B', colorLight: '#FFFFFF',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch(e) {
+    document.getElementById('qr-code').innerHTML =
+      '<p style="color:#EF4444;font-size:13px;font-family:var(--font);">Could not generate QR. Try the Copy Link button instead.</p>';
+  }
+
+  document.getElementById('qr-url').style.display = 'block';
+  document.getElementById('qr-url').textContent = url;
+}
+
+function leanCategory(cat) {
+  return {
+    id: cat.id, label: cat.label, color: cat.color, emoji: cat.emoji,
+    symbols: cat.symbols.map(sym => {
+      const lean = { id: sym.id, label: sym.label, speech: sym.speech };
+      // Keep image URLs (web URLs only, skip large data URLs from uploads)
+      if (sym.imgUrl && !sym.imgUrl.startsWith('data:')) lean.imgUrl = sym.imgUrl;
+      // Keep emoji reference for custom emoji symbols
+      if (sym.emoji) lean.emoji = sym.emoji;
+      // Keep SVG only if it's short (custom emoji SVGs, not full illustrated ones)
+      if (sym.svg && sym.svg.length < 300) lean.svg = sym.svg;
+      return lean;
+    })
+  };
+}
+
+function copyQRLink() {
+  if (!currentQRLink) return;
+  navigator.clipboard.writeText(currentQRLink).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => { btn.textContent = '📋 Copy Link'; }, 2000);
+  }).catch(() => {
+    prompt('Copy this link:', currentQRLink);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUTO-IMPORT FROM URL — triggered when student scans QR code
+// ═══════════════════════════════════════════════════════════════════════════
+function checkURLForPack() {
+  const params = new URLSearchParams(window.location.search);
+  const packed = params.get('pack');
+  if (!packed) return;
+
+  try {
+    const data = JSON.parse(decodeURIComponent(escape(atob(packed))));
+    if (!data.categories) return;
+
+    if (data.mode === 'category' && data.categories.length === 1) {
+      // Merge single category — add it if not already present
+      const incoming = data.categories[0];
+      // Restore built-in SVGs by matching symbol IDs
+      incoming.symbols = incoming.symbols.map(sym => {
+        if (!sym.svg && !sym.imgUrl && S[sym.id]) sym.svg = S[sym.id];
+        if (!sym.svg && sym.emoji) {
+          sym.svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${incoming.color||'#6366F1'}"/><text x="50" y="68" text-anchor="middle" font-size="52">${sym.emoji}</text></svg>`;
+        }
+        return sym;
+      });
+      // Replace existing category with same id, or add new
+      const existing = VOCAB.categories.findIndex(c => c.id === incoming.id);
+      if (existing >= 0) {
+        VOCAB.categories[existing] = incoming;
+        currentCat = existing;
+      } else {
+        VOCAB.categories.push(incoming);
+        currentCat = VOCAB.categories.length - 1;
+      }
+      showToast(`📲 "${incoming.label}" loaded from QR code!`);
+    } else {
+      // Full vocab replace — confirm first
+      if (confirm(`📲 Load shared vocabulary pack with ${data.categories.length} categories? This will replace your current vocabulary.`)) {
+        // Restore built-in SVGs
+        data.categories.forEach(cat => {
+          cat.symbols = cat.symbols.map(sym => {
+            if (!sym.svg && !sym.imgUrl && S[sym.id]) sym.svg = S[sym.id];
+            return sym;
+          });
+        });
+        VOCAB.categories = data.categories;
+        currentCat = 0;
+        showToast('📲 Full vocabulary pack loaded from QR code!');
+      }
+    }
+
+    saveVocab();
+    render();
+    // Clean URL without reloading
+    window.history.replaceState({}, '', window.location.pathname);
+  } catch(e) {
+    console.warn('Could not parse QR pack:', e);
+  }
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1E293B;color:white;padding:12px 20px;border-radius:50px;font-family:var(--font-display);font-weight:800;font-size:14px;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,0.3);white-space:nowrap;animation:fadeIn 0.3s ease;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+loadVocab();
+render();
+checkURLForPack(); // Auto-import if opened via QR code
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PWA — Service Worker (enables offline use & "Add to Home Screen")
+// ═══════════════════════════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'talktiles-v1';
+    self.addEventListener('install', e => {
+      self.skipWaiting();
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll([self.location.href])));
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(clients.claim());
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(
+        caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+          return res;
+        }))
+      );
+    });
+  `;
+  const blob = new Blob([swCode], {type: 'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+
+// PWA Install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show a subtle install nudge after 10 seconds
+  setTimeout(() => {
+    if (deferredPrompt) {
+      const nudge = document.createElement('div');
+      nudge.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1E293B;color:white;padding:12px 20px;border-radius:50px;font-family:var(--font-display);font-weight:800;font-size:14px;z-index:200;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,0.3);cursor:pointer;white-space:nowrap;';
+      nudge.innerHTML = '📲 Install TalkTiles as an app &nbsp;<span style="opacity:0.6;font-size:18px;">×</span>';
+      nudge.onclick = () => { deferredPrompt.prompt(); nudge.remove(); };
+      nudge.querySelector('span').onclick = e => { e.stopPropagation(); nudge.remove(); };
+      document.body.appendChild(nudge);
+      setTimeout(() => nudge.remove(), 8000);
+    }
+  }, 10000);
+});
+</script>
+<!-- ═══════════════════════════════════════════════════════════════════
+     FOCUS MODE — Clean 2-5 choice presentation screen
+═══════════════════════════════════════════════════════════════════ -->
+
+<!-- Setup Screen -->
+<div id="focus-setup-screen">
+  <div id="focus-setup-header">
+    <div id="focus-setup-title">⭐ Focus Mode</div>
+    <button class="focus-close-btn" onclick="closeFocusSetup()">✕ Close</button>
+  </div>
+  <div id="focus-setup-body">
+
+    <!-- Saved Scenes -->
+    <div class="focus-section">
+      <div class="focus-section-title">📋 Quick Scenes — Tap to Launch</div>
+      <div class="focus-scene-list" id="focus-scene-list"></div>
+    </div>
+
+    <!-- Build Custom Focus -->
+    <div class="focus-section">
+      <div class="focus-section-title">🛠️ Build a Custom Focus</div>
+      <input class="focus-name-input" id="focus-custom-name" placeholder="Name this scene… e.g. Bedtime Choices">
+      <div style="font-family:var(--font-display);font-weight:800;font-size:14px;color:#64748B;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Pick a category</div>
+      <select class="focus-cat-select" id="focus-cat-select" onchange="renderFocusPicker()"></select>
+      <div class="focus-selected-count" id="focus-selected-count">Select 2–5 symbols below</div>
+      <div class="focus-picker-grid" id="focus-picker-grid"></div>
+      <button class="focus-launch-big" id="focus-launch-btn" onclick="launchFocus()" disabled>
+        ⭐ Launch Focus Mode
+      </button>
+      <button style="width:100%;margin-top:10px;background:rgba(16,185,129,0.15);border:2px solid #10B981;border-radius:14px;color:#10B981;font-family:var(--font-display);font-weight:800;font-size:16px;padding:14px;cursor:pointer;" onclick="saveAndLaunchFocus()">
+        💾 Save Scene &amp; Launch
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Play Screen -->
+<div id="focus-play-screen">
+  <div id="focus-play-header">
+    <div id="focus-play-title">⭐ Focus Mode</div>
+    <button id="focus-exit-btn" onclick="exitFocus()">✕ Exit</button>
+  </div>
+  <div id="focus-play-sentence" class="empty">Tap a picture to speak…</div>
+  <div id="focus-controls">
+    <button class="focus-ctrl-btn" onclick="focusClear()">✕ Clear</button>
+    <button class="focus-ctrl-btn" onclick="focusBack()">⌫ Delete</button>
+    <button id="focus-speak-btn" onclick="focusSpeak()">🔊 Speak</button>
+  </div>
+  <div id="focus-grid"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     COMMUNITY LIBRARY — 25 Research-Backed Vocabulary Packs
+═══════════════════════════════════════════════════════════════════ -->
+<div id="library-screen">
+  <div id="lib-header">
+    <div id="lib-header-top">
+      <div id="lib-title">🌐 Community Library</div>
+      <button id="lib-close" onclick="closeLibrary()">✕ Close</button>
+    </div>
+    <div id="lib-search-row" style="margin-top:8px;">
+      <input id="lib-search" type="text" placeholder="🔍 Search 25 packs… Financial Literacy, Water Cycle…" autocorrect="off" oninput="filterLibrary()">
+    </div>
+    <div class="grade-chips" id="cat-filter-chips" style="margin-top:8px;">
+      <button class="grade-chip active" onclick="filterCat(this,'All')">All 25</button>
+      <button class="grade-chip" onclick="filterCat(this,'Daily Life')">🏠 Daily Life</button>
+      <button class="grade-chip" onclick="filterCat(this,'Social')">💛 Social & SEL</button>
+      <button class="grade-chip" onclick="filterCat(this,'Academic')">📚 Academic</button>
+      <button class="grade-chip" onclick="filterCat(this,'School')">🏫 School</button>
+      <button class="grade-chip" onclick="filterCat(this,'Transition')">🎓 Transition</button>
+    </div>
+    <div id="lib-apikey-row" style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+      <input id="lib-apikey" type="password" class="form-input" placeholder="🤖 Optional: Paste Anthropic API key for AI generation" style="flex:1;font-size:13px;background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);color:white;border-radius:10px;padding:8px 12px;" autocomplete="off">
+      <button onclick="testAndSaveApiKey()" style="background:#6366F1;border:none;border-radius:10px;color:white;font-family:var(--font-display);font-weight:800;font-size:12px;padding:8px 12px;cursor:pointer;white-space:nowrap;">Save Key</button>
+    </div>
+  </div>
+  <div id="lib-body">
+    <div id="lib-ai-result"></div>
+    <div id="lib-pack-count" class="lib-section-title" style="margin-bottom:8px;"></div>
+    <div id="lib-pack-list"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     BRANCH NAVIGATION PANEL — Drill-down choices
+═══════════════════════════════════════════════════ -->
+<div id="branch-overlay" onclick="closeBranch()"></div>
+<div id="branch-panel">
+  <div id="branch-header">
+    <div id="branch-breadcrumb"></div>
+    <div id="branch-title-row">
+      <button id="branch-back" onclick="branchBack()">← Back</button>
+      <div id="branch-title">Choose an option</div>
+    </div>
+  </div>
+  <div id="branch-grid"></div>
+</div>
+
+<!-- QR CODE MODAL -->
+<div id="qr-overlay" onclick="closeQR()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;"></div>
+<div id="qr-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border-radius:24px;padding:28px 24px 24px;z-index:201;width:90%;max-width:380px;box-shadow:0 12px 60px rgba(0,0,0,0.3);text-align:center;">
+  <div style="font-size:32px;margin-bottom:6px;">📲</div>
+  <h2 style="font-family:var(--font-display);font-weight:900;font-size:22px;color:#1E293B;margin-bottom:4px;">Share This Vocabulary</h2>
+  <p id="qr-desc" style="font-size:13px;color:#64748B;margin-bottom:18px;font-family:var(--font);">Students scan this QR code to instantly load this vocabulary pack on any device.</p>
+
+  <div style="display:flex;gap:8px;margin-bottom:18px;justify-content:center;">
+    <button onclick="generateQR('category')" id="qr-btn-cat" style="flex:1;font-family:var(--font-display);font-weight:800;font-size:13px;border:2px solid #3B82F6;border-radius:10px;padding:10px 8px;cursor:pointer;background:#EFF6FF;color:#1D4ED8;">This Category Only</button>
+    <button onclick="generateQR('all')" id="qr-btn-all" style="flex:1;font-family:var(--font-display);font-weight:800;font-size:13px;border:2px solid #E2E8F0;border-radius:10px;padding:10px 8px;cursor:pointer;background:#F8FAFC;color:#475569;">All Categories</button>
+  </div>
+
+  <div id="qr-code" style="display:flex;justify-content:center;align-items:center;min-height:200px;background:#F8FAFC;border-radius:16px;margin-bottom:16px;padding:16px;">
+    <p style="color:#94A3B8;font-size:14px;font-family:var(--font);">Choose an option above to generate QR code</p>
+  </div>
+
+  <div id="qr-url" style="display:none;background:#F1F5F9;border-radius:10px;padding:10px 14px;margin-bottom:14px;word-break:break-all;font-size:11px;color:#475569;font-family:monospace;text-align:left;"></div>
+
+  <div style="display:flex;gap:8px;">
+    <button onclick="copyQRLink()" id="copy-btn" style="flex:1;font-family:var(--font-display);font-weight:800;font-size:14px;background:#10B981;color:white;border:none;border-radius:12px;padding:12px;cursor:pointer;">📋 Copy Link</button>
+    <button onclick="closeQR()" style="flex:1;font-family:var(--font-display);font-weight:800;font-size:14px;background:#E2E8F0;color:#374151;border:none;border-radius:12px;padding:12px;cursor:pointer;">Close</button>
+  </div>
+
+  <p style="font-size:11px;color:#94A3B8;margin-top:12px;font-family:var(--font);">💡 Project this on your classroom screen or share the link directly</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+</body>
+</html>
