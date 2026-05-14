@@ -693,6 +693,24 @@ body.size-l #add-sym-btn { min-height:200px;font-size:18px; }
   content:'▶';position:absolute;bottom:5px;right:7px;
   font-size:9px;color:#818CF8;font-weight:900;
 }
+/* ── SHARE MODAL ── */
+#share-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;padding:20px;}
+#share-modal.open{display:flex;}
+#share-box{background:#1E293B;border-radius:24px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+#share-box h2{font-family:var(--font-display);font-weight:900;font-size:22px;color:white;}
+.share-sub{font-size:15px;color:#64748B;line-height:1.5;}
+.share-field{display:flex;flex-direction:column;gap:6px;}
+.share-label{font-family:var(--font-display);font-weight:800;font-size:14px;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;}
+.share-input{font-family:var(--font-display);font-size:16px;font-weight:700;background:#0F172A;border:2px solid rgba(255,255,255,0.12);border-radius:12px;padding:12px 16px;color:white;outline:none;}
+.share-input:focus{border-color:#6366F1;}
+.share-row{display:flex;gap:12px;}
+.share-row .share-field{flex:1;}
+#share-submit{background:#10B981;border:none;border-radius:14px;color:white;font-family:var(--font-display);font-weight:900;font-size:18px;padding:16px;cursor:pointer;margin-top:4px;}
+#share-submit:disabled{background:#334155;color:#475569;cursor:not-allowed;}
+#share-cancel{background:rgba(255,255,255,0.06);border:none;border-radius:14px;color:#94A3B8;font-family:var(--font-display);font-weight:800;font-size:16px;padding:14px;cursor:pointer;}
+#share-status{font-family:var(--font-display);font-weight:800;font-size:15px;text-align:center;padding:10px;border-radius:10px;display:none;}
+#share-status.success{background:rgba(16,185,129,0.2);color:#10B981;display:block;}
+#share-status.error{background:rgba(239,68,68,0.2);color:#EF4444;display:block;}
 </style>
 </head>
 <body>
@@ -711,6 +729,7 @@ body.size-l #add-sym-btn { min-height:200px;font-size:18px; }
   <label class="topbar-btn" style="cursor:pointer;">
     ⬇ Import<input type="file" accept=".json" style="display:none" onchange="importVocab(event)">
   </label>
+<button class="topbar-btn" onclick="openShareModal()" style="background:#F59E0B;color:#1E293B;">☁️ Share</button>
   <button class="topbar-btn" id="edit-toggle" onclick="toggleEditMode()">✏️ Edit</button>
 </div>
 
@@ -2789,5 +2808,68 @@ window.addEventListener('beforeinstallprompt', e => {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+<!-- SHARE WITH COMMUNITY MODAL -->
+<div id="share-modal">
+  <div id="share-box">
+    <h2>☁️ Share with Community</h2>
+    <div class="share-sub">Your current vocabulary will be submitted for review. Once approved, teachers worldwide can browse and install it from the Community Library.</div>
+    <div class="share-field">
+      <div class="share-label">Module Title *</div>
+      <input class="share-input" id="sh-title" placeholder="e.g. Waterfall Vocabulary">
+    </div>
+    <div class="share-row">
+      <div class="share-field">
+        <div class="share-label">Subject</div>
+        <select class="share-input" id="sh-subject"><option>General Communication</option><option>Science</option><option>Math</option><option>Social Studies</option><option>Language Arts</option><option>Social Skills</option><option>Life Skills</option><option>Other</option></select>
+      </div>
+      <div class="share-field">
+        <div class="share-label">Grade Level</div>
+        <select class="share-input" id="sh-grade"><option>All Ages</option><option>Pre-K / K</option><option>Grades 1-3</option><option>Grades 4-5</option><option>Grades 6-8</option><option>Grades 9-12</option><option>Adult</option></select>
+      </div>
+    </div>
+    <div class="share-row">
+      <div class="share-field">
+        <div class="share-label">Language</div>
+        <select class="share-input" id="sh-language"><option>English</option><option>Spanish</option><option>French</option><option>Portuguese</option><option>Other</option></select>
+      </div>
+      <div class="share-field">
+        <div class="share-label">Country / Region</div>
+        <input class="share-input" id="sh-region" placeholder="e.g. Canada, Texas">
+      </div>
+    </div>
+    <div class="share-field">
+      <div class="share-label">Your Name (optional)</div>
+      <input class="share-input" id="sh-author" placeholder="e.g. Ms. Johnson, Toronto">
+    </div>
+    <div class="share-field">
+      <div class="share-label">Description</div>
+      <input class="share-input" id="sh-desc" placeholder="What is this module for?">
+    </div>
+    <div id="share-status"></div>
+    <button id="share-submit" onclick="submitToSupabase()">☁️ Submit for Review</button>
+    <button id="share-cancel" onclick="closeShareModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://dhvdlsnlxkoptszktxpo.supabase.co';
+const SUPABASE_KEY='sb_publishable_jSI1NDTguKSLH_nnzvNL-Q_acXFCRto';
+function sbHeaders(){return{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'};}
+function openShareModal(){document.getElementById('share-modal').classList.add('open');document.getElementById('share-status').className='share-status';document.getElementById('share-status').textContent='';document.getElementById('share-submit').disabled=false;document.getElementById('share-submit').textContent='☁️ Submit for Review';}
+function closeShareModal(){document.getElementById('share-modal').classList.remove('open');}
+async function submitToSupabase(){
+  const title=document.getElementById('sh-title').value.trim();
+  if(!title){showShareStatus('error','⚠️ Please enter a module title.');return;}
+  const btn=document.getElementById('share-submit');
+  btn.disabled=true;btn.textContent='⏳ Submitting…';
+  const payload={title,subject:document.getElementById('sh-subject').value,grade_band:document.getElementById('sh-grade').value,language:document.getElementById('sh-language').value,region:document.getElementById('sh-region').value||null,author_name:document.getElementById('sh-author').value||'Anonymous',description:document.getElementById('sh-desc').value||null,pack_data:VOCAB,status:'pending'};
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/modules',{method:'POST',headers:sbHeaders(),body:JSON.stringify(payload)});
+    if(res.ok||res.status===201){showShareStatus('success','✅ Submitted! Your module is under review. Thank you!');btn.textContent='✅ Submitted!';setTimeout(closeShareModal,3000);}
+    else{showShareStatus('error','❌ Submission failed. Please try again.');btn.disabled=false;btn.textContent='☁️ Submit for Review';}
+  }catch(e){showShareStatus('error','❌ Network error. Check your connection.');btn.disabled=false;btn.textContent='☁️ Submit for Review';}
+}
+function showShareStatus(type,msg){const el=document.getElementById('share-status');el.className='share-status '+type;el.textContent=msg;}
+</script>
 </body>
 </html>
