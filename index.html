@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TalkTiles">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1E293B">
+<title>TalkTiles — Free Picture Communication</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F0F4FF;--card:#fff;--radius:20px;--shadow:0 4px 18px rgba(0,0,0,0.13);--font:'Nunito Sans',sans-serif;--font-display:'Nunito',sans-serif;--core-h:116px;--top-h:68px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--font);}
+body{display:flex;flex-direction:column;}
+#topbar{height:var(--top-h);background:#1E293B;display:flex;align-items:center;padding:0 14px;gap:8px;flex-shrink:0;overflow-x:auto;}
+#topbar-title{font-family:var(--font-display);font-weight:900;font-size:22px;color:white;flex-shrink:0;}
+.topbar-btn{background:rgba(255,255,255,0.12);border:none;border-radius:12px;color:white;font-family:var(--font-display);font-weight:800;font-size:15px;padding:10px 16px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.topbar-btn:active{background:rgba(255,255,255,0.25);}
+.topbar-btn.edit-active{background:#F59E0B;color:#1E293B;}
+.size-btn{background:none;border:none;border-radius:8px;color:rgba(255,255,255,0.55);font-family:var(--font-display);font-weight:900;font-size:15px;padding:6px 12px;cursor:pointer;}
+.size-btn.active{background:rgba(255,255,255,0.2);color:white;}
+body.size-s #symbol-area{grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;padding:10px;}
+body.size-s .sym-btn{min-height:110px;padding:8px 4px 10px;}
+body.size-s .sym-btn svg,body.size-s .sym-btn img{width:68px;height:68px;}
+body.size-s .sym-label{font-size:12px;}
+body.size-s #core-strip{height:78px;}
+body.size-s .core-btn svg,body.size-s .core-btn img{width:50px;height:50px;}
+body.size-s .core-label{font-size:11px;}
+body.size-m #symbol-area{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;padding:14px;}
+body.size-m .sym-btn{min-height:160px;}
+body.size-m .sym-btn svg,body.size-m .sym-btn img{width:96px;height:96px;}
+body.size-m .sym-label{font-size:16px;}
+body.size-l #symbol-area{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;padding:16px;}
+body.size-l .sym-btn{min-height:200px;padding:14px 10px 16px;}
+body.size-l .sym-btn svg,body.size-l .sym-btn img{width:130px;height:130px;}
+body.size-l .sym-label{font-size:20px;margin-top:10px;}
+body.size-l #core-strip{height:136px;}
+body.size-l .core-btn svg,body.size-l .core-btn img{width:84px;height:84px;}
+body.size-l .core-label{font-size:15px;}
+#sentence-area{background:#0F172A;padding:12px 12px 8px;flex-shrink:0;min-height:110px;}
+#sentence-chips{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;padding-bottom:8px;scrollbar-width:none;min-height:50px;align-items:center;}
+#sentence-chips::-webkit-scrollbar{display:none;}
+.chip{background:rgba(255,255,255,0.15);border-radius:50px;padding:9px 18px;color:white;font-family:var(--font-display);font-weight:800;font-size:18px;white-space:nowrap;cursor:pointer;flex-shrink:0;}
+.chip:active{background:rgba(255,100,100,0.4);}
+#sentence-controls{display:flex;gap:8px;align-items:center;padding-top:4px;}
+.sentence-btn{background:none;border:none;cursor:pointer;border-radius:10px;padding:6px 12px;font-family:var(--font-display);font-weight:800;font-size:16px;color:rgba(255,255,255,0.65);}
+.sentence-btn:active{color:white;}
+#speak-btn{background:#10B981;color:white;font-size:17px;padding:9px 22px;border-radius:50px;margin-left:auto;}
+#speak-btn:active{background:#059669;}
+#speak-btn.speaking{background:#F59E0B;}
+.placeholder-text{color:rgba(255,255,255,0.3);font-size:18px;font-style:italic;padding-left:4px;}
+#cat-nav{height:72px;background:#fff;border-bottom:3px solid #E2E8F0;display:flex;align-items:center;overflow-x:auto;gap:6px;padding:0 10px;flex-shrink:0;scrollbar-width:none;}
+#cat-nav::-webkit-scrollbar{display:none;}
+.cat-tab{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:50px;cursor:pointer;font-family:var(--font-display);font-weight:800;font-size:17px;white-space:nowrap;border:none;background:none;color:#64748B;flex-shrink:0;}
+.cat-tab.active{color:white;}
+.cat-emoji{font-size:22px;}
+#symbol-area{flex:1;overflow-y:auto;padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;align-content:start;}
+.sym-btn{background:var(--card);border:3px solid transparent;border-radius:var(--radius);cursor:pointer;display:flex;flex-direction:column;align-items:center;padding:12px 8px 14px;box-shadow:var(--shadow);transition:transform 0.1s;position:relative;min-height:160px;user-select:none;}
+.sym-btn:active{transform:scale(0.94);box-shadow:none;}
+.sym-btn.edit-mode{border-style:dashed;cursor:grab;}
+.sym-btn svg,.sym-btn img{width:96px;height:96px;object-fit:contain;border-radius:12px;flex-shrink:0;}
+.sym-label{font-family:var(--font-display);font-weight:800;font-size:16px;color:#1E293B;text-align:center;margin-top:8px;line-height:1.2;max-width:100%;word-break:break-word;}
+.sym-delete{position:absolute;top:-10px;right:-10px;background:#EF4444;color:white;border:none;border-radius:50%;width:30px;height:30px;font-size:17px;cursor:pointer;display:none;align-items:center;justify-content:center;font-weight:900;z-index:10;}
+.edit-mode .sym-delete{display:flex;}
+#add-sym-btn{background:rgba(99,102,241,0.07);border:3px dashed #A5B4FC;border-radius:var(--radius);min-height:160px;display:none;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;color:#6366F1;font-family:var(--font-display);font-weight:800;font-size:16px;}
+#core-strip{height:var(--core-h);background:#1E293B;display:flex;align-items:center;gap:8px;padding:0 10px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+#core-strip::-webkit-scrollbar{display:none;}
+.core-btn{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;padding:6px;border:none;background:none;}
+.core-btn svg,.core-btn img{width:68px;height:68px;border-radius:12px;display:block;}
+.core-label{font-family:var(--font-display);font-weight:800;font-size:13px;color:rgba(255,255,255,0.85);text-align:center;}
+#edit-panel{position:fixed;bottom:0;left:0;right:0;background:white;border-radius:24px 24px 0 0;padding:20px 20px 36px;box-shadow:0 -8px 40px rgba(0,0,0,0.2);transform:translateY(110%);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:100;max-height:70vh;overflow-y:auto;}
+#edit-panel.open{transform:translateY(0);}
+#edit-panel h2{font-family:var(--font-display);font-weight:900;font-size:24px;color:#1E293B;margin-bottom:16px;}
+.edit-section{background:#F8FAFC;border-radius:14px;padding:18px;margin-bottom:12px;}
+.edit-section h3{font-family:var(--font-display);font-weight:800;font-size:16px;color:#475569;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;}
+.form-row{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.form-label{font-family:var(--font-display);font-weight:800;font-size:15px;color:#374151;}
+.form-input{font-family:var(--font);font-size:17px;border:2px solid #E2E8F0;border-radius:10px;padding:12px 16px;outline:none;transition:border-color 0.15s;}
+.form-input:focus{border-color:#6366F1;}
+.edit-btn{font-family:var(--font-display);font-weight:800;font-size:17px;border:none;border-radius:12px;padding:14px 20px;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;justify-content:center;margin-top:6px;}
+.btn-indigo{background:#6366F1;color:white;}
+.btn-green{background:#10B981;color:white;}
+.btn-red{background:#EF4444;color:white;}
+.btn-gray{background:#E2E8F0;color:#374151;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:99;display:none;}
+.overlay.show{display:block;}
+#library-screen{position:fixed;inset:0;background:#0F172A;z-index:150;display:none;flex-direction:column;overflow:hidden;}
+#library-screen.open{display:flex;}
+#lib-header{background:#1E293B;padding:16px 18px 14px;flex-shrink:0;}
+#lib-header-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+#lib-title{font-family:var(--font-display);font-weight:900;font-size:22px;color:white;flex:1;}
+#lib-close{background:rgba(255,255,255,0.12);border:none;border-radius:12px;color:white;padding:10px 16px;font-family:var(--font-display);font-weight:800;font-size:16px;cursor:pointer;}
+#lib-search-row{display:flex;gap:8px;}
+#lib-search{flex:1;font-family:var(--font-display);font-weight:700;font-size:17px;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px 18px;color:white;outline:none;}
+#lib-search::placeholder{color:rgba(255,255,255,0.4);}
+#lib-search:focus{border-color:#6366F1;}
+#lib-search-btn{background:#6366F1;border:none;border-radius:12px;color:white;font-family:var(--font-display);font-weight:800;font-size:16px;padding:13px 20px;cursor:pointer;white-space:nowrap;}
+#lib-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:16px;}
+.pack-card{background:#1E293B;border-radius:18px;padding:18px 20px;cursor:pointer;border:2px solid transparent;transition:border-color 0.15s,transform 0.1s;}
+.pack-card:active{transform:scale(0.98);}
+.pack-card-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:12px;}
+.pack-icon{width:58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;}
+.pack-info{flex:1;}
+.pack-name{font-family:var(--font-display);font-weight:900;font-size:19px;color:white;line-height:1.2;margin-bottom:4px;}
+.pack-meta{font-size:14px;color:#64748B;font-weight:600;}
+.pack-desc{font-size:15px;color:#94A3B8;line-height:1.5;margin-bottom:12px;}
+.pack-symbols{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.pack-sym-chip{background:rgba(99,102,241,0.15);border-radius:50px;padding:5px 14px;font-size:14px;color:#A5B4FC;font-family:var(--font-display);font-weight:700;}
+.pack-install-btn{width:100%;background:#6366F1;color:white;border:none;border-radius:12px;padding:14px;font-family:var(--font-display);font-weight:800;font-size:17px;cursor:pointer;}
+.pack-install-btn:active{background:#4F46E5;}
+.gen-spinner{width:52px;height:52px;border:5px solid rgba(99,102,241,0.3);border-top-color:#6366F1;border-radius:50%;animation:spin 0.8s linear infinite;}
+.grade-chip{background:rgba(255,255,255,0.07);border:none;border-radius:50px;padding:8px 16px;font-family:var(--font-display);font-weight:700;font-size:14px;color:#94A3B8;cursor:pointer;}
+.grade-chip.active{background:#6366F1;color:white;}
+#focus-setup-screen,#focus-play-screen{position:fixed;inset:0;z-index:160;display:none;flex-direction:column;}
+#focus-setup-screen.open,#focus-play-screen.open{display:flex;}
+#focus-setup-screen{background:#0F172A;overflow-y:auto;}
+#focus-setup-header{background:#1E293B;padding:16px 18px;flex-shrink:0;display:flex;align-items:center;gap:12px;}
+#focus-setup-title{font-family:var(--font-display);font-weight:900;font-size:22px;color:white;flex:1;}
+.focus-close-btn{background:rgba(255,255,255,0.1);border:none;border-radius:12px;color:white;font-family:var(--font-display);font-weight:800;font-size:16px;padding:10px 18px;cursor:pointer;}
+#focus-setup-body{padding:18px;display:flex;flex-direction:column;gap:16px;}
+.focus-section{background:#1E293B;border-radius:18px;padding:18px;}
+.focus-section-title{font-family:var(--font-display);font-weight:900;font-size:16px;color:white;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.06em;}
+.focus-scene-list{display:flex;flex-direction:column;gap:8px;}
+.focus-scene-card{background:#0F172A;border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid transparent;}
+.focus-scene-emoji{font-size:28px;flex-shrink:0;}
+.focus-scene-info{flex:1;}
+.focus-scene-name{font-family:var(--font-display);font-weight:800;font-size:17px;color:white;}
+.focus-scene-choices{font-size:14px;color:#64748B;margin-top:3px;}
+.focus-scene-launch{background:#10B981;border:none;border-radius:10px;color:white;font-family:var(--font-display);font-weight:800;font-size:14px;padding:8px 16px;cursor:pointer;white-space:nowrap;}
+.focus-picker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-top:10px;}
+.focus-picker-btn{background:#0F172A;border:3px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:100px;}
+.focus-picker-btn.selected{border-color:#10B981;background:rgba(16,185,129,0.15);}
+.focus-picker-btn svg,.focus-picker-btn img{width:56px;height:56px;border-radius:10px;}
+.focus-picker-label{font-family:var(--font-display);font-weight:800;font-size:13px;color:white;text-align:center;line-height:1.2;}
+.focus-cat-select{width:100%;font-family:var(--font-display);font-size:16px;font-weight:700;background:#0F172A;border:2px solid rgba(255,255,255,0.15);border-radius:12px;padding:12px 16px;color:white;outline:none;margin-bottom:12px;}
+.focus-selected-count{font-size:14px;color:#10B981;font-family:var(--font-display);font-weight:800;margin-bottom:10px;}
+.focus-launch-big{background:#10B981;border:none;border-radius:16px;color:white;font-family:var(--font-display);font-weight:900;font-size:22px;padding:18px;cursor:pointer;width:100%;margin-top:6px;}
+.focus-launch-big:disabled{background:#334155;color:#64748B;cursor:not-allowed;}
+.focus-name-input{width:100%;font-family:var(--font-display);font-weight:700;font-size:17px;background:#0F172A;border:2px solid rgba(255,255,255,0.15);border-radius:12px;padding:12px 16px;color:white;outline:none;margin-bottom:10px;}
+#focus-play-screen{background:#0F172A;}
+#focus-play-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#1E293B;flex-shrink:0;}
+#focus-play-title{font-family:var(--font-display);font-weight:900;font-size:20px;color:white;}
+#focus-exit-btn{background:rgba(255,255,255,0.1);border:none;border-radius:12px;color:white;font-family:var(--font-display);font-weight:800;font-size:16px;padding:10px 18px;cursor:pointer;}
+#focus-play-sentence{background:#0A0F1E;padding:10px 18px;font-family:var(--font-display);font-weight:800;font-size:20px;color:white;min-height:52px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0;overflow-x:auto;}
+#focus-play-sentence.empty{color:rgba(255,255,255,0.25);font-style:italic;font-size:17px;}
+#focus-controls{display:flex;gap:10px;padding:10px 18px;background:#0A0F1E;flex-shrink:0;}
+.focus-ctrl-btn{background:rgba(255,255,255,0.08);border:none;border-radius:10px;color:rgba(255,255,255,0.7);font-family:var(--font-display);font-weight:800;font-size:16px;padding:10px 18px;cursor:pointer;}
+#focus-speak-btn{background:#10B981;color:white;border:none;border-radius:10px;font-family:var(--font-display);font-weight:800;font-size:17px;padding:10px 22px;cursor:pointer;margin-left:auto;}
+#focus-grid{flex:1;display:grid;gap:14px;padding:14px;overflow:hidden;}
+#branch-panel{position:fixed;bottom:0;left:0;right:0;background:#1E293B;border-radius:24px 24px 0 0;padding:0 0 24px;box-shadow:0 -8px 40px rgba(0,0,0,0.4);transform:translateY(110%);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:120;max-height:72vh;display:flex;flex-direction:column;}
+#branch-panel.open{transform:translateY(0);}
+#branch-header{padding:18px 18px 12px;flex-shrink:0;}
+#branch-breadcrumb{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.crumb{font-family:var(--font-display);font-weight:800;font-size:16px;color:rgba(255,255,255,0.45);}
+.crumb.active{color:white;}
+.crumb-sep{color:rgba(255,255,255,0.25);}
+#branch-title-row{display:flex;align-items:center;gap:12px;}
+#branch-back{background:rgba(255,255,255,0.1);border:none;border-radius:12px;color:white;font-family:var(--font-display);font-weight:800;font-size:16px;padding:10px 18px;cursor:pointer;}
+#branch-title{font-family:var(--font-display);font-weight:900;font-size:22px;color:white;flex:1;}
+#branch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;padding:12px 18px 0;overflow-y:auto;flex:1;}
+.branch-sym-btn{background:#0F172A;border:2px solid rgba(255,255,255,0.06);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;padding:14px 8px;transition:transform 0.1s;min-height:140px;position:relative;}
+.branch-sym-btn:active{transform:scale(0.94);}
+.branch-sym-btn svg,.branch-sym-btn img{width:78px;height:78px;border-radius:12px;}
+.branch-sym-btn .sym-label{color:rgba(255,255,255,0.88);font-size:15px;}
+.branch-has-children{border-color:rgba(99,102,241,0.6);}
+.branch-arrow{position:absolute;top:6px;right:6px;background:#6366F1;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;}
+#branch-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:119;display:none;}
+#branch-overlay.show{display:block;}
+.sym-btn.has-branch::after{content:'▶';position:absolute;bottom:5px;right:7px;font-size:9px;color:#818CF8;font-weight:900;}
+#share-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;padding:20px;}
+#share-modal.open{display:flex;}
+#share-box{background:#1E293B;border-radius:24px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+#share-box h2{font-family:var(--font-display);font-weight:900;font-size:22px;color:white;}
+.share-sub{font-size:15px;color:#64748B;line-height:1.5;}
+.share-field{display:flex;flex-direction:column;gap:6px;}
+.share-label{font-family:var(--font-display);font-weight:800;font-size:14px;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;}
+.share-input{font-family:var(--font-display);font-size:16px;font-weight:700;background:#0F172A;border:2px solid rgba(255,255,255,0.12);border-radius:12px;padding:12px 16px;color:white;outline:none;}
+.share-input:focus{border-color:#6366F1;}
+.share-row{display:flex;gap:12px;}
+.share-row .share-field{flex:1;}
+#share-submit{background:#10B981;border:none;border-radius:14px;color:white;font-family:var(--font-display);font-weight:900;font-size:18px;padding:16px;cursor:pointer;}
+#share-submit:disabled{background:#334155;color:#475569;cursor:not-allowed;}
+#share-cancel{background:rgba(255,255,255,0.06);border:none;border-radius:14px;color:#94A3B8;font-family:var(--font-display);font-weight:800;font-size:16px;padding:14px;cursor:pointer;}
+#share-status{font-family:var(--font-display);font-weight:800;font-size:15px;text-align:center;padding:10px;border-radius:10px;display:none;}
+#share-status.success{background:rgba(16,185,129,0.2);color:#10B981;display:block;}
+#share-status.error{background:rgba(239,68,68,0.2);color:#EF4444;display:block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@media(min-width:600px){#symbol-area{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}.sym-btn{min-height:180px;}.sym-btn svg,.sym-btn img{width:110px;height:110px;}}
+@media(min-width:900px){#symbol-area{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));}.sym-btn svg,.sym-btn img{width:120px;height:120px;}}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div id="topbar-title">🗣️ TalkTiles</div>
+  <button class="topbar-btn" id="focus-btn" onclick="openFocusSetup()" style="background:#10B981;color:white;">⭐ Focus</button>
+  <button class="topbar-btn" id="library-btn" onclick="openLibrary()" style="background:#6366F1;color:white;">🌐 Library</button>
+  <div style="display:flex;gap:2px;background:rgba(255,255,255,0.08);border-radius:10px;padding:3px;flex-shrink:0;">
+    <button class="size-btn" id="size-s" onclick="setSymbolSize('s')">S</button>
+    <button class="size-btn active" id="size-m" onclick="setSymbolSize('m')">M</button>
+    <button class="size-btn" id="size-l" onclick="setSymbolSize('l')">L</button>
+  </div>
+  <button class="topbar-btn" onclick="showQR()">📲 QR</button>
+  <button class="topbar-btn" onclick="exportVocab()">⬆ Export</button>
+  <label class="topbar-btn" style="cursor:pointer;">⬇ Import<input type="file" accept=".json" style="display:none" onchange="importVocab(event)"></label>
+  <button class="topbar-btn" onclick="openShareModal()" style="background:#F59E0B;color:#1E293B;">☁️ Share</button>
+  <button class="topbar-btn" id="edit-toggle" onclick="toggleEditMode()">✏️ Edit</button>
+</div>
+<div id="sentence-area">
+  <div id="sentence-chips"><span class="placeholder-text">Tap pictures to build a sentence…</span></div>
+  <div id="sentence-controls">
+    <button class="sentence-btn" onclick="clearSentence()">✕ Clear</button>
+    <button class="sentence-btn" onclick="backspace()">⌫ Delete</button>
+    <button class="sentence-btn" id="autospeak-btn" onclick="toggleAutoSpeak()">🔇 Auto</button>
+    <button class="sentence-btn" id="speak-btn" onclick="speakSentence()">🔊 Speak</button>
+  </div>
+</div>
+<div id="cat-nav"></div>
+<div id="symbol-area">
+  <button id="add-sym-btn" onclick="openAddSymbol()"><span style="font-size:28px;">＋</span><span>Add Symbol</span></button>
+</div>
+<div id="core-strip"></div>
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div id="edit-panel">
+  <h2 id="panel-title">Add New Symbol</h2>
+  <div class="edit-section">
+    <h3>Symbol Info</h3>
+    <div class="form-row"><div class="form-label">Label</div><input class="form-input" id="f-label" placeholder="e.g. Pizza" oninput="previewSvg()"></div>
+    <div class="form-row"><div class="form-label">Speech text</div><input class="form-input" id="f-speech" placeholder="e.g. I want pizza"></div>
+    <div class="form-row"><div class="form-label">Image URL (optional)</div><input class="form-input" id="f-imgurl" placeholder="https://…" oninput="previewSvg()"></div>
+    <div class="form-row"><div class="form-label">Choose an emoji</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="emoji-picker">🍕🥪🍎🍔🥤🍦🐶🐱🐠🐦🎮📺🎵⚽🎨📚🏠🏫🌳🏖️😊😢😡😴🌟❤️✋👋🌍🏆💪✏️🎂🎈</div>
+    </div>
+    <div class="form-row"><div class="form-label">Emoji (selected)</div><input class="form-input" id="f-emoji" placeholder="Click emoji above or type one"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin:12px 0;">
+      <div id="sym-preview" style="width:80px;height:80px;border-radius:12px;background:#E2E8F0;display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;flex-shrink:0;">?</div>
+    </div>
+    <div class="form-row"><div class="form-label">Upload image from device</div><input type="file" accept="image/*" class="form-input" id="f-upload" onchange="handleUpload(event)" style="padding:6px;"></div>
+  </div>
+  <div class="edit-section">
+    <h3>Category</h3>
+    <div class="form-row"><select class="form-input" id="f-category"></select></div>
+  </div>
+  <button class="edit-btn btn-indigo" onclick="saveSymbol()">💾 Save Symbol</button>
+  <button class="edit-btn btn-gray" onclick="closePanel()" style="margin-top:8px;">Cancel</button>
+  <div style="height:12px;"></div>
+  <div class="edit-section" id="cat-mgmt">
+    <h3>Manage Categories</h3>
+    <div class="form-row"><div class="form-label">New category name</div><input class="form-input" id="f-catname" placeholder="e.g. Sports"></div>
+    <div class="form-row"><div class="form-label">Emoji icon</div><input class="form-input" id="f-catemoji" placeholder="e.g. ⚽"></div>
+    <div class="form-row"><div class="form-label">Color (hex)</div><input class="form-input" id="f-catcolor" placeholder="#3B82F6" value="#3B82F6"></div>
+    <button class="edit-btn btn-green" onclick="addCategory()">＋ Add Category</button>
+  </div>
+</div>
+
+<!-- LIBRARY SCREEN -->
+<div id="library-screen">
+  <div id="lib-header">
+    <div id="lib-header-top">
+      <div id="lib-title">🌐 Vocabulary Library</div>
+      <button id="lib-close" onclick="closeLibrary()">✕ Close</button>
+    </div>
+    <div id="lib-search-row">
+      <input id="lib-search" placeholder="Search packs…" oninput="filterLibrary()">
+      <button id="lib-search-btn" onclick="aiGenerateFromSearch()">✨ AI Generate</button>
+    </div>
+    <div style="margin-top:10px;">
+      <div class="form-row">
+        <div style="font-family:var(--font-display);font-weight:800;font-size:13px;color:#94A3B8;margin-bottom:6px;">Anthropic API Key (for AI packs)</div>
+        <div style="display:flex;gap:8px;">
+          <input class="form-input" id="lib-apikey" type="password" placeholder="sk-ant-…" style="flex:1;background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);color:white;font-size:14px;padding:10px 14px;">
+          <button onclick="testAndSaveApiKey()" style="background:#6366F1;border:none;border-radius:10px;color:white;font-family:var(--font-display);font-weight:800;font-size:14px;padding:10px 16px;cursor:pointer;white-space:nowrap;">Save Key</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;" id="cat-filter-chips">
+      <button class="grade-chip active" onclick="filterCat(this,'All')">All</button>
+      <button class="grade-chip" onclick="filterCat(this,'Daily Life')">Daily Life</button>
+      <button class="grade-chip" onclick="filterCat(this,'Social')">Social</button>
+      <button class="grade-chip" onclick="filterCat(this,'Academic')">Academic</button>
+      <button class="grade-chip" onclick="filterCat(this,'School')">School</button>
+      <button class="grade-chip" onclick="filterCat(this,'Transition')">Transition</button>
+    </div>
+    <div id="lib-pack-count" style="font-family:var(--font-display);font-weight:800;font-size:14px;color:#64748B;margin-top:8px;"></div>
+  </div>
+  <div id="lib-body">
+    <div id="lib-ai-result"></div>
+    <div id="lib-pack-list"></div>
+  </div>
+</div>
+
+<!-- FOCUS SETUP SCREEN -->
+<div id="focus-setup-screen">
+  <div id="focus-setup-header">
+    <div id="focus-setup-title">⭐ Focus Mode</div>
+    <button class="focus-close-btn" onclick="closeFocusSetup()">✕ Close</button>
+  </div>
+  <div id="focus-setup-body">
+    <div class="focus-section">
+      <div class="focus-section-title">Quick Launch — Built-In Scenes</div>
+      <div class="focus-scene-list" id="focus-scene-list"></div>
+    </div>
+    <div class="focus-section">
+      <div class="focus-section-title">Build a Custom Scene</div>
+      <input class="focus-name-input" id="focus-custom-name" placeholder="Scene name (e.g. After School Choices)">
+      <select class="focus-cat-select" id="focus-cat-select" onchange="renderFocusPicker()"></select>
+      <div class="focus-selected-count" id="focus-selected-count">Select 2–5 symbols below</div>
+      <div class="focus-picker-grid" id="focus-picker-grid"></div>
+      <button class="focus-launch-big" id="focus-launch-btn" onclick="launchFocus()" disabled>⭐ Launch Focus Mode</button>
+      <button onclick="saveAndLaunchFocus()" style="background:rgba(16,185,129,0.15);border:2px solid #10B981;border-radius:14px;color:#10B981;font-family:var(--font-display);font-weight:800;font-size:16px;padding:14px;cursor:pointer;width:100%;margin-top:8px;">💾 Save Scene &amp; Launch</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOCUS PLAY SCREEN -->
+<div id="focus-play-screen">
+  <div id="focus-play-header">
+    <div id="focus-play-title">⭐ Focus Mode</div>
+    <button id="focus-exit-btn" onclick="exitFocus()">✕ Exit</button>
+  </div>
+  <div id="focus-play-sentence" class="empty">Tap a picture to speak…</div>
+  <div id="focus-controls">
+    <button class="focus-ctrl-btn" onclick="focusClear()">✕ Clear</button>
+    <button class="focus-ctrl-btn" onclick="focusBack()">⌫ Back</button>
+    <button id="focus-speak-btn" onclick="focusSpeak()">🔊 Speak</button>
+  </div>
+  <div id="focus-grid"></div>
+</div>
+
+<!-- BRANCH PANEL -->
+<div id="branch-overlay" onclick="closeBranch()"></div>
+<div id="branch-panel">
+  <div id="branch-header">
+    <div id="branch-breadcrumb"></div>
+    <div id="branch-title-row">
+      <button id="branch-back" onclick="branchBack()">← Back</button>
+      <div id="branch-title"></div>
+    </div>
+  </div>
+  <div id="branch-grid"></div>
+</div>
+
+<!-- QR MODAL -->
+<div id="qr-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:180;align-items:center;justify-content:center;" onclick="closeQR()">
+  <div id="qr-modal" style="display:none;background:white;border-radius:24px;padding:28px;max-width:420px;width:90%;z-index:181;" onclick="event.stopPropagation()">
+    <h2 style="font-family:var(--font-display);font-weight:900;font-size:22px;color:#1E293B;margin-bottom:8px;">📲 Share via QR Code</h2>
+    <p id="qr-desc" style="font-size:14px;color:#64748B;margin-bottom:16px;">Choose what to share:</p>
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <button id="qr-btn-cat" onclick="generateQR('category')" style="flex:1;background:#F8FAFC;border:2px solid #E2E8F0;border-radius:12px;padding:12px;font-family:var(--font-display);font-weight:800;font-size:14px;cursor:pointer;">This Category Only</button>
+      <button id="qr-btn-all" onclick="generateQR('all')" style="flex:1;background:#F8FAFC;border:2px solid #E2E8F0;border-radius:12px;padding:12px;font-family:var(--font-display);font-weight:800;font-size:14px;cursor:pointer;">All Categories</button>
+    </div>
+    <div id="qr-code" style="display:flex;align-items:center;justify-content:center;min-height:100px;margin-bottom:12px;"></div>
+    <div id="qr-url" style="display:none;font-size:11px;color:#94A3B8;word-break:break-all;margin-bottom:12px;"></div>
+    <div style="display:flex;gap:8px;">
+      <button id="copy-btn" onclick="copyQRLink()" style="flex:1;background:#6366F1;color:white;border:none;border-radius:12px;padding:13px;font-family:var(--font-display);font-weight:800;font-size:15px;cursor:pointer;">📋 Copy Link</button>
+      <button onclick="closeQR()" style="flex:1;background:#E2E8F0;color:#374151;border:none;border-radius:12px;padding:13px;font-family:var(--font-display);font-weight:800;font-size:15px;cursor:pointer;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE WITH COMMUNITY MODAL -->
+<div id="share-modal">
+  <div id="share-box">
+    <h2>☁️ Share with Community</h2>
+    <div class="share-sub">Your current vocabulary will be submitted for review. Once approved, teachers worldwide can browse and install it from the Community Library.</div>
+    <div class="share-field">
+      <div class="share-label">Module Title *</div>
+      <input class="share-input" id="sh-title" placeholder="e.g. Waterfall Vocabulary">
+    </div>
+    <div class="share-row">
+      <div class="share-field">
+        <div class="share-label">Subject</div>
+        <select class="share-input" id="sh-subject"><option>General Communication</option><option>Science</option><option>Math</option><option>Social Studies</option><option>Language Arts</option><option>Social Skills</option><option>Life Skills</option><option>Other</option></select>
+      </div>
+      <div class="share-field">
+        <div class="share-label">Grade Level</div>
+        <select class="share-input" id="sh-grade"><option>All Ages</option><option>Pre-K / K</option><option>Grades 1-3</option><option>Grades 4-5</option><option>Grades 6-8</option><option>Grades 9-12</option><option>Adult</option></select>
+      </div>
+    </div>
+    <div class="share-row">
+      <div class="share-field">
+        <div class="share-label">Language</div>
+        <select class="share-input" id="sh-language"><option>English</option><option>Spanish</option><option>French</option><option>Portuguese</option><option>Other</option></select>
+      </div>
+      <div class="share-field">
+        <div class="share-label">Country / Region</div>
+        <input class="share-input" id="sh-region" placeholder="e.g. Canada, Texas">
+      </div>
+    </div>
+    <div class="share-field">
+      <div class="share-label">Your Name (optional)</div>
+      <input class="share-input" id="sh-author" placeholder="e.g. Ms. Johnson, Toronto">
+    </div>
+    <div class="share-field">
+      <div class="share-label">Description</div>
+      <input class="share-input" id="sh-desc" placeholder="What is this module for?">
+    </div>
+    <div id="share-status"></div>
+    <button id="share-submit" onclick="submitToSupabase()">☁️ Submit for Review</button>
+    <button id="share-cancel" onclick="closeShareModal()">Cancel</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// SVG SYMBOL LIBRARY
+function makeSvg(bg,content){return`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${bg}"/>${content}</svg>`;}
+const S={
+  yes:makeSvg('#10B981','<polyline points="20,52 42,74 80,26" stroke="white" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'),
+  no:makeSvg('#EF4444','<line x1="26" y1="26" x2="74" y2="74" stroke="white" stroke-width="11" stroke-linecap="round"/><line x1="74" y1="26" x2="26" y2="74" stroke="white" stroke-width="11" stroke-linecap="round"/>'),
+  me:makeSvg('#3B82F6','<circle cx="50" cy="28" r="16" fill="white"/><path d="M22,84 Q22,54 50,54 Q78,54 78,84Z" fill="white"/><line x1="50" y1="62" x2="26" y2="50" stroke="white" stroke-width="6" stroke-linecap="round"/><circle cx="21" cy="47" r="7" fill="#FCD34D"/>'),
+  want:makeSvg('#8B5CF6','<rect x="28" y="52" width="44" height="28" rx="10" fill="white"/><rect x="28" y="32" width="9" height="23" rx="5" fill="white"/><rect x="41" y="25" width="9" height="29" rx="5" fill="white"/><rect x="54" y="27" width="9" height="27" rx="5" fill="white"/><rect x="67" y="32" width="9" height="22" rx="5" fill="white"/>'),
+  like:makeSvg('#EC4899','<path d="M50,78 L22,52 Q12,38 26,28 Q38,20 50,36 Q62,20 74,28 Q88,38 78,52Z" fill="white"/>'),
+  help:makeSvg('#F59E0B','<rect x="10" y="44" width="34" height="14" rx="7" fill="white"/><rect x="56" y="44" width="34" height="14" rx="7" fill="white"/><circle cx="50" cy="51" r="12" fill="white"/>'),
+  more:makeSvg('#14B8A6','<line x1="50" y1="22" x2="50" y2="50" stroke="white" stroke-width="8" stroke-linecap="round"/><line x1="36" y1="36" x2="64" y2="36" stroke="white" stroke-width="8" stroke-linecap="round"/><line x1="50" y1="56" x2="50" y2="78" stroke="white" stroke-width="8" stroke-linecap="round"/><line x1="36" y1="67" x2="64" y2="67" stroke="white" stroke-width="8" stroke-linecap="round"/>'),
+  stop:makeSvg('#DC2626','<polygon points="35,14 65,14 86,35 86,65 65,86 35,86 14,65 14,35" fill="#B91C1C"/><line x1="50" y1="30" x2="50" y2="58" stroke="white" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="70" r="5" fill="white"/>'),
+  go:makeSvg('#22C55E','<polygon points="30,20 78,50 30,80" fill="white"/>'),
+  finish:makeSvg('#0EA5E9','<polyline points="18,50 38,70 82,26" stroke="white" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="18" y1="82" x2="82" y2="82" stroke="white" stroke-width="6" stroke-linecap="round"/>'),
+  happy:makeSvg('#FBBF24','<circle cx="50" cy="50" r="38" fill="#FCD34D"/><circle cx="37" cy="42" r="5" fill="#1E293B"/><circle cx="63" cy="42" r="5" fill="#1E293B"/><path d="M32,60 Q50,78 68,60" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/>'),
+  sad:makeSvg('#60A5FA','<circle cx="50" cy="50" r="38" fill="#93C5FD"/><circle cx="37" cy="42" r="5" fill="#1E293B"/><circle cx="63" cy="42" r="5" fill="#1E293B"/><path d="M32,68 Q50,52 68,68" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/>'),
+  angry:makeSvg('#EF4444','<circle cx="50" cy="52" r="38" fill="#FCA5A5"/><circle cx="37" cy="44" r="5" fill="#1E293B"/><circle cx="63" cy="44" r="5" fill="#1E293B"/><path d="M32,70 Q50,56 68,70" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/><line x1="28" y1="30" x2="44" y2="40" stroke="#DC2626" stroke-width="5" stroke-linecap="round"/><line x1="72" y1="30" x2="56" y2="40" stroke="#DC2626" stroke-width="5" stroke-linecap="round"/>'),
+  tired:makeSvg('#94A3B8','<circle cx="50" cy="50" r="38" fill="#CBD5E1"/><path d="M30,42 Q37,36 44,42" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M56,42 Q63,36 70,42" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M36,64 Q50,72 64,64" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/>'),
+  excited:makeSvg('#F59E0B','<circle cx="50" cy="50" r="38" fill="#FDE68A"/><circle cx="37" cy="42" r="6" fill="#1E293B"/><circle cx="63" cy="42" r="6" fill="#1E293B"/><path d="M30,60 Q50,82 70,60" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/>'),
+  scared:makeSvg('#8B5CF6','<circle cx="50" cy="50" r="38" fill="#DDD6FE"/><circle cx="37" cy="44" r="7" fill="#1E293B"/><circle cx="63" cy="44" r="7" fill="#1E293B"/><circle cx="37" cy="44" r="3" fill="white"/><circle cx="63" cy="44" r="3" fill="white"/><path d="M35,65 Q42,60 50,65 Q58,70 65,65" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/>'),
+  sick:makeSvg('#86EFAC','<circle cx="50" cy="50" r="38" fill="#BBF7D0"/><circle cx="37" cy="42" r="5" fill="#1E293B"/><circle cx="63" cy="42" r="5" fill="#1E293B"/><path d="M35,66 Q50,58 65,66" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/>'),
+  okay:makeSvg('#6EE7B7','<circle cx="50" cy="50" r="38" fill="#A7F3D0"/><circle cx="37" cy="42" r="5" fill="#1E293B"/><circle cx="63" cy="42" r="5" fill="#1E293B"/><line x1="34" y1="65" x2="66" y2="65" stroke="#1E293B" stroke-width="5" stroke-linecap="round"/>'),
+  loved:makeSvg('#F472B6','<circle cx="50" cy="50" r="38" fill="#FBCFE8"/><circle cx="37" cy="40" r="5" fill="#1E293B"/><circle cx="63" cy="40" r="5" fill="#1E293B"/><path d="M32,58 Q50,76 68,58" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/>'),
+  pizza:makeSvg('#F59E0B','<polygon points="50,14 88,82 12,82" fill="#FCD34D"/><circle cx="50" cy="56" r="6" fill="#EF4444"/><circle cx="36" cy="68" r="5" fill="#EF4444"/><circle cx="64" cy="68" r="5" fill="#EF4444"/>'),
+  sandwich:makeSvg('#D97706','<rect x="14" y="26" width="72" height="14" rx="7" fill="#FDE68A"/><rect x="18" y="40" width="64" height="8" rx="2" fill="#86EFAC"/><rect x="18" y="48" width="64" height="8" rx="2" fill="#FCA5A5"/><rect x="14" y="64" width="72" height="14" rx="7" fill="#FDE68A"/>'),
+  apple:makeSvg('#EF4444','<ellipse cx="50" cy="56" rx="32" ry="30" fill="#FCA5A5"/><path d="M50,26 Q60,16 66,20" stroke="#16A34A" stroke-width="4" fill="none" stroke-linecap="round"/>'),
+  water:makeSvg('#3B82F6','<rect x="28" y="24" width="44" height="58" rx="10" fill="#BFDBFE"/><line x1="50" y1="16" x2="50" y2="24" stroke="#3B82F6" stroke-width="5" stroke-linecap="round"/>'),
+  pasta:makeSvg('#CA8A04','<ellipse cx="50" cy="72" rx="36" ry="16" fill="#FDE68A"/><path d="M28,72 Q32,48 38,55 Q44,62 50,48 Q56,34 62,48 Q68,62 72,55" stroke="#FCD34D" stroke-width="5" fill="none" stroke-linecap="round"/>'),
+  icecream:makeSvg('#F9A8D4','<polygon points="50,88 28,42 72,42" fill="#FDE68A"/><ellipse cx="50" cy="38" rx="22" ry="20" fill="#FBCFE8"/>'),
+  snack:makeSvg('#92400E','<rect x="22" y="22" width="56" height="56" rx="6" fill="none" stroke="#FDE68A" stroke-width="4"/><rect x="30" y="30" width="18" height="18" rx="4" fill="#FDE68A"/><rect x="52" y="30" width="18" height="18" rx="4" fill="#FDE68A"/><rect x="30" y="52" width="18" height="18" rx="4" fill="#FDE68A"/><rect x="52" y="52" width="18" height="18" rx="4" fill="#FDE68A"/>'),
+  burger:makeSvg('#B45309','<rect x="16" y="20" width="68" height="16" rx="10" fill="#FDE68A"/><rect x="16" y="36" width="68" height="10" rx="2" fill="#86EFAC"/><rect x="16" y="46" width="68" height="10" rx="2" fill="#FCA5A5"/><rect x="16" y="66" width="68" height="14" rx="6" fill="#FCD34D"/>'),
+  fruit:makeSvg('#16A34A','<circle cx="36" cy="58" r="20" fill="#FCA5A5"/><circle cx="64" cy="58" r="20" fill="#86EFAC"/><circle cx="50" cy="46" r="20" fill="#FDE68A"/>'),
+  videogame:makeSvg('#6366F1','<rect x="12" y="30" width="76" height="46" rx="16" fill="#818CF8"/><line x1="36" y1="53" x2="36" y2="45" stroke="white" stroke-width="5" stroke-linecap="round"/><line x1="32" y1="49" x2="40" y2="49" stroke="white" stroke-width="5" stroke-linecap="round"/><circle cx="64" cy="45" r="5" fill="white"/><circle cx="72" cy="52" r="5" fill="white"/>'),
+  tv:makeSvg('#1E293B','<rect x="12" y="18" width="76" height="52" rx="10" fill="#334155"/><rect x="18" y="24" width="64" height="40" rx="6" fill="#0EA5E9"/><polygon points="44,36 62,44 44,52" fill="white"/>'),
+  music:makeSvg('#7C3AED','<ellipse cx="36" cy="72" rx="12" ry="10" fill="#A78BFA"/><ellipse cx="70" cy="64" rx="12" ry="10" fill="#A78BFA"/><line x1="48" y1="72" x2="48" y2="28" stroke="#A78BFA" stroke-width="7" stroke-linecap="round"/><line x1="82" y1="64" x2="82" y2="20" stroke="#A78BFA" stroke-width="7" stroke-linecap="round"/><line x1="48" y1="28" x2="82" y2="20" stroke="#A78BFA" stroke-width="7" stroke-linecap="round"/>'),
+  sports:makeSvg('#065F46','<circle cx="50" cy="50" r="36" fill="white" stroke="#16A34A" stroke-width="4"/><path d="M50,14 Q62,30 62,50 Q62,70 50,86" stroke="#1E293B" stroke-width="3" fill="none"/><path d="M14,50 Q30,38 50,38 Q70,38 86,50" stroke="#1E293B" stroke-width="3" fill="none"/>'),
+  art:makeSvg('#0EA5E9','<circle cx="28" cy="50" r="10" fill="#FCA5A5"/><circle cx="50" cy="40" r="10" fill="#FDE68A"/><circle cx="72" cy="50" r="10" fill="#A7F3D0"/><circle cx="50" cy="60" r="10" fill="#DDD6FE"/><circle cx="50" cy="52" r="8" fill="white"/>'),
+  outside:makeSvg('#16A34A','<rect x="0" y="60" width="100" height="40" fill="#86EFAC"/><circle cx="72" cy="30" r="18" fill="#FCD34D"/><path d="M20,60 Q20,20 50,20 Q30,20 30,60Z" fill="#15803D"/>'),
+  read:makeSvg('#0369A1','<rect x="14" y="20" width="34" height="62" rx="4" fill="#BFDBFE"/><rect x="52" y="20" width="34" height="62" rx="4" fill="#BFDBFE"/><line x1="50" y1="22" x2="50" y2="80" stroke="#93C5FD" stroke-width="4"/>'),
+  swim:makeSvg('#0284C7','<path d="M10,50 Q25,38 40,50 Q55,62 70,50 Q85,38 100,50" stroke="#BAE6FD" stroke-width="6" fill="none"/><circle cx="50" cy="28" r="10" fill="#FDE68A"/>'),
+  dance:makeSvg('#DB2777','<circle cx="55" cy="18" r="10" fill="#FDE68A"/><path d="M55,28 L48,50 L36,60" stroke="#FBCFE8" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M55,28 L66,48 L76,44" stroke="#FBCFE8" stroke-width="6" fill="none" stroke-linecap="round"/>'),
+  dog:makeSvg('#B45309','<ellipse cx="50" cy="54" rx="30" ry="26" fill="#FDE68A"/><circle cx="50" cy="38" r="20" fill="#FDE68A"/><ellipse cx="32" cy="30" rx="10" ry="16" fill="#D97706"/><ellipse cx="68" cy="30" rx="10" ry="16" fill="#D97706"/><circle cx="42" cy="36" r="4" fill="#1E293B"/><circle cx="58" cy="36" r="4" fill="#1E293B"/>'),
+  cat:makeSvg('#F97316','<ellipse cx="50" cy="54" rx="30" ry="26" fill="#FED7AA"/><circle cx="50" cy="38" r="20" fill="#FED7AA"/><polygon points="30,22 22,8 38,18" fill="#F97316"/><polygon points="70,22 78,8 62,18" fill="#F97316"/><circle cx="42" cy="36" r="4" fill="#1E293B"/><circle cx="58" cy="36" r="4" fill="#1E293B"/>'),
+  fish:makeSvg('#0284C7','<ellipse cx="48" cy="50" rx="32" ry="20" fill="#7DD3FC"/><path d="M80,50 L96,36 L96,64Z" fill="#38BDF8"/><circle cx="32" cy="44" r="5" fill="#1E293B"/>'),
+  bird:makeSvg('#EAB308','<ellipse cx="50" cy="52" rx="24" ry="22" fill="#FDE68A"/><circle cx="50" cy="34" r="16" fill="#FDE68A"/><circle cx="44" cy="30" r="4" fill="#1E293B"/>'),
+  rabbit:makeSvg('#94A3B8','<ellipse cx="50" cy="58" rx="26" ry="24" fill="#E2E8F0"/><circle cx="50" cy="40" r="18" fill="#E2E8F0"/><ellipse cx="37" cy="18" rx="7" ry="18" fill="#E2E8F0"/><ellipse cx="63" cy="18" rx="7" ry="18" fill="#E2E8F0"/><ellipse cx="37" cy="18" rx="4" ry="14" fill="#FCA5A5"/><ellipse cx="63" cy="18" rx="4" ry="14" fill="#FCA5A5"/>'),
+  nopet:makeSvg('#EF4444','<circle cx="50" cy="50" r="36" fill="#FEE2E2"/><line x1="20" y1="80" x2="80" y2="20" stroke="#EF4444" stroke-width="8" stroke-linecap="round"/>'),
+  turtle:makeSvg('#16A34A','<ellipse cx="50" cy="56" rx="34" ry="26" fill="#86EFAC"/><circle cx="50" cy="50" r="22" fill="#4ADE80"/>'),
+  home:makeSvg('#0369A1','<polygon points="50,14 84,44 84,84 16,84 16,44" fill="#BFDBFE"/><polygon points="50,14 16,44 84,44" fill="#3B82F6"/><rect x="38" y="54" width="24" height="30" rx="4" fill="#1D4ED8"/>'),
+  school:makeSvg('#7C3AED','<rect x="14" y="38" width="72" height="48" rx="4" fill="#DDD6FE"/><rect x="36" y="18" width="28" height="20" rx="4" fill="#A78BFA"/><rect x="42" y="52" width="16" height="20" rx="2" fill="#1E293B"/>'),
+  park:makeSvg('#16A34A','<rect x="0" y="62" width="100" height="38" fill="#86EFAC"/><circle cx="34" cy="46" r="22" fill="#4ADE80"/><rect x="30" y="46" width="8" height="20" rx="2" fill="#92400E"/>'),
+  beach:makeSvg('#0EA5E9','<rect x="0" y="50" width="100" height="50" fill="#FDE68A"/><rect x="0" y="0" width="100" height="54" fill="#BAE6FD"/><circle cx="75" cy="24" r="16" fill="#FCD34D"/>'),
+  mountains:makeSvg('#475569','<rect x="0" y="60" width="100" height="40" fill="#86EFAC"/><polygon points="50,12 18,60 82,60" fill="#94A3B8"/><polygon points="50,12 34,42 66,42" fill="white"/>'),
+  city:makeSvg('#334155','<rect x="8" y="26" width="20" height="74" rx="2" fill="#64748B"/><rect x="32" y="14" width="20" height="86" rx="2" fill="#94A3B8"/><rect x="56" y="32" width="20" height="68" rx="2" fill="#64748B"/><rect x="76" y="20" width="16" height="80" rx="2" fill="#94A3B8"/>'),
+  anywhere:makeSvg('#0EA5E9','<circle cx="50" cy="50" r="36" fill="#BAE6FD"/><ellipse cx="50" cy="50" rx="18" ry="36" fill="none" stroke="#7DD3FC" stroke-width="3"/><line x1="14" y1="50" x2="86" y2="50" stroke="#7DD3FC" stroke-width="3"/>'),
+  store:makeSvg('#F59E0B','<rect x="10" y="36" width="80" height="50" rx="4" fill="#FDE68A"/><rect x="10" y="28" width="80" height="16" rx="4" fill="#F59E0B"/><rect x="36" y="52" width="28" height="34" rx="4" fill="#D97706"/>'),
+  friend:makeSvg('#EC4899','<circle cx="36" cy="30" r="14" fill="#FBCFE8"/><path d="M14,72 Q14,48 36,48 Q58,48 58,72Z" fill="#FBCFE8"/><circle cx="64" cy="30" r="14" fill="#FBCFE8"/><path d="M42,72 Q42,48 64,48 Q86,48 86,72Z" fill="#FBCFE8"/>'),
+  teacher:makeSvg('#0369A1','<circle cx="50" cy="26" r="14" fill="#FDE68A"/><path d="M28,70 Q28,48 50,48 Q72,48 72,70Z" fill="#BFDBFE"/><rect x="18" y="56" width="40" height="30" rx="4" fill="#F1F5F9"/>'),
+  mom:makeSvg('#EC4899','<circle cx="50" cy="26" r="16" fill="#FDE68A"/><path d="M24,82 Q24,52 50,52 Q76,52 76,82Z" fill="#FBCFE8"/><path d="M34,26 Q40,12 50,14 Q60,12 66,26" fill="#8B5CF6"/>'),
+  dad:makeSvg('#3B82F6','<circle cx="50" cy="26" r="16" fill="#FDE68A"/><path d="M24,82 Q24,52 50,52 Q76,52 76,82Z" fill="#BFDBFE"/><rect x="34" y="10" width="32" height="20" rx="6" fill="#1E293B"/>'),
+  family:makeSvg('#0D9488','<circle cx="26" cy="28" r="12" fill="#FDE68A"/><path d="M10,64 Q10,44 26,44 Q42,44 42,64Z" fill="#CCFBF1"/><circle cx="74" cy="24" r="14" fill="#FDE68A"/><path d="M56,64 Q56,42 74,42 Q92,42 92,64Z" fill="#CCFBF1"/><circle cx="50" cy="56" r="10" fill="#FDE68A"/>'),
+  baby:makeSvg('#FCD34D','<circle cx="50" cy="36" r="22" fill="#FDE68A"/><circle cx="43" cy="32" r="4" fill="#1E293B"/><circle cx="57" cy="32" r="4" fill="#1E293B"/><path d="M40,46 Q50,54 60,46" stroke="#1E293B" stroke-width="3" fill="none" stroke-linecap="round"/>'),
+  doctor:makeSvg('#0284C7','<circle cx="50" cy="26" r="16" fill="#FDE68A"/><path d="M24,82 Q24,52 50,52 Q76,52 76,82Z" fill="white"/><rect x="40" y="60" width="20" height="6" rx="2" fill="#EF4444"/><rect x="47" y="54" width="6" height="18" rx="2" fill="#EF4444"/>'),
+};
+
+// VOCABULARY DATA
+let VOCAB={version:"1.0",appName:"TalkTiles",categories:[
+  {id:"feelings",label:"Feelings",color:"#FBBF24",emoji:"😊",symbols:[
+    {id:"happy",label:"Happy",speech:"Happy",svg:S.happy},{id:"sad",label:"Sad",speech:"Sad",svg:S.sad},
+    {id:"angry",label:"Angry",speech:"Angry",svg:S.angry},{id:"tired",label:"Tired",speech:"Tired",svg:S.tired},
+    {id:"excited",label:"Excited",speech:"Excited",svg:S.excited},{id:"scared",label:"Scared",speech:"Scared",svg:S.scared},
+    {id:"sick",label:"Sick",speech:"I feel sick",svg:S.sick},{id:"okay",label:"Okay",speech:"Okay",svg:S.okay},
+    {id:"loved",label:"Loved",speech:"I feel loved",svg:S.loved},
+  ]},
+  {id:"food",label:"Food & Drink",color:"#F97316",emoji:"🍕",symbols:[
+    {id:"pizza",label:"Pizza",speech:"Pizza",svg:S.pizza},{id:"sandwich",label:"Sandwich",speech:"Sandwich",svg:S.sandwich},
+    {id:"apple",label:"Apple",speech:"Apple",svg:S.apple},{id:"water",label:"Water",speech:"Water",svg:S.water},
+    {id:"pasta",label:"Pasta",speech:"Pasta",svg:S.pasta},{id:"icecream",label:"Ice Cream",speech:"Ice cream",svg:S.icecream},
+    {id:"snack",label:"Snack",speech:"A snack",svg:S.snack},{id:"burger",label:"Burger",speech:"Burger",svg:S.burger},
+    {id:"fruit",label:"Fruit",speech:"Fruit",svg:S.fruit},
+  ]},
+  {id:"activities",label:"Fun & Activities",color:"#6366F1",emoji:"🎮",symbols:[
+    {id:"videogame",label:"Video Game",speech:"Video game",svg:S.videogame},{id:"tv",label:"TV / Movie",speech:"Watch TV",svg:S.tv},
+    {id:"music",label:"Music",speech:"Music",svg:S.music},{id:"sports",label:"Sports",speech:"Sports",svg:S.sports},
+    {id:"art",label:"Art",speech:"Art",svg:S.art},{id:"outside",label:"Outside",speech:"Go outside",svg:S.outside},
+    {id:"read",label:"Read",speech:"Read a book",svg:S.read},{id:"swim",label:"Swim",speech:"Swim",svg:S.swim},
+    {id:"dance",label:"Dance",speech:"Dance",svg:S.dance},
+  ]},
+  {id:"animals",label:"Animals",color:"#16A34A",emoji:"🐾",symbols:[
+    {id:"dog",label:"Dog",speech:"Dog",svg:S.dog},{id:"cat",label:"Cat",speech:"Cat",svg:S.cat},
+    {id:"fish",label:"Fish",speech:"Fish",svg:S.fish},{id:"bird",label:"Bird",speech:"Bird",svg:S.bird},
+    {id:"rabbit",label:"Rabbit",speech:"Rabbit",svg:S.rabbit},{id:"nopet",label:"No Pet",speech:"I do not have a pet",svg:S.nopet},
+    {id:"turtle",label:"Turtle",speech:"Turtle",svg:S.turtle},
+  ]},
+  {id:"places",label:"Places",color:"#0284C7",emoji:"🌍",symbols:[
+    {id:"home",label:"Home",speech:"Home",svg:S.home},{id:"school",label:"School",speech:"School",svg:S.school},
+    {id:"park",label:"Park",speech:"The park",svg:S.park},{id:"beach",label:"Beach",speech:"The beach",svg:S.beach},
+    {id:"mountains",label:"Mountains",speech:"The mountains",svg:S.mountains},{id:"city",label:"City",speech:"The city",svg:S.city},
+    {id:"store",label:"Store",speech:"The store",svg:S.store},{id:"anywhere",label:"Anywhere",speech:"Anywhere",svg:S.anywhere},
+  ]},
+  {id:"people",label:"People",color:"#DB2777",emoji:"👥",symbols:[
+    {id:"me",label:"Me / I",speech:"I",svg:S.me},{id:"friend",label:"Friend",speech:"My friend",svg:S.friend},
+    {id:"teacher",label:"Teacher",speech:"My teacher",svg:S.teacher},{id:"mom",label:"Mom",speech:"My mom",svg:S.mom},
+    {id:"dad",label:"Dad",speech:"My dad",svg:S.dad},{id:"family",label:"Family",speech:"My family",svg:S.family},
+    {id:"baby",label:"Baby",speech:"A baby",svg:S.baby},{id:"doctor",label:"Doctor",speech:"The doctor",svg:S.doctor},
+  ]},
+],core:[
+  {id:"yes",label:"Yes",speech:"Yes",svg:S.yes},{id:"no",label:"No",speech:"No",svg:S.no},
+  {id:"want",label:"Want",speech:"I want",svg:S.want},{id:"like",label:"Like",speech:"I like",svg:S.like},
+  {id:"help",label:"Help",speech:"I need help",svg:S.help},{id:"more",label:"More",speech:"More",svg:S.more},
+  {id:"stop",label:"Stop",speech:"Stop",svg:S.stop},{id:"go",label:"Go",speech:"Go",svg:S.go},
+  {id:"finish",label:"Finish",speech:"I am finished",svg:S.finish},
+]};
+
+// APP STATE
+let sentence=[],currentCat=0,editMode=false,autoSpeak=false,uploadedDataUrl=null,selectedEmoji='',editingSymIdx=null;
+
+function saveVocab(){try{localStorage.setItem('openaac_vocab',JSON.stringify(VOCAB));}catch(e){}}
+function loadVocab(){try{const s=localStorage.getItem('openaac_vocab');if(s)VOCAB=JSON.parse(s);}catch(e){}}
+
+// RENDER
+function render(){renderCatNav();renderSymbols();renderCore();}
+
+function renderCatNav(){
+  const nav=document.getElementById('cat-nav');nav.innerHTML='';
+  VOCAB.categories.forEach((cat,i)=>{
+    const wrap=document.createElement('div');wrap.style.cssText='position:relative;display:flex;flex-shrink:0;';
+    const btn=document.createElement('button');btn.className='cat-tab'+(i===currentCat?' active':'');
+    if(i===currentCat)btn.style.background=cat.color;
+    btn.innerHTML=`<span class="cat-emoji">${cat.emoji}</span>${cat.label}`;
+    btn.onclick=()=>{currentCat=i;renderCatNav();renderSymbols();};
+    wrap.appendChild(btn);
+    if(editMode){
+      const del=document.createElement('button');
+      del.style.cssText='position:absolute;top:-8px;right:-8px;width:22px;height:22px;background:#EF4444;color:white;border:none;border-radius:50%;font-size:13px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;line-height:1;padding:0;';
+      del.textContent='×';del.onclick=(e)=>{e.stopPropagation();deleteCategory(i);};wrap.appendChild(del);
+    }
+    nav.appendChild(wrap);
+  });
+}
+
+function deleteCategory(idx){
+  const cat=VOCAB.categories[idx];if(!cat)return;
+  if(!confirm(`Delete "${cat.label}"?`))return;
+  VOCAB.categories.splice(idx,1);
+  if(currentCat>=VOCAB.categories.length)currentCat=Math.max(0,VOCAB.categories.length-1);
+  saveVocab();render();
+}
+
+function renderSymbols(){
+  const area=document.getElementById('symbol-area');const addBtn=document.getElementById('add-sym-btn');
+  area.innerHTML='';area.appendChild(addBtn);addBtn.style.display=editMode?'flex':'none';
+  const cat=VOCAB.categories[currentCat];if(!cat)return;
+  cat.symbols.forEach((sym,idx)=>{
+    const btn=document.createElement('button');
+    btn.className='sym-btn'+(editMode?' edit-mode':'')+(sym.branch&&sym.branch.length?' has-branch':'');
+    btn.style.borderColor=editMode?cat.color:'transparent';
+    const img=sym.imgUrl?`<img src="${sym.imgUrl}" alt="${sym.label}">`:sym.svg||`<div style="font-size:52px;line-height:74px;text-align:center;">${sym.emoji||'?'}</div>`;
+    btn.innerHTML=`<button class="sym-delete" onclick="deleteSymbol(event,${idx})">×</button>${img}<span class="sym-label">${sym.label}</span>`;
+    btn.onclick=()=>{if(editMode){openEditSymbol(idx);return;}tapSymbol(sym);};
+    area.appendChild(btn);
+  });
+}
+
+function renderCore(){
+  const strip=document.getElementById('core-strip');strip.innerHTML='';
+  VOCAB.core.forEach(sym=>{
+    const btn=document.createElement('button');btn.className='core-btn';
+    const img=sym.imgUrl?`<img src="${sym.imgUrl}" alt="${sym.label}">`:sym.svg||`<div style="font-size:36px;line-height:52px;">${sym.emoji||'?'}</div>`;
+    btn.innerHTML=`${img}<span class="core-label">${sym.label}</span>`;
+    btn.onclick=()=>tapSymbol(sym);strip.appendChild(btn);
+  });
+}
+
+// SENTENCE
+function tapSymbol(sym){
+  if(sym.branch&&sym.branch.length>0){openBranch(sym);return;}
+  sentence.push(sym);renderSentence();
+  if(autoSpeak)speakWord(sym.speech);
+  const chips=document.getElementById('sentence-chips');chips.scrollLeft=chips.scrollWidth;
+}
+function renderSentence(){
+  const chips=document.getElementById('sentence-chips');
+  if(sentence.length===0){chips.innerHTML='<span class="placeholder-text">Tap pictures to build a sentence…</span>';return;}
+  chips.innerHTML='';
+  sentence.forEach((sym,i)=>{
+    const chip=document.createElement('div');chip.className='chip';
+    chip.innerHTML=`${sym.emoji||''} ${sym.label}`;
+    chip.onclick=()=>{sentence.splice(i,1);renderSentence();};chips.appendChild(chip);
+  });
+}
+function clearSentence(){sentence=[];renderSentence();}
+function backspace(){sentence.pop();renderSentence();}
+
+// SPEECH
+function speakSentence(){
+  if(!sentence.length)return;
+  const text=sentence.map(s=>s.speech).join(', ');speakText(text);
+  const btn=document.getElementById('speak-btn');btn.classList.add('speaking');btn.textContent='⏸ Speaking…';
+  setTimeout(()=>{btn.classList.remove('speaking');btn.innerHTML='🔊 Speak';},text.length*65+500);
+}
+function speakWord(text){speakText(text);}
+function speakText(text){
+  if(!('speechSynthesis' in window))return;
+  window.speechSynthesis.cancel();
+  const utt=new SpeechSynthesisUtterance(text);utt.rate=0.75;utt.pitch=1.1;utt.volume=1;
+  window.speechSynthesis.speak(utt);
+}
+function toggleAutoSpeak(){
+  autoSpeak=!autoSpeak;
+  const btn=document.getElementById('autospeak-btn');
+  btn.textContent=autoSpeak?'🔊 Auto ON':'🔇 Auto';btn.style.color=autoSpeak?'#10B981':'';
+}
+
+// EDIT MODE
+function toggleEditMode(){
+  editMode=!editMode;
+  const btn=document.getElementById('edit-toggle');
+  btn.textContent=editMode?'✅ Done':'✏️ Edit';btn.classList.toggle('edit-active',editMode);renderSymbols();
+}
+function deleteSymbol(e,idx){
+  e.stopPropagation();if(!confirm('Remove this symbol?'))return;
+  VOCAB.categories[currentCat].symbols.splice(idx,1);saveVocab();renderSymbols();
+}
+function openAddSymbol(){
+  editingSymIdx=null;
+  document.getElementById('panel-title').textContent='Add New Symbol';
+  ['f-label','f-speech','f-imgurl','f-emoji'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-upload').value='';document.getElementById('sym-preview').innerHTML='?';
+  uploadedDataUrl=null;selectedEmoji='';
+  const sel=document.getElementById('f-category');
+  sel.innerHTML=VOCAB.categories.map((c,i)=>`<option value="${i}">${c.emoji} ${c.label}</option>`).join('');
+  sel.value=currentCat;
+  const existing=document.getElementById('branch-editor');if(existing)existing.remove();
+  document.getElementById('edit-panel').classList.add('open');document.getElementById('overlay').classList.add('show');
+}
+function closePanel(){document.getElementById('edit-panel').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+function previewSvg(){
+  const preview=document.getElementById('sym-preview');
+  const imgUrl=document.getElementById('f-imgurl').value;
+  if(uploadedDataUrl){preview.innerHTML=`<img src="${uploadedDataUrl}" style="width:80px;height:80px;object-fit:contain;border-radius:10px;">`;}
+  else if(imgUrl){preview.innerHTML=`<img src="${imgUrl}" style="width:80px;height:80px;object-fit:contain;border-radius:10px;">`;}
+  else if(selectedEmoji){preview.innerHTML=selectedEmoji;preview.style.fontSize='52px';}
+  else{const label=document.getElementById('f-label').value||'?';preview.innerHTML=label.slice(0,2)||'?';preview.style.fontSize='28px';}
+}
+function handleUpload(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();reader.onload=ev=>{uploadedDataUrl=ev.target.result;previewSvg();};reader.readAsDataURL(file);
+}
+function saveSymbol(){
+  const label=document.getElementById('f-label').value.trim();
+  const speech=document.getElementById('f-speech').value.trim()||label;
+  const imgUrl=document.getElementById('f-imgurl').value.trim();
+  const catIdx=parseInt(document.getElementById('f-category').value);
+  if(!label){alert('Please enter a label.');return;}
+  const sym={id:'custom_'+Date.now(),label,speech};
+  if(uploadedDataUrl){sym.imgUrl=uploadedDataUrl;}
+  else if(imgUrl){sym.imgUrl=imgUrl;}
+  else if(selectedEmoji){sym.svg=`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${VOCAB.categories[catIdx]?.color||'#6366F1'}"/><text x="50" y="65" text-anchor="middle" font-size="52">${selectedEmoji}</text></svg>`;}
+  else{const color=VOCAB.categories[catIdx]?.color||'#6366F1';const initials=label.slice(0,2).toUpperCase();sym.svg=`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${color}"/><text x="50" y="62" text-anchor="middle" font-size="34" font-weight="900" fill="white" font-family="sans-serif">${initials}</text></svg>`;}
+  if(editingSymIdx!==null){VOCAB.categories[catIdx].symbols[editingSymIdx]={...VOCAB.categories[catIdx].symbols[editingSymIdx],...sym};}
+  else{VOCAB.categories[catIdx].symbols.push(sym);}
+  currentCat=catIdx;saveVocab();render();closePanel();
+}
+function addCategory(){
+  const name=document.getElementById('f-catname').value.trim();
+  const emoji=document.getElementById('f-catemoji').value.trim()||'📌';
+  const color=document.getElementById('f-catcolor').value.trim()||'#6366F1';
+  if(!name){alert('Please enter a category name.');return;}
+  VOCAB.categories.push({id:'cat_'+Date.now(),label:name,color,emoji,symbols:[]});
+  saveVocab();render();document.getElementById('f-catname').value='';document.getElementById('f-catemoji').value='';
+}
+document.getElementById('emoji-picker').addEventListener('click',e=>{
+  if(!e.target.textContent.trim())return;selectedEmoji=e.target.textContent.trim();
+  document.getElementById('f-emoji').value=selectedEmoji;previewSvg();
+});
+document.getElementById('f-emoji').addEventListener('input',e=>{selectedEmoji=e.target.value;previewSvg();});
+
+// IMPORT / EXPORT
+function exportVocab(){
+  const blob=new Blob([JSON.stringify(VOCAB,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='talktiles_vocab.json';a.click();
+}
+function importVocab(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{const data=JSON.parse(ev.target.result);if(!data.categories)throw new Error('Invalid format');
+      VOCAB=data;saveVocab();currentCat=0;render();alert('✅ Vocabulary imported successfully!');}
+    catch(err){alert('❌ Could not import: '+err.message);}
+  };reader.readAsText(file);
+}
+
+// LIBRARY PACKS
+function mkSym(label,speech,emoji){return{id:'lib_'+label.replace(/\s/g,'_').toLowerCase()+'_'+Math.random().toString(36).slice(2),label,speech:speech||label,emoji};}
+const LIBRARY_PACKS=[
+  {name:"Morning Routine",emoji:"☀️",color:"#F59E0B",tier:"Daily Life",grade:"All ages",research:"Beukelman & Light (2020)",desc:"Start every day with independence.",symbols:[mkSym("Good morning","Good morning","☀️"),mkSym("I am ready","I am ready","✅"),mkSym("Get dressed","Time to get dressed","👕"),mkSym("Brush teeth","Brush my teeth","🪥"),mkSym("Eat breakfast","Eat breakfast","🥣"),mkSym("Take medicine","Take my medicine","💊"),mkSym("Pack my bag","Pack my bag","🎒"),mkSym("I need help","I need help","🙋"),mkSym("Bathroom","I need the bathroom","🚽"),mkSym("Let us go","Let us go","🚪")]},
+  {name:"Ordering Food",emoji:"🍔",color:"#F97316",tier:"Daily Life",grade:"All ages",research:"Beukelman & Light (2020)",desc:"Restaurant and cafeteria vocabulary.",symbols:[mkSym("I want","I want","🙋"),mkSym("Small","Small please","🤏"),mkSym("Medium","Medium please","✋"),mkSym("Large","Large please","👐"),mkSym("Please","Please","🙏"),mkSym("Thank you","Thank you","😊"),mkSym("To go","To go please","🥡"),mkSym("No onions","No onions please","🧅"),mkSym("Check please","Check please","🧾"),mkSym("Delicious","This is delicious","😋")]},
+  {name:"Doctor Visit",emoji:"🏥",color:"#0284C7",tier:"Daily Life",grade:"All ages",research:"ASHA Practice Portal",desc:"Medical appointment vocabulary.",symbols:[mkSym("It hurts here","It hurts here","🤕"),mkSym("My head hurts","My head hurts","🧠"),mkSym("My stomach hurts","My stomach hurts","🫃"),mkSym("I feel dizzy","I feel dizzy","😵"),mkSym("I am allergic","I am allergic","⚠️"),mkSym("Pain level 3","Pain level three","3️⃣"),mkSym("Pain level 7","Pain level seven","7️⃣"),mkSym("I have a question","I have a question","❓"),mkSym("Call my family","Please call my family","📞")]},
+  {name:"Emergency Communication",emoji:"🆘",color:"#DC2626",tier:"Daily Life",grade:"All ages",research:"Safety — highest priority in AAC",desc:"Critical safety vocabulary.",symbols:[mkSym("Help","Help me please","🆘"),mkSym("Call 911","Please call 911","📞"),mkSym("I am lost","I am lost","😨"),mkSym("I am hurt","I am hurt","🩹"),mkSym("Fire","Fire","🔥"),mkSym("I need medicine","I need my medicine","💊"),mkSym("Go away","Go away","🚫"),mkSym("I feel unsafe","I feel unsafe","⚠️"),mkSym("I cannot breathe","I cannot breathe","😮‍💨")]},
+  {name:"Financial Literacy",emoji:"💰",color:"#16A34A",tier:"Daily Life",grade:"Grades 6-Adult",research:"ASHA — transition planning",desc:"Money and banking vocabulary.",symbols:[mkSym("How much","How much does it cost","💲"),mkSym("Too expensive","That is too expensive","😬"),mkSym("On sale","Is this on sale","🏷️"),mkSym("Save money","I want to save money","🏦"),mkSym("Pay with card","I will pay with my card","💳"),mkSym("Receipt please","May I have a receipt","🧾"),mkSym("ATM","I need to find an ATM","🏧")]},
+  {name:"Public Transportation",emoji:"🚌",color:"#7C3AED",tier:"Daily Life",grade:"Grades 6-Adult",research:"ASHA — transition to adulthood",desc:"Bus, subway, and rideshare vocabulary.",symbols:[mkSym("Bus stop","Where is the bus stop","🚏"),mkSym("How much is the fare","How much is the fare","💲"),mkSym("Next stop","What is the next stop","🗺️"),mkSym("I missed my stop","I missed my stop","😟"),mkSym("Round trip","Round trip please","↩️"),mkSym("I need to get off","I need to get off here","🛎️")]},
+  {name:"Shopping and Stores",emoji:"🛒",color:"#0891B2",tier:"Daily Life",grade:"All ages",research:"Beukelman & Light (2020)",desc:"Grocery and shopping vocabulary.",symbols:[mkSym("Where is","Where is","❓"),mkSym("I am looking for","I am looking for","👀"),mkSym("What size","What size is this","📏"),mkSym("I want to return","I would like to return this","↩️"),mkSym("Which aisle","Which aisle","🛣️"),mkSym("Bag please","May I have a bag please","🛍️"),mkSym("Manager","May I speak to a manager","👤")]},
+  {name:"Conflict Resolution",emoji:"🤝",color:"#DB2777",tier:"Social",grade:"All ages",research:"ASHA — social participation",desc:"Navigate disagreements appropriately.",symbols:[mkSym("I feel frustrated","I feel frustrated","😤"),mkSym("That is not fair","That is not fair","😒"),mkSym("I need a break","I need a break","⏸️"),mkSym("I disagree","I disagree","🙅"),mkSym("I am sorry","I am sorry","😔"),mkSym("Let us compromise","Let us find a compromise","🤝"),mkSym("I forgive you","I forgive you","💛")]},
+  {name:"Self-Advocacy",emoji:"💪",color:"#0D9488",tier:"Social",grade:"Grades 4-Adult",research:"Light and McNaughton (2014)",desc:"Express needs and rights.",symbols:[mkSym("I need support","I need support","🙋"),mkSym("Please repeat that","Please repeat that","🔁"),mkSym("I need more time","I need more time","⏰"),mkSym("Too loud","That is too loud","🔇"),mkSym("I can do this","I can do this myself","💪"),mkSym("My IEP says","My IEP says I get","📋")]},
+  {name:"Friendship and Social Skills",emoji:"👫",color:"#EC4899",tier:"Social",grade:"All ages",research:"ASHA — social communication",desc:"Make friends and navigate social situations.",symbols:[mkSym("Want to play","Do you want to play","🎮"),mkSym("My name is","Hi my name is","👋"),mkSym("That is funny","That is really funny","😄"),mkSym("Can I join","Can I join you","🙋"),mkSym("Nice to meet you","Nice to meet you","🤝"),mkSym("Good game","Good game","🏆"),mkSym("Let us take turns","Let us take turns","🔄")]},
+  {name:"Mental Health and Wellbeing",emoji:"🧠",color:"#8B5CF6",tier:"Social",grade:"Grades 4-Adult",research:"ASHA, PODD research",desc:"Express emotional states and ask for support.",symbols:[mkSym("I feel overwhelmed","I feel overwhelmed","😵"),mkSym("I need to calm down","I need to calm down","🧘"),mkSym("I feel anxious","I feel anxious","😰"),mkSym("I am proud of myself","I am proud of myself","🌟"),mkSym("Deep breath","Let me take a deep breath","🌬️"),mkSym("I need my counselor","I need to see my counselor","💙")]},
+  {name:"American Revolution",emoji:"🦅",color:"#1D4ED8",tier:"Academic",grade:"Grades 4-8",research:"Social Studies fringe vocabulary",desc:"Key vocabulary for the American Revolution.",symbols:[mkSym("Colonists","The colonists","🏘️"),mkSym("Unfair taxes","Unfair taxes","💰"),mkSym("Boston Tea Party","The Boston Tea Party","🍵"),mkSym("Declaration","The Declaration of Independence","📜"),mkSym("Freedom","Freedom and independence","🗽"),mkSym("George Washington","George Washington","⭐"),mkSym("Patriots","The Patriots wanted freedom","🦅")]},
+  {name:"US Government and Democracy",emoji:"🏛️",color:"#1E3A8A",tier:"Academic",grade:"Grades 5-Adult",research:"ASHA — community participation",desc:"Government, voting, rights vocabulary.",symbols:[mkSym("President","The President","🇺🇸"),mkSym("Congress","Congress makes laws","🏛️"),mkSym("Supreme Court","The Supreme Court","⚖️"),mkSym("Vote","The right to vote","🗳️"),mkSym("Constitution","The Constitution","📖"),mkSym("Democracy","Our democracy","🕊️"),mkSym("Election","The election","🗓️")]},
+  {name:"Water Cycle and Weather",emoji:"🌧️",color:"#0369A1",tier:"Academic",grade:"Grades 3-8",research:"ASHA — curriculum access",desc:"Water cycle and weather vocabulary.",symbols:[mkSym("Evaporation","Evaporation","☀️"),mkSym("Condensation","Condensation","💧"),mkSym("Precipitation","Precipitation","🌧️"),mkSym("Rain","Rain falls","🌧️"),mkSym("Snow","Snow falls","❄️"),mkSym("Drought","Drought","🏜️"),mkSym("Temperature","Temperature","🌡️")]},
+  {name:"Solar System and Space",emoji:"🚀",color:"#312E81",tier:"Academic",grade:"Grades 3-8",research:"High-interest vocabulary",desc:"Planets, stars, and space exploration.",symbols:[mkSym("The Sun","The Sun","☀️"),mkSym("Earth","Earth","🌍"),mkSym("Mars","Mars","🔴"),mkSym("Jupiter","Jupiter","🟠"),mkSym("Saturn","Saturn with rings","🪐"),mkSym("The Moon","The Moon","🌕"),mkSym("Orbit","Orbit","🔄"),mkSym("Gravity","Gravity","⬇️"),mkSym("Astronaut","An astronaut","👨‍🚀")]},
+  {name:"Human Body Systems",emoji:"🫀",color:"#BE123C",tier:"Academic",grade:"Grades 4-8",research:"Science curriculum + self-advocacy",desc:"Body systems and health vocabulary.",symbols:[mkSym("Heart","The heart pumps blood","🫀"),mkSym("Lungs","The lungs help me breathe","🫁"),mkSym("Brain","The brain controls everything","🧠"),mkSym("Muscles","Muscles help me move","💪"),mkSym("Immune system","The immune system","🛡️"),mkSym("Good nutrition","Good nutrition","🥦")]},
+  {name:"Scientific Method",emoji:"🔬",color:"#065F46",tier:"Academic",grade:"Grades 3-Adult",research:"ASHA — curriculum access",desc:"Hypothesis, experiment, and results vocabulary.",symbols:[mkSym("My question is","My scientific question is","❓"),mkSym("My hypothesis","My hypothesis is","💡"),mkSym("I observe that","I observe that","👁️"),mkSym("Record the data","Record the data","📊"),mkSym("My results show","My results show","📈"),mkSym("My conclusion is","My conclusion is","✅"),mkSym("I predict that","I predict that","🎯")]},
+  {name:"Classroom Language",emoji:"🙋",color:"#CA8A04",tier:"School",grade:"All ages",research:"ASHA — IEP goal",desc:"Participate fully in class.",symbols:[mkSym("I have a question","I have a question","🙋"),mkSym("I know the answer","I know the answer","✋"),mkSym("I do not understand","I do not understand","🤔"),mkSym("Can you repeat","Can you repeat that please","🔁"),mkSym("I need help","I need help","🙏"),mkSym("I am finished","I am finished","✅"),mkSym("I need more time","I need more time","⏰"),mkSym("May I use the bathroom","May I use the bathroom","🚽")]},
+  {name:"PE and Sports",emoji:"⚽",color:"#16A34A",tier:"School",grade:"All ages",research:"ASHA — leisure settings",desc:"Physical education vocabulary.",symbols:[mkSym("Pass to me","Pass to me","🙌"),mkSym("Good shot","Good shot","⭐"),mkSym("My turn","My turn","👉"),mkSym("Time out","Time out","⏸️"),mkSym("Water break","Water break please","💧"),mkSym("I am injured","I am injured","🩹"),mkSym("Great job team","Great job team","🌟")]},
+  {name:"Art Class",emoji:"🎨",color:"#DC2626",tier:"School",grade:"All ages",research:"ASHA — leisure participation",desc:"Art supplies and creative expression.",symbols:[mkSym("Paint","Paint","🎨"),mkSym("I want to draw","I want to draw","✏️"),mkSym("I need scissors","I need scissors","✂️"),mkSym("Pass the glue","Pass the glue","🔫"),mkSym("More paper","More paper please","📄"),mkSym("I like my work","I like my work","❤️"),mkSym("I am finished","I am finished","✅")]},
+  {name:"Lunchroom and Recess",emoji:"🍱",color:"#B45309",tier:"School",grade:"All ages",research:"ASHA — lunchroom is critical AAC setting",desc:"Cafeteria and playground vocabulary.",symbols:[mkSym("Sit with me","Will you sit with me","🙋"),mkSym("What is for lunch","What is for lunch today","🍽️"),mkSym("I am allergic","I am allergic to this","⚠️"),mkSym("More please","More please","🙏"),mkSym("Play with me","Do you want to play","🎮"),mkSym("I saved your seat","I saved your seat","💺")]},
+  {name:"Job Interview Skills",emoji:"💼",color:"#0D9488",tier:"Transition",grade:"Grades 9-Adult",research:"ASHA — vocational settings",desc:"Professional communication for interviews.",symbols:[mkSym("My name is","My name is","👤"),mkSym("My strengths are","My strengths are","⭐"),mkSym("I work well with others","I work well with others","🤝"),mkSym("I am dependable","I am dependable","🏅"),mkSym("I have a question","I have a question","❓"),mkSym("Thank you for your time","Thank you for your time","🙏"),mkSym("I am very interested","I am very interested","✅")]},
+  {name:"Workplace Communication",emoji:"🏢",color:"#1E40AF",tier:"Transition",grade:"Grades 9-Adult",research:"ASHA — employment settings",desc:"On-the-job communication.",symbols:[mkSym("Good morning","Good morning","👋"),mkSym("I finished my task","I finished my task","✅"),mkSym("What should I do next","What should I do next","🤔"),mkSym("There is a problem","There is a problem","⚠️"),mkSym("When is my break","When is my break","⏰"),mkSym("I am sick today","I cannot come in today","🤒")]},
+  {name:"Independent Living",emoji:"🏠",color:"#6D28D9",tier:"Transition",grade:"Grades 9-Adult",research:"Beukelman and Light (2020)",desc:"Cooking, cleaning, and home management.",symbols:[mkSym("Grocery list","Add to grocery list","🛒"),mkSym("Is it done cooking","Is it done cooking","🔥"),mkSym("Do laundry","Time to do laundry","🧺"),mkSym("Pay a bill","I need to pay a bill","💸"),mkSym("Call my landlord","I need to call my landlord","📞"),mkSym("I am locked out","I am locked out","🔑")]},
+  {name:"Civil War",emoji:"⚔️",color:"#374151",tier:"Academic",grade:"Grades 5-8",research:"AAC Social Studies fringe packs",desc:"Civil War vocabulary for Social Studies.",symbols:[mkSym("Abraham Lincoln","Abraham Lincoln","🎩"),mkSym("The Union","The Union","🔵"),mkSym("Emancipation","The Emancipation Proclamation","📜"),mkSym("Reconstruction","Reconstruction period","🔨"),mkSym("Underground Railroad","The Underground Railroad","🚂"),mkSym("End of the war","End of the Civil War","🕊️")]},
+];
+
+// LIBRARY STATE
+let libFilterCat='All',libSearchQuery='',savedApiKey='';
+
+function openLibrary(){
+  document.getElementById('library-screen').classList.add('open');
+  try{savedApiKey=localStorage.getItem('talktiles_apikey')||'';}catch(e){}
+  if(savedApiKey)document.getElementById('lib-apikey').value=savedApiKey;
+  renderLibrary();
+}
+function closeLibrary(){document.getElementById('library-screen').classList.remove('open');}
+function filterCat(btn,cat){
+  document.querySelectorAll('#cat-filter-chips .grade-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');libFilterCat=cat;renderLibrary();
+}
+function filterLibrary(){libSearchQuery=document.getElementById('lib-search').value.toLowerCase();renderLibrary();}
+
+function renderLibrary(){
+  let packs=LIBRARY_PACKS;
+  if(libFilterCat!=='All')packs=packs.filter(p=>p.tier===libFilterCat);
+  if(libSearchQuery)packs=packs.filter(p=>p.name.toLowerCase().includes(libSearchQuery)||p.desc.toLowerCase().includes(libSearchQuery));
+  document.getElementById('lib-pack-count').textContent=`📚 ${packs.length} pack${packs.length!==1?'s':''} found`;
+  const list=document.getElementById('lib-pack-list');list.innerHTML='';
+  const tierColors={'Daily Life':'#F97316','Social':'#EC4899','Academic':'#3B82F6','School':'#CA8A04','Transition':'#0D9488','AI Generated':'#6366F1'};
+  packs.forEach((pack)=>{
+    const packIdx=LIBRARY_PACKS.indexOf(pack);const tc=tierColors[pack.tier]||'#6366F1';
+    const card=document.createElement('div');card.className='pack-card';card.style.marginBottom='12px';
+    const symPreview=pack.symbols.slice(0,5).map(s=>`<span class="pack-sym-chip">${s.emoji} ${s.label}</span>`).join('');
+    const more=pack.symbols.length>5?`<span class="pack-sym-chip">+${pack.symbols.length-5} more</span>`:'';
+    card.innerHTML=`<div class="pack-card-top"><div class="pack-icon" style="background:${pack.color}22;font-size:28px;">${pack.emoji}</div><div class="pack-info"><div class="pack-name">${pack.name}</div><div class="pack-meta"><span style="background:${tc}22;color:${tc};border-radius:50px;padding:2px 8px;font-size:11px;font-weight:800;">${pack.tier}</span> · ${pack.grade}</div></div></div><div class="pack-desc">${pack.desc}</div><div style="font-size:10px;color:#475569;font-style:italic;margin-bottom:8px;">📖 ${pack.research}</div><div class="pack-symbols">${symPreview}${more}</div><button class="pack-install-btn" onclick="installLibraryPack(${packIdx})">⬇ Install into TalkTiles</button>`;
+    list.appendChild(card);
+  });
+  const aiResult=document.getElementById('lib-ai-result');
+  if(savedApiKey){aiResult.innerHTML=`<div style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:14px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;"><span style="font-size:24px;">✨</span><div style="flex:1;"><div style="font-family:var(--font-display);font-weight:800;font-size:14px;color:white;">AI Generator Active</div><div style="font-size:12px;color:#94A3B8;">Search any topic — AI will create a custom pack</div></div></div>`;}
+  else{aiResult.innerHTML=`<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:12px;margin-bottom:14px;font-size:12px;color:#64748B;line-height:1.5;">💡 <strong style="color:#94A3B8;">Want AI packs?</strong> Add an Anthropic API key above.</div>`;}
+}
+
+function testAndSaveApiKey(){
+  const key=document.getElementById('lib-apikey').value.trim();
+  if(!key.startsWith('sk-ant-')){showToast('⚠️ Key should start with sk-ant-');return;}
+  try{localStorage.setItem('talktiles_apikey',key);}catch(e){}
+  savedApiKey=key;showToast('✅ API key saved!');renderLibrary();
+}
+
+async function aiGenerateFromSearch(){
+  const query=document.getElementById('lib-search').value.trim()||'General Communication';
+  if(!savedApiKey){showToast('⚠️ Add an Anthropic API key first');return;}
+  const aiResult=document.getElementById('lib-ai-result');
+  aiResult.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;padding:28px;gap:12px;text-align:center;background:rgba(99,102,241,0.1);border-radius:14px;margin-bottom:14px;"><div class="gen-spinner"></div><div style="font-family:var(--font-display);font-weight:800;font-size:15px;color:white;">Building "${query}" pack…</div></div>`;
+  try{
+    const prompt=`You are an AAC specialist. Create a TalkTiles vocab pack for: "${query}"\nRespond ONLY with valid JSON:\n{"name":"short name","emoji":"one emoji","color":"hex color","desc":"2 sentences","symbols":[{"label":"1-3 words","speech":"full sentence","emoji":"one emoji"}]}\nRules: 12-14 symbols, functional vocabulary.`;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':savedApiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();if(!res.ok)throw new Error(data.error?.message||'API error');
+    const text=data.content.map(b=>b.text||'').join('');const match=text.match(/\{[\s\S]*\}/);
+    if(!match)throw new Error('Could not parse response');
+    const pack=JSON.parse(match[0]);if(!pack.symbols)throw new Error('Invalid format');
+    pack.symbols=pack.symbols.map((s,i)=>({id:'ai_'+Date.now()+'_'+i,label:s.label,speech:s.speech||s.label,emoji:s.emoji||'❓',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${pack.color||'#6366F1'}"/><text x="50" y="65" text-anchor="middle" font-size="48">${s.emoji||'❓'}</text></svg>`}));
+    pack.tier='AI Generated';pack.grade='Custom';pack.research='AI-generated custom pack';
+    const idx=LIBRARY_PACKS.length;LIBRARY_PACKS.push(pack);
+    aiResult.innerHTML=`<div style="margin-bottom:12px;"><div class="pack-card"><div class="pack-card-top"><div class="pack-icon" style="background:${pack.color}22;font-size:28px;">${pack.emoji}</div><div class="pack-info"><div class="pack-name">${pack.name}</div><div class="pack-meta">✨ AI Generated</div></div></div><div class="pack-desc">${pack.desc}</div><div class="pack-symbols">${pack.symbols.slice(0,5).map(s=>`<span class="pack-sym-chip">${s.emoji} ${s.label}</span>`).join('')}</div><button class="pack-install-btn" onclick="installLibraryPack(${idx})">⬇ Install into TalkTiles</button></div></div>`;
+  }catch(err){aiResult.innerHTML=`<div style="background:rgba(127,29,29,0.5);border-radius:12px;padding:14px;color:#FCA5A5;font-size:13px;margin-bottom:12px;">⚠️ ${err.message}</div>`;}
+}
+
+function installLibraryPack(idx){
+  const pack=LIBRARY_PACKS[idx];if(!pack)return;
+  const newCat={id:'lib_'+pack.name.replace(/\s/g,'_').toLowerCase()+'_'+Date.now(),label:pack.name,emoji:pack.emoji,color:pack.color||'#6366F1',
+    symbols:pack.symbols.map((s,i)=>({id:'libsym_'+idx+'_'+i,label:s.label,speech:s.speech||s.label,emoji:s.emoji||'❓',svg:s.svg||`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${pack.color||'#6366F1'}"/><text x="50" y="65" text-anchor="middle" font-size="48">${s.emoji||'❓'}</text></svg>`}))};
+  const existing=VOCAB.categories.findIndex(c=>c.label===newCat.label);
+  if(existing>=0){if(!confirm(`"${newCat.label}" already exists. Replace it?`))return;VOCAB.categories[existing]=newCat;currentCat=existing;}
+  else{VOCAB.categories.push(newCat);currentCat=VOCAB.categories.length-1;}
+  saveVocab();render();closeLibrary();showToast(`✅ "${newCat.label}" installed!`);
+}
+
+// CORE VOCAB
+function coreSymSVG(word,bg){return`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="16" fill="${bg}"/><text x="50" y="58" text-anchor="middle" dominant-baseline="middle" font-family="system-ui,sans-serif" font-size="${word.length>7?'18':word.length>5?'22':'26'}" font-weight="700" fill="white">${word}</text></svg>`;}
+const CORE_CAT={id:'core_vocab',label:'Core Words',color:'#1E293B',emoji:'⭐',symbols:[
+  {id:'cv_i',label:'I',speech:'I',svg:coreSymSVG('I','#F59E0B')},{id:'cv_you',label:'You',speech:'You',svg:coreSymSVG('you','#F59E0B')},
+  {id:'cv_we',label:'We',speech:'We',svg:coreSymSVG('we','#F59E0B')},{id:'cv_my',label:'My',speech:'My',svg:coreSymSVG('my','#F59E0B')},
+  {id:'cv_it',label:'It',speech:'It',svg:coreSymSVG('it','#F59E0B')},{id:'cv_they',label:'They',speech:'They',svg:coreSymSVG('they','#F59E0B')},
+  {id:'cv_want',label:'Want',speech:'I want',svg:coreSymSVG('want','#16A34A')},{id:'cv_need',label:'Need',speech:'I need',svg:coreSymSVG('need','#16A34A')},
+  {id:'cv_like',label:'Like',speech:'I like',svg:coreSymSVG('like','#16A34A')},{id:'cv_go',label:'Go',speech:'Go',svg:coreSymSVG('go','#16A34A')},
+  {id:'cv_stop',label:'Stop',speech:'Stop',svg:coreSymSVG('stop','#16A34A')},{id:'cv_help',label:'Help',speech:'Help me',svg:coreSymSVG('help','#16A34A')},
+  {id:'cv_feel',label:'Feel',speech:'I feel',svg:coreSymSVG('feel','#16A34A')},{id:'cv_more',label:'More',speech:'More',svg:coreSymSVG('more','#2563EB')},
+  {id:'cv_done',label:'All done',speech:'All done',svg:coreSymSVG('all done','#2563EB')},{id:'cv_good',label:'Good',speech:'Good',svg:coreSymSVG('good','#2563EB')},
+  {id:'cv_bad',label:'Bad',speech:'Bad',svg:coreSymSVG('bad','#2563EB')},{id:'cv_big',label:'Big',speech:'Big',svg:coreSymSVG('big','#2563EB')},
+  {id:'cv_again',label:'Again',speech:'Again',svg:coreSymSVG('again','#2563EB')},{id:'cv_here',label:'Here',speech:'Here',svg:coreSymSVG('here','#2563EB')},
+  {id:'cv_no',label:'No',speech:'No',svg:coreSymSVG('no','#DC2626')},{id:'cv_not',label:'Not',speech:'Not',svg:coreSymSVG('not','#DC2626')},
+  {id:'cv_dont',label:"Don't",speech:"Don't",svg:coreSymSVG("don't",'#DC2626')},{id:'cv_stop2',label:'Stop it',speech:'Stop it',svg:coreSymSVG('stop it','#DC2626')},
+  {id:'cv_yes',label:'Yes',speech:'Yes',svg:coreSymSVG('yes','#DB2777')},{id:'cv_please',label:'Please',speech:'Please',svg:coreSymSVG('please','#DB2777')},
+  {id:'cv_thanks',label:'Thank you',speech:'Thank you',svg:coreSymSVG('thank you','#DB2777')},{id:'cv_sorry',label:'Sorry',speech:'I am sorry',svg:coreSymSVG('sorry','#DB2777')},
+  {id:'cv_hi',label:'Hi',speech:'Hi',svg:coreSymSVG('hi','#DB2777')},{id:'cv_bye',label:'Bye',speech:'Goodbye',svg:coreSymSVG('bye','#DB2777')},
+  {id:'cv_what',label:'What',speech:'What',svg:coreSymSVG('what','#7C3AED')},{id:'cv_where',label:'Where',speech:'Where',svg:coreSymSVG('where','#7C3AED')},
+  {id:'cv_who',label:'Who',speech:'Who',svg:coreSymSVG('who','#7C3AED')},{id:'cv_why',label:'Why',speech:'Why',svg:coreSymSVG('why','#7C3AED')},
+  {id:'cv_when',label:'When',speech:'When',svg:coreSymSVG('when','#7C3AED')},{id:'cv_how',label:'How',speech:'How',svg:coreSymSVG('how','#7C3AED')},
+]};
+if(!VOCAB.categories.find(c=>c.id==='core_vocab')){VOCAB.categories.unshift(CORE_CAT);saveVocab();}
+
+// RESTAURANT MENUS
+function rSym(label,speech,emoji,color){return{id:'r_'+label.replace(/\s/g,'_').toLowerCase()+'_'+Math.random().toString(36).slice(2),label,speech:speech||label,emoji,svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${color}"/><text x="50" y="65" text-anchor="middle" font-size="46">${emoji}</text></svg>`};}
+const RED_ROBIN_CAT={id:'red_robin',label:'Red Robin',emoji:'🍔',color:'#CC0000',symbols:[
+  {...rSym('Burgers','I want a burger','🍔','#CC0000'),branch:[rSym('Royal Red Robin','Royal Red Robin burger','👑','#A30000'),rSym('Whiskey River BBQ','Whiskey River BBQ Burger','🥃','#A30000'),rSym('Burnin Love Burger','Burnin Love Burger','🌶️','#A30000'),rSym('Bacon Cheeseburger','Classic Bacon Cheeseburger','🥓','#A30000')]},
+  {...rSym('Chicken','I want chicken','🍗','#CC0000'),branch:[rSym('Crispy Chicken Sandwich','Crispy Chicken Sandwich','🥪','#A30000'),rSym('Chicken Tenders','Crispy Chicken Tenders','🍟','#A30000'),rSym('Buffalo Wings','Buffalo wings','🔥','#A30000')]},
+  {...rSym('Kids Meals','I want a kids meal','⭐','#CC0000'),branch:[rSym('Kids Burger','Kids cheeseburger','🍔','#A30000'),rSym('Kids Chicken Tenders','Kids chicken tenders','🐔','#A30000'),rSym('Kids Corn Dog','Kids corn dog','🌭','#A30000'),rSym('Kids Pizza','Kids pizza','🍕','#A30000')]},
+  {...rSym('Sides','I want a side dish','🍟','#CC0000'),branch:[rSym('Bottomless Steak Fries','Bottomless Steak Fries','🍟','#A30000'),rSym('Sweet Potato Fries','Sweet Potato Fries','🍠','#A30000'),rSym('Side Salad','House Side Salad','🥗','#A30000'),rSym('More Fries Please','May I have more fries','🙏','#A30000')]},
+  {...rSym('Drinks','I want a drink','🥤','#CC0000'),branch:[rSym('Freckled Lemonade','Freckled Lemonade','🍋','#A30000'),rSym('Milkshake','Gourmet Milkshake','🥛','#A30000'),rSym('Water','Water please','💧','#A30000')]},
+  {...rSym('Desserts','I want dessert','🍰','#CC0000'),branch:[rSym('Mountain High Mudd Pie','Mountain High Mudd Pie','🥧','#A30000'),rSym('Ice Cream','Ice cream','🍦','#A30000')]},
+  rSym('Refill Please','May I have a refill please','🔄','#CC0000'),rSym('Check Please','Check please','🧾','#CC0000'),
+  rSym('No Onions','No onions please','🧅','#CC0000'),rSym('Allergy Alert','I have a food allergy','⚠️','#CC0000'),
+]};
+const MCDONALDS_CAT={id:'mcdonalds',label:"McDonald's",emoji:'🍟',color:'#DA9B09',symbols:[
+  {...rSym('Burgers','I want a burger','🍔','#DA9B09'),branch:[rSym('Big Mac','Big Mac please','🍔','#C17D00'),rSym('Quarter Pounder','Quarter Pounder with Cheese','🍔','#C17D00'),rSym('McDouble','McDouble please','🍔','#C17D00'),rSym('Cheeseburger','Cheeseburger please','🧀','#C17D00')]},
+  {...rSym('Chicken','I want chicken','🍗','#DA9B09'),branch:[rSym('McNuggets 6 piece','6 piece McNuggets','🍗','#C17D00'),rSym('McNuggets 10 piece','10 piece McNuggets','🍗','#C17D00'),rSym('McNuggets 20 piece','20 piece McNuggets','🍗','#C17D00'),rSym('McChicken','McChicken sandwich','🥪','#C17D00')]},
+  {...rSym('Happy Meal','I want a Happy Meal','😊','#DA9B09'),branch:[rSym('McNuggets Happy Meal','McNuggets Happy Meal','🍗','#C17D00'),rSym('Cheeseburger Happy Meal','Cheeseburger Happy Meal','🍔','#C17D00'),rSym('Apple Juice','Apple juice','🧃','#C17D00')]},
+  {...rSym('Breakfast','I want breakfast','🌅','#DA9B09'),branch:[rSym('Egg McMuffin','Egg McMuffin please','🥚','#C17D00'),rSym('Hotcakes','Hotcakes please','🥞','#C17D00'),rSym('Hash Browns','Hash Browns please','🥔','#C17D00')]},
+  {...rSym('French Fries','I want french fries','🍟','#DA9B09'),branch:[rSym('Small Fries','Small fries please','🤏','#C17D00'),rSym('Medium Fries','Medium fries please','✋','#C17D00'),rSym('Large Fries','Large fries please','👐','#C17D00')]},
+  {...rSym('Drinks','I want a drink','🥤','#DA9B09'),branch:[rSym('Small Drink','Small drink please','🤏','#C17D00'),rSym('Medium Drink','Medium drink please','✋','#C17D00'),rSym('Large Drink','Large drink please','👐','#C17D00'),rSym('Water','Water please','💧','#C17D00')]},
+  {...rSym('Desserts','I want dessert','🍦','#DA9B09'),branch:[rSym('McFlurry','McFlurry please','🍦','#C17D00'),rSym('Oreo McFlurry','Oreo McFlurry please','🍪','#C17D00'),rSym('Apple Pie','Baked apple pie please','🥧','#C17D00')]},
+  rSym('No Pickles','No pickles please','🥒','#DA9B09'),rSym('Ketchup','Extra ketchup please','🍅','#DA9B09'),
+  rSym('To Go','To go please','🥡','#DA9B09'),rSym('Allergy Alert','I have a food allergy','⚠️','#DA9B09'),
+]};
+if(!VOCAB.categories.find(c=>c.id==='red_robin')){VOCAB.categories.push(RED_ROBIN_CAT);saveVocab();}
+if(!VOCAB.categories.find(c=>c.id==='mcdonalds')){VOCAB.categories.push(MCDONALDS_CAT);saveVocab();}
+
+// MEAL PLANNING
+const MEAL_CAT={id:'meal_planning',label:'Meal Planning',emoji:'🍽️',color:'#DC2626',symbols:[
+  {id:'mp_chicken',label:'Chicken',speech:'Chicken',emoji:'🍗',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#DC2626"/><text x="50" y="65" text-anchor="middle" font-size="52">🍗</text></svg>`,branch:[
+    {id:'mp_roast',label:'Roast Chicken',speech:'Roast chicken',emoji:'🍗',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#B91C1C"/><text x="50" y="65" text-anchor="middle" font-size="46">🍗</text></svg>`},
+    {id:'mp_csoup',label:'Chicken Soup',speech:'Chicken soup',emoji:'🍲',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#B91C1C"/><text x="50" y="65" text-anchor="middle" font-size="46">🍲</text></svg>`},
+    {id:'mp_cpasta',label:'Chicken Pasta',speech:'Chicken pasta',emoji:'🍝',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#B91C1C"/><text x="50" y="65" text-anchor="middle" font-size="46">🍝</text></svg>`},
+  ]},
+  {id:'mp_pizza',label:'Pizza',speech:'Pizza',emoji:'🍕',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#F97316"/><text x="50" y="65" text-anchor="middle" font-size="52">🍕</text></svg>`},
+  {id:'mp_pasta',label:'Pasta',speech:'Pasta',emoji:'🍝',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#CA8A04"/><text x="50" y="65" text-anchor="middle" font-size="52">🍝</text></svg>`},
+  {id:'mp_salad',label:'Salad',speech:'Salad',emoji:'🥗',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#16A34A"/><text x="50" y="65" text-anchor="middle" font-size="52">🥗</text></svg>`},
+  {id:'mp_dessert',label:'Dessert',speech:'Dessert',emoji:'🍰',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#DB2777"/><text x="50" y="65" text-anchor="middle" font-size="52">🍰</text></svg>`,branch:[
+    {id:'mp_icecream',label:'Ice Cream',speech:'Ice cream',emoji:'🍦',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#Be185D"/><text x="50" y="65" text-anchor="middle" font-size="46">🍦</text></svg>`},
+    {id:'mp_cake',label:'Cake',speech:'Cake',emoji:'🎂',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#Be185D"/><text x="50" y="65" text-anchor="middle" font-size="46">🎂</text></svg>`},
+    {id:'mp_cookies',label:'Cookies',speech:'Cookies',emoji:'🍪',svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#Be185D"/><text x="50" y="65" text-anchor="middle" font-size="46">🍪</text></svg>`},
+  ]},
+]};
+if(!VOCAB.categories.find(c=>c.id==='meal_planning')){VOCAB.categories.push(MEAL_CAT);saveVocab();}
+
+// FOCUS MODE
+function fSym(id,label,speech,emoji,color){return{id,label,speech,emoji,svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${color}"/><text x="50" y="65" text-anchor="middle" font-size="52">${emoji}</text></svg>`};}
+const DEFAULT_SCENES=[
+  {name:"Bath or Shower",emoji:"🛁",color:"#0284C7",symbols:[fSym('f_bath','Bath','I want a bath','🛁','#0284C7'),fSym('f_shower','Shower','I want a shower','🚿','#0284C7')]},
+  {name:"TV Tonight",emoji:"📺",color:"#6366F1",symbols:[fSym('f_cartoon','Cartoon','I want to watch cartoons','🎨','#6366F1'),fSym('f_movie','Movie','I want to watch a movie','🎬','#6366F1'),fSym('f_youtube','YouTube','I want to watch YouTube','📱','#6366F1')]},
+  {name:"Ready for Bed?",emoji:"😴",color:"#312E81",symbols:[fSym('f_tired','Tired','I am tired and ready for bed','😴','#312E81'),fSym('f_notsleepy','Not Yet','I am not sleepy yet','😊','#312E81'),fSym('f_readtome','Read to Me','Please read me a story','📖','#312E81')]},
+  {name:"What for Dinner?",emoji:"🍽️",color:"#DC2626",symbols:[fSym('f_dchicken','Chicken','I want chicken','🍗','#DC2626'),fSym('f_dpizza','Pizza','I want pizza','🍕','#DC2626'),fSym('f_dpasta','Pasta','I want pasta','🍝','#DC2626'),fSym('f_dtacos','Tacos','I want tacos','🌮','#DC2626')]},
+  {name:"Free Time",emoji:"🎮",color:"#0D9488",symbols:[fSym('f_games','Video Games','I want to play video games','🎮','#0D9488'),fSym('f_tvfree','Watch TV','I want to watch TV','📺','#0D9488'),fSym('f_outside','Go Outside','I want to go outside','🌳','#0D9488'),fSym('f_read','Read','I want to read','📚','#0D9488')]},
+  {name:"How Do You Feel?",emoji:"😊",color:"#F59E0B",symbols:[fSym('f_happy2','Happy','I feel happy','😊','#F59E0B'),fSym('f_sad2','Sad','I feel sad','😢','#F59E0B'),fSym('f_angry2','Angry','I feel angry','😠','#F59E0B'),fSym('f_tired2','Tired','I feel tired','😴','#F59E0B')]},
+  {name:"Yes or No",emoji:"👍",color:"#16A34A",symbols:[fSym('f_yes2','YES','Yes','✅','#16A34A'),fSym('f_no2','NO','No','❌','#DC2626')]},
+];
+let focusSelectedSyms=[],focusCurrentSyms=[],focusSentence=[],focusSavedScenes=[],focusPickerCatIdx=0;
+function loadFocusScenes(){try{const s=localStorage.getItem('talktiles_focus_scenes');focusSavedScenes=s?JSON.parse(s):[];}catch(e){focusSavedScenes=[];}}
+function saveFocusScenes(){try{localStorage.setItem('talktiles_focus_scenes',JSON.stringify(focusSavedScenes));}catch(e){}}
+function openFocusSetup(){loadFocusScenes();focusSelectedSyms=[];document.getElementById('focus-setup-screen').classList.add('open');renderFocusScenes();renderFocusCatSelect();renderFocusPicker();updateFocusLaunchBtn();}
+function closeFocusSetup(){document.getElementById('focus-setup-screen').classList.remove('open');}
+function renderFocusScenes(){
+  const list=document.getElementById('focus-scene-list');const all=[...DEFAULT_SCENES,...focusSavedScenes];list.innerHTML='';
+  all.forEach((scene,i)=>{
+    const card=document.createElement('div');card.className='focus-scene-card';const isCustom=i>=DEFAULT_SCENES.length;
+    card.innerHTML=`<span class="focus-scene-emoji">${scene.emoji}</span><div class="focus-scene-info"><div class="focus-scene-name">${scene.name}</div><div class="focus-scene-choices">${scene.symbols.map(s=>s.label).join(' · ')}</div></div>${isCustom?`<button onclick="deleteFocusScene(${i-DEFAULT_SCENES.length})" style="background:#EF4444;border:none;border-radius:8px;color:white;font-weight:800;font-size:13px;padding:6px 10px;cursor:pointer;margin-right:6px;">🗑️</button>`:''}<button class="focus-scene-launch" onclick="launchScene(${i})">▶ Launch</button>`;
+    list.appendChild(card);
+  });
+}
+function deleteFocusScene(idx){focusSavedScenes.splice(idx,1);saveFocusScenes();renderFocusScenes();}
+function launchScene(idx){
+  const all=[...DEFAULT_SCENES,...focusSavedScenes];const scene=all[idx];if(!scene)return;
+  focusCurrentSyms=scene.symbols;focusSentence=[];
+  document.getElementById('focus-play-title').textContent=`⭐ ${scene.name}`;
+  renderFocusPlayScreen();
+  document.getElementById('focus-setup-screen').classList.remove('open');
+  document.getElementById('focus-play-screen').classList.add('open');updateFocusSentenceBar();
+}
+function renderFocusCatSelect(){
+  const sel=document.getElementById('focus-cat-select');
+  sel.innerHTML=VOCAB.categories.map((c,i)=>`<option value="${i}">${c.emoji} ${c.label}</option>`).join('');sel.value=focusPickerCatIdx;
+}
+function renderFocusPicker(){
+  const catIdx=parseInt(document.getElementById('focus-cat-select').value);focusPickerCatIdx=catIdx;
+  const cat=VOCAB.categories[catIdx];const grid=document.getElementById('focus-picker-grid');grid.innerHTML='';if(!cat)return;
+  cat.symbols.forEach(sym=>{
+    const btn=document.createElement('button');btn.className='focus-picker-btn'+(focusSelectedSyms.find(s=>s.id===sym.id)?' selected':'');
+    const img=sym.imgUrl?`<img src="${sym.imgUrl}" alt="${sym.label}">`:sym.svg||`<div style="font-size:36px;line-height:56px;">${sym.emoji||'?'}</div>`;
+    btn.innerHTML=`${img}<span class="focus-picker-label">${sym.label}</span>`;
+    btn.onclick=()=>toggleFocusSymbol(sym,btn);grid.appendChild(btn);
+  });updateFocusCount();
+}
+function toggleFocusSymbol(sym,btn){
+  const idx=focusSelectedSyms.findIndex(s=>s.id===sym.id);
+  if(idx>=0){focusSelectedSyms.splice(idx,1);btn.classList.remove('selected');}
+  else{if(focusSelectedSyms.length>=5){showToast('⚠️ Maximum 5 choices');return;}focusSelectedSyms.push(sym);btn.classList.add('selected');}
+  updateFocusCount();updateFocusLaunchBtn();
+}
+function updateFocusCount(){
+  const n=focusSelectedSyms.length;const el=document.getElementById('focus-selected-count');
+  el.textContent=n===0?'Select 2–5 symbols below':n===1?'✅ 1 selected — pick at least 1 more':`✅ ${n} selected`;
+  el.style.color=n>=2?'#10B981':'#F59E0B';
+}
+function updateFocusLaunchBtn(){
+  const btn=document.getElementById('focus-launch-btn');btn.disabled=focusSelectedSyms.length<2;
+  btn.textContent=focusSelectedSyms.length>=2?`⭐ Launch Focus Mode (${focusSelectedSyms.length} choices)`:'⭐ Launch Focus Mode';
+}
+function launchFocus(){
+  if(focusSelectedSyms.length<2)return;
+  const name=document.getElementById('focus-custom-name').value.trim()||'Custom Focus';
+  focusCurrentSyms=[...focusSelectedSyms];focusSentence=[];
+  document.getElementById('focus-play-title').textContent=`⭐ ${name}`;renderFocusPlayScreen();
+  document.getElementById('focus-setup-screen').classList.remove('open');document.getElementById('focus-play-screen').classList.add('open');updateFocusSentenceBar();
+}
+function saveAndLaunchFocus(){
+  if(focusSelectedSyms.length<2){showToast('⚠️ Select at least 2 symbols first');return;}
+  const name=document.getElementById('focus-custom-name').value.trim()||'My Custom Scene';
+  const cat=VOCAB.categories[focusPickerCatIdx];
+  focusSavedScenes.push({name,emoji:cat?.emoji||'⭐',color:cat?.color||'#10B981',symbols:[...focusSelectedSyms]});
+  saveFocusScenes();launchFocus();
+}
+function renderFocusPlayScreen(){
+  const grid=document.getElementById('focus-grid');const n=focusCurrentSyms.length;
+  const layouts={2:'grid-template-columns:1fr 1fr;',3:'grid-template-columns:1fr 1fr 1fr;',4:'grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;',5:'grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;'};
+  grid.style.cssText=layouts[n]||layouts[4];grid.innerHTML='';
+  focusCurrentSyms.forEach((sym,i)=>{
+    const btn=document.createElement('button');
+    btn.style.cssText='background:#1E293B;border:4px solid rgba(255,255,255,0.08);border-radius:24px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;transition:transform 0.1s;';
+    const imgSize=n<=2?'160px':n<=3?'130px':'100px';const fontSize=n<=2?'30px':n<=3?'26px':'22px';
+    const img=sym.imgUrl?`<img src="${sym.imgUrl}" style="width:${imgSize};height:${imgSize};border-radius:16px;object-fit:contain;">`:sym.svg?sym.svg.replace('viewBox="0 0 100 100"',`viewBox="0 0 100 100" style="width:${imgSize};height:${imgSize};border-radius:16px;"`):(`<div style="font-size:80px;">${sym.emoji||'?'}</div>`);
+    btn.innerHTML=`${img}<span style="font-family:var(--font-display);font-weight:900;font-size:${fontSize};color:white;text-align:center;line-height:1.2;">${sym.label}</span>`;
+    btn.onclick=()=>{focusSentence.push(sym);updateFocusSentenceBar();speakWord(sym.speech);};
+    if(n===5&&i===4)btn.style.gridColumn='2';grid.appendChild(btn);
+  });
+}
+function updateFocusSentenceBar(){
+  const bar=document.getElementById('focus-play-sentence');
+  if(!focusSentence.length){bar.className='empty';bar.textContent='Tap a picture to speak…';return;}
+  bar.className='';bar.innerHTML=focusSentence.map(s=>`<span style="background:rgba(255,255,255,0.12);border-radius:50px;padding:6px 16px;font-size:18px;white-space:nowrap;">${s.emoji||''} ${s.label}</span>`).join('');
+}
+function focusSpeak(){if(!focusSentence.length)return;speakText(focusSentence.map(s=>s.speech).join(', '));}
+function focusClear(){focusSentence=[];updateFocusSentenceBar();}
+function focusBack(){focusSentence.pop();updateFocusSentenceBar();}
+function exitFocus(){document.getElementById('focus-play-screen').classList.remove('open');focusSentence=[];}
+loadFocusScenes();
+
+// SYMBOL SIZE
+function setSymbolSize(size){
+  document.body.classList.remove('size-s','size-m','size-l');document.body.classList.add('size-'+size);
+  document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('size-'+size);if(btn)btn.classList.add('active');
+  try{localStorage.setItem('talktiles_symsize',size);}catch(e){}
+}
+function loadSymbolSize(){try{setSymbolSize(localStorage.getItem('talktiles_symsize')||'m');}catch(e){setSymbolSize('m');}}
+loadSymbolSize();
+
+// BRANCH NAVIGATION
+let branchStack=[];
+function openBranch(sym){branchStack=[{sym,symbols:sym.branch}];renderBranchPanel();document.getElementById('branch-panel').classList.add('open');document.getElementById('branch-overlay').classList.add('show');}
+function drillBranch(sym){branchStack.push({sym,symbols:sym.branch});renderBranchPanel();}
+function branchBack(){if(branchStack.length<=1){closeBranch();return;}branchStack.pop();renderBranchPanel();}
+function closeBranch(){branchStack=[];document.getElementById('branch-panel').classList.remove('open');document.getElementById('branch-overlay').classList.remove('show');}
+function renderBranchPanel(){
+  if(!branchStack.length)return;const current=branchStack[branchStack.length-1];const symbols=current.symbols||[];
+  document.getElementById('branch-breadcrumb').innerHTML=branchStack.map((item,i)=>(i>0?'<span class="crumb-sep">›</span>':'')+`<span class="crumb ${i===branchStack.length-1?'active':''}">${item.sym.label}</span>`).join('');
+  document.getElementById('branch-title').textContent=current.sym.label;
+  document.getElementById('branch-back').textContent=branchStack.length<=1?'✕ Close':'← Back';
+  const grid=document.getElementById('branch-grid');grid.innerHTML='';
+  symbols.forEach(sym=>{
+    const btn=document.createElement('button');const hasSub=sym.branch&&sym.branch.length>0;
+    btn.className='branch-sym-btn'+(hasSub?' branch-has-children':'');
+    const img=sym.imgUrl?`<img src="${sym.imgUrl}" alt="${sym.label}">`:sym.svg||`<div style="font-size:44px;text-align:center;width:62px;">${sym.emoji||'?'}</div>`;
+    btn.innerHTML=`${hasSub?'<div class="branch-arrow">▶</div>':''}${img}<span class="sym-label" style="font-size:12px;margin-top:6px;">${sym.label}</span>`;
+    btn.onclick=()=>{if(hasSub){drillBranch(sym);}else{sentence.push(sym);renderSentence();if(autoSpeak)speakWord(sym.speech);closeBranch();showToast(`✅ "${sym.label}" added`);}};
+    grid.appendChild(btn);
+  });
+}
+
+// EDIT SYMBOL
+function openEditSymbol(idx){
+  editingSymIdx=idx;const sym=VOCAB.categories[currentCat].symbols[idx];
+  document.getElementById('panel-title').textContent=`✏️ Edit: ${sym.label}`;
+  document.getElementById('f-label').value=sym.label;document.getElementById('f-speech').value=sym.speech||sym.label;
+  document.getElementById('f-imgurl').value=sym.imgUrl?.startsWith('data:')?'':(sym.imgUrl||'');
+  document.getElementById('f-emoji').value=sym.emoji||'';
+  uploadedDataUrl=sym.imgUrl?.startsWith('data:')?sym.imgUrl:null;selectedEmoji=sym.emoji||'';
+  const sel=document.getElementById('f-category');sel.innerHTML=VOCAB.categories.map((c,i)=>`<option value="${i}">${c.emoji} ${c.label}</option>`).join('');sel.value=currentCat;
+  renderBranchEditor(sym);document.getElementById('edit-panel').classList.add('open');document.getElementById('overlay').classList.add('show');previewSvg();
+}
+function renderBranchEditor(sym){
+  const existing=document.getElementById('branch-editor');if(existing)existing.remove();
+  const branch=sym.branch||[];const div=document.createElement('div');div.id='branch-editor';div.className='edit-section';
+  div.innerHTML=`<h3>🌿 Branch Choices (${branch.length})</h3><p style="font-size:13px;color:#64748B;margin-bottom:10px;">Tapping <strong>${sym.label}</strong> opens these choices.</p>
+    <div id="branch-items" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">${branch.map((b,i)=>`<div style="display:flex;align-items:center;gap:8px;background:#F1F5F9;border-radius:10px;padding:8px 12px;"><span style="font-size:22px;">${b.emoji||'❓'}</span><div style="flex:1;"><div style="font-family:var(--font-display);font-weight:800;font-size:14px;">${b.label}</div></div><button onclick="removeBranchItem(${i})" style="background:#EF4444;color:white;border:none;border-radius:8px;padding:4px 10px;font-weight:800;cursor:pointer;">✕</button></div>`).join('')}</div>
+    <div style="background:#F8FAFC;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+      <div style="font-family:var(--font-display);font-weight:800;font-size:13px;color:#374151;">Add a choice:</div>
+      <div style="display:flex;gap:6px;"><input id="branch-emoji-in" class="form-input" placeholder="🍔" style="width:64px;text-align:center;font-size:20px;"><input id="branch-label-in" class="form-input" style="flex:1;" placeholder="e.g. Meatballs"></div>
+      <input id="branch-speech-in" class="form-input" placeholder='Speech text'>
+      <button class="edit-btn btn-green" onclick="addBranchItem()" style="margin-top:0;">＋ Add This Choice</button>
+    </div>`;
+  const saveBtn=document.querySelector('.edit-btn.btn-indigo');if(saveBtn)saveBtn.parentNode.insertBefore(div,saveBtn);
+}
+function addBranchItem(){
+  if(editingSymIdx===null)return;
+  const emoji=document.getElementById('branch-emoji-in').value.trim()||'❓';
+  const label=document.getElementById('branch-label-in').value.trim();
+  const speech=document.getElementById('branch-speech-in').value.trim()||label;
+  if(!label){alert('Please enter a label.');return;}
+  const sym=VOCAB.categories[currentCat].symbols[editingSymIdx];if(!sym.branch)sym.branch=[];
+  const color=VOCAB.categories[currentCat].color||'#6366F1';
+  sym.branch.push({id:'b_'+Date.now(),label,speech,emoji,svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="${color}"/><text x="50" y="65" text-anchor="middle" font-size="48">${emoji}</text></svg>`});
+  saveVocab();renderBranchEditor(sym);
+  document.getElementById('branch-emoji-in').value='';document.getElementById('branch-label-in').value='';document.getElementById('branch-speech-in').value='';
+}
+function removeBranchItem(idx){
+  if(editingSymIdx===null)return;const sym=VOCAB.categories[currentCat].symbols[editingSymIdx];
+  if(sym.branch){sym.branch.splice(idx,1);saveVocab();renderBranchEditor(sym);}
+}
+
+// QR CODE
+let currentQRLink='';
+function showQR(){
+  document.getElementById('qr-overlay').style.display='flex';document.getElementById('qr-modal').style.display='block';
+  document.getElementById('qr-code').innerHTML='<p style="color:#94A3B8;font-size:14px;">Choose an option above to generate QR code</p>';
+  document.getElementById('qr-url').style.display='none';currentQRLink='';
+}
+function closeQR(){document.getElementById('qr-overlay').style.display='none';document.getElementById('qr-modal').style.display='none';}
+function generateQR(mode){
+  document.getElementById('qr-btn-cat').style.background=mode==='category'?'#EFF6FF':'#F8FAFC';
+  document.getElementById('qr-btn-all').style.background=mode==='all'?'#EFF6FF':'#F8FAFC';
+  let pack;
+  if(mode==='category'){const cat=VOCAB.categories[currentCat];pack={v:1,mode:'category',categories:[leanCategory(cat)]};document.getElementById('qr-desc').textContent=`Scanning loads "${cat.label}" vocabulary.`;}
+  else{pack={v:1,mode:'all',categories:VOCAB.categories.map(leanCategory)};document.getElementById('qr-desc').textContent='Scanning loads ALL categories.';}
+  let encoded;
+  try{encoded=btoa(unescape(encodeURIComponent(JSON.stringify(pack))));}
+  catch(e){alert('Pack too large. Try "This Category Only" instead.');return;}
+  const base=window.location.href.split('?')[0].split('#')[0];const url=base+'?pack='+encoded;currentQRLink=url;
+  if(url.length>2800){document.getElementById('qr-code').innerHTML='<p style="color:#EF4444;font-size:13px;">⚠️ Pack too large. Use "This Category Only".</p>';return;}
+  document.getElementById('qr-code').innerHTML='';
+  try{new QRCode(document.getElementById('qr-code'),{text:url,width:220,height:220,colorDark:'#1E293B',colorLight:'#FFFFFF',correctLevel:QRCode.CorrectLevel.M});}
+  catch(e){document.getElementById('qr-code').innerHTML='<p style="color:#EF4444;font-size:13px;">Could not generate QR. Try Copy Link instead.</p>';}
+  document.getElementById('qr-url').style.display='block';document.getElementById('qr-url').textContent=url;
+}
+function leanCategory(cat){
+  return{id:cat.id,label:cat.label,color:cat.color,emoji:cat.emoji,
+    symbols:cat.symbols.map(sym=>{const lean={id:sym.id,label:sym.label,speech:sym.speech};
+      if(sym.imgUrl&&!sym.imgUrl.startsWith('data:'))lean.imgUrl=sym.imgUrl;
+      if(sym.emoji)lean.emoji=sym.emoji;
+      if(sym.svg&&sym.svg.length<300)lean.svg=sym.svg;return lean;})};
+}
+function copyQRLink(){
+  if(!currentQRLink)return;
+  navigator.clipboard.writeText(currentQRLink).then(()=>{const btn=document.getElementById('copy-btn');btn.textContent='✅ Copied!';setTimeout(()=>{btn.textContent='📋 Copy Link';},2000);}).catch(()=>{prompt('Copy this link:',currentQRLink);});
+}
+
+// AUTO-IMPORT FROM URL
+function tryAutoImport(){
+  const params=new URLSearchParams(window.location.search);const pack=params.get('pack');if(!pack)return;
+  try{
+    const decoded=JSON.parse(decodeURIComponent(escape(atob(pack))));if(!decoded.categories)return;
+    decoded.categories.forEach(cat=>{
+      const existing=VOCAB.categories.findIndex(c=>c.id===cat.id);
+      if(existing>=0)VOCAB.categories[existing]=cat;else VOCAB.categories.push(cat);
+    });
+    saveVocab();history.replaceState(null,'',window.location.pathname);showToast('✅ Vocabulary loaded from QR code!');
+  }catch(e){console.warn('Auto-import failed:',e);}
+}
+
+// TOAST
+function showToast(msg){
+  let toast=document.getElementById('tt-toast');
+  if(!toast){toast=document.createElement('div');toast.id='tt-toast';toast.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1E293B;color:white;padding:12px 24px;border-radius:50px;font-family:var(--font-display);font-weight:800;font-size:16px;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:opacity 0.3s;pointer-events:none;';document.body.appendChild(toast);}
+  toast.textContent=msg;toast.style.opacity='1';clearTimeout(toast._t);toast._t=setTimeout(()=>{toast.style.opacity='0';},2500);
+}
+
+// SUPABASE COMMUNITY LIBRARY
+const SUPABASE_URL='https://dhvdlsnlxkoptszktxpo.supabase.co';
+const SUPABASE_KEY='sb_publishable_jSI1NDTguKSLH_nnzvNL-Q_acXFCRto';
+function sbHeaders(){return{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'};}
+function openShareModal(){document.getElementById('share-modal').classList.add('open');document.getElementById('share-status').className='share-status';document.getElementById('share-status').textContent='';document.getElementById('share-submit').disabled=false;document.getElementById('share-submit').textContent='☁️ Submit for Review';}
+function closeShareModal(){document.getElementById('share-modal').classList.remove('open');}
+async function submitToSupabase(){
+  const title=document.getElementById('sh-title').value.trim();
+  if(!title){showShareStatus('error','⚠️ Please enter a module title.');return;}
+  const btn=document.getElementById('share-submit');btn.disabled=true;btn.textContent='⏳ Submitting…';
+  const payload={title,subject:document.getElementById('sh-subject').value,grade_band:document.getElementById('sh-grade').value,language:document.getElementById('sh-language').value,region:document.getElementById('sh-region').value||null,author_name:document.getElementById('sh-author').value||'Anonymous',description:document.getElementById('sh-desc').value||null,pack_data:VOCAB,status:'pending'};
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/modules',{method:'POST',headers:sbHeaders(),body:JSON.stringify(payload)});
+    if(res.ok||res.status===201){showShareStatus('success','✅ Submitted! Your module is under review. Thank you!');btn.textContent='✅ Submitted!';setTimeout(closeShareModal,3000);}
+    else{showShareStatus('error','❌ Submission failed. Please try again.');btn.disabled=false;btn.textContent='☁️ Submit for Review';}
+  }catch(e){showShareStatus('error','❌ Network error. Check your connection.');btn.disabled=false;btn.textContent='☁️ Submit for Review';}
+}
+function showShareStatus(type,msg){const el=document.getElementById('share-status');el.className='share-status '+type;el.textContent=msg;}
+
+// INIT
+loadVocab();tryAutoImport();render();
+</script>
+</body>
+</html>
